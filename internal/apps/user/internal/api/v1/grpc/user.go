@@ -7,7 +7,7 @@ import (
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/api/v1/grpc/serializer"
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
 	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics"
-	apimetrics "github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics/api"
+	grpcmetrics "github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -25,7 +25,7 @@ func NewUserService(service *service.Service) *UserServiceServer {
 }
 
 func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUser_Request) (*pb.CreateUser_Response, error) {
-	metrics.GlobalRegistry.GetMetric(apimetrics.GRPCMethodCreateUser).Counter.WithLabelValues().Inc()
+	metrics.GlobalRegistry.GetMetric(grpcmetrics.GRPCMethodCreateUser).Counter.WithLabelValues().Inc()
 
 	id, err := s.service.Create(ctx, serializer.PbCreateRequestToServiceRequest(req))
 	if err != nil {
@@ -38,7 +38,7 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUser_R
 }
 
 func (s *UserServiceServer) ListUsers(ctx context.Context, req *pb.ListUsers_Request) (*pb.ListUsers_Response, error) {
-	metrics.GlobalRegistry.GetMetric(apimetrics.GRPCMethodListUsers).Counter.WithLabelValues().Inc()
+	metrics.GlobalRegistry.GetMetric(grpcmetrics.GRPCMethodListUsers).Counter.WithLabelValues().Inc()
 
 	options := serializer.PbListRequestToServiceOptions(req)
 
@@ -58,7 +58,7 @@ func (s *UserServiceServer) ListUsers(ctx context.Context, req *pb.ListUsers_Req
 }
 
 func (s *UserServiceServer) DeleteUser(ctx context.Context, req *pb.DeleteUser_Request) (*pb.DeleteUser_Response, error) {
-	metrics.GlobalRegistry.GetMetric(apimetrics.GRPCMethodDeleteUser).Counter.WithLabelValues().Inc()
+	metrics.GlobalRegistry.GetMetric(grpcmetrics.GRPCMethodDeleteUser).Counter.WithLabelValues().Inc()
 
 	err := s.service.Delete(ctx, req.Id)
 	if err != nil {

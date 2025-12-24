@@ -3,7 +3,7 @@ package metrics
 import (
 	"log"
 
-	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics/api"
+	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics/grpc"
 	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics/service"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 )
@@ -16,7 +16,7 @@ func init() {
 	if err := service.RegisterMetrics(GlobalRegistry); err != nil {
 		log.Fatal(err)
 	}
-	if err := api.RegisterMetrics(GlobalRegistry); err != nil {
+	if err := grpc.RegisterMetrics(GlobalRegistry); err != nil {
 		log.Fatal(err)
 	}
 }

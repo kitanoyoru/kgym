@@ -1,4 +1,4 @@
-package api
+package grpc
 
 import (
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
