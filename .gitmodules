@@ -1,0 +1,11 @@
+[submodule "tools/mockgen"]
+	path = tools/mockgen
+	url = https://github.com/golang/mock.git
+
+[submodule "tools/golangci-lint"]
+	path = tools/golangci-lint
+	url = https://github.com/golangci/golangci-lint.git
+
+[submodule "tools/gotestsum"]
+	path = tools/gotestsum
+	url = https://github.com/gotestyourself/gotestsum.git

@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/goleak"
 )
 
 type RepositoryTestSuite struct {
@@ -607,6 +608,10 @@ func (s *RepositoryTestSuite) TestDelete() {
 		require.NoError(s.T(), err)
 		assert.Len(s.T(), users, 1)
 	})
+}
+
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
 }
 
 func TestRepositoryTestSuite(t *testing.T) {

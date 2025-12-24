@@ -14,6 +14,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/goleak"
 	"go.uber.org/mock/gomock"
 )
 
@@ -416,6 +417,10 @@ func (s *ServiceTestSuite) TestDelete() {
 		assert.Error(s.T(), err)
 		assert.Equal(s.T(), expectedError, err)
 	})
+}
+
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
 }
 
 func TestServiceTestSuite(t *testing.T) {

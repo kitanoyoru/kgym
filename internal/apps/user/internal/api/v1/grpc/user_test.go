@@ -18,6 +18,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"go.uber.org/goleak"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -372,6 +373,10 @@ func (s *UserServiceTestSuite) createTestUser(ctx context.Context, email, role, 
 	}
 	require.NoError(s.T(), err)
 	return resp.Id
+}
+
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
 }
 
 func TestUserServiceTestSuite(t *testing.T) {

@@ -33,3 +33,6 @@ go.work.sum
 
 # Protobuf generated files
 contracts/protobuf/deps
+
+# Tools binaries
+bin/
