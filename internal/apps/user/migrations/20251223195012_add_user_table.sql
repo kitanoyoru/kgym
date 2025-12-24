@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     deleted_at TIMESTAMP WITH TIME ZONE NULL,
 
-    CONSTRAINT fk_users_email UNIQUE (email),
-    CONSTRAINT fk_users_username UNIQUE (username)
+    CONSTRAINT users_email_unique UNIQUE (email),
+    CONSTRAINT users_username_unique UNIQUE (username)
 );
 -- +goose StatementEnd
 

@@ -1,0 +1,13 @@
+package postgres
+
+import (
+	"context"
+
+	filemodel "github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/models/file"
+)
+
+type IRepository interface {
+	Create(ctx context.Context, file filemodel.File) error
+	List(ctx context.Context, filters ...Filter) ([]filemodel.File, error)
+	Delete(ctx context.Context, filters ...Filter) error
+}
