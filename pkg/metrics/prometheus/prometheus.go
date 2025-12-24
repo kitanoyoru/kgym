@@ -1,6 +1,8 @@
 package prometheus
 
 import (
+	"sync"
+
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -35,6 +37,7 @@ type Metric struct {
 }
 
 type Registry struct {
+	mu      sync.RWMutex
 	metrics map[string]*Metric
 }
 
@@ -45,6 +48,9 @@ func NewRegistry() *Registry {
 }
 
 func (r *Registry) RegisterMetric(cfg MetricConfig) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	switch cfg.Type {
 	case Counter:
 		counter := prometheus.NewCounterVec(prometheus.CounterOpts{
@@ -129,10 +135,14 @@ func (r *Registry) RegisterMetric(cfg MetricConfig) error {
 		}
 		r.metrics[cfg.Name] = m
 	}
+
 	return nil
 }
 
 func (r *Registry) GetMetric(name string) *Metric {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
 	return r.metrics[name]
 }
 
