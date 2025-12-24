@@ -3,29 +3,20 @@ package cmd
 import (
 	"log"
 
-	"github.com/kitanoyoru/kgym/internal/apps/user/cmd/run"
-	"github.com/kitanoyoru/kgym/internal/apps/user/cmd/shutdown"
-	pkgLogger "github.com/kitanoyoru/kgym/pkg/logger"
 	"github.com/spf13/cobra"
+
+	"github.com/kitanoyoru/kgym/internal/gateway/cmd/run"
+	"github.com/kitanoyoru/kgym/internal/gateway/cmd/shutdown"
+	pkgLogger "github.com/kitanoyoru/kgym/pkg/logger"
 )
 
 var rootCmd = &cobra.Command{
-	Use: "kgym-user-service",
+	Use: "kgym-gateway",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		logger, err := pkgLogger.New(pkgLogger.WithDev())
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		/*
-			TODO: What I want to see
-
-			if err := dependecy.InjectToContext(cmd.Context(), []dependency.Dependecy{
-				logger.AsDependency(),
-			}); err != nil {
-				log.Fatal(err)
-			}
-		*/
 
 		cmd.SetContext(pkgLogger.Inject(cmd.Context(), logger))
 	},
@@ -34,15 +25,6 @@ var rootCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		/*
-			TODO: What I want to see
-
-			if err := dependenncy.CloseAll(cmd.Context()); err != nil {
-				log.Fatal(err)
-			}
-
-		*/
 
 		if err := logger.Sync(); err != nil {
 			log.Fatal(err)

@@ -1,6 +1,6 @@
-.PHONY: help user-% gym-% subscription-% tools tools-install tools-update ci-test
+.PHONY: help user-% gym-% subscription-% gateway-% tools tools-install tools-update ci-test
 
-SERVICES := user gym subscription
+SERVICES := user gym subscription gateway
 
 TOOLS_DIR := $(CURDIR)/tools
 BIN_DIR := $(CURDIR)/bin
@@ -57,7 +57,14 @@ ci-test:
 
 define SERVICE_TARGET
 $(1)-%:
-	@if [ -f internal/apps/$(1)/Makefile ]; then \
+	@if [ "$(1)" = "gateway" ]; then \
+		if [ -f internal/gateway/Makefile ]; then \
+			$(MAKE) -C internal/gateway $$*; \
+		else \
+			echo "Error: Makefile not found for service $(1)"; \
+			exit 1; \
+		fi; \
+	elif [ -f internal/apps/$(1)/Makefile ]; then \
 		$(MAKE) -C internal/apps/$(1) $$*; \
 	else \
 		echo "Error: Makefile not found for service $(1)"; \
