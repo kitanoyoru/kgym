@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package file.v1;
+
+import "file/v1/file.proto";
+
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+
+option go_package = "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1;file";
+
+service FileService {
+    rpc UploadUserAvatar(stream UploadUserAvatar.Request) returns (UploadUserAvatar.Response) {
+        option (google.api.http) = {
+            post: "/api/v1/files/user-avatar"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            parameters: {
+                headers: {
+                name: "X-Idempotency-Key";
+                description: "Idempotency key";
+                type: STRING,
+                required: false;
+                };
+            };
+        };
+    }
+}
+
+message UploadUserAvatar {
+    message Request {
+        Metadata metadata = 1;
+        bytes data = 2;
+    }
+
+    message Response {
+        File file = 1;
+    }
+}

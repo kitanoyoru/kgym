@@ -13,20 +13,20 @@ option go_package = "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v
 service UserService {
   rpc CreateUser(CreateUser.Request) returns (CreateUser.Response) {
     option (google.api.http) = {
-      post: "/v1/users"
+      post: "/api/v1/users"
       body: "*"
     };
   }
 
   rpc ListUsers(ListUsers.Request) returns (ListUsers.Response) {
     option (google.api.http) = {
-      get: "/v1/users"
+      get: "/api/v1/users"
     };
   }
 
   rpc DeleteUser(DeleteUser.Request) returns (DeleteUser.Response) {
     option (google.api.http) = {
-      delete: "/v1/users/{id}"
+      delete: "/api/v1/users/{id}"
     };
   }
 }

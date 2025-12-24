@@ -32,7 +32,8 @@ go.work.sum
 # .vscode/
 
 # Protobuf generated files
-contracts/protobuf/deps
+contracts/protobuf/deps/*
+!contracts/protobuf/deps/.git
 
 # Tools binaries
 bin/

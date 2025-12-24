@@ -9,3 +9,19 @@
 [submodule "tools/gotestsum"]
 	path = tools/gotestsum
 	url = https://github.com/gotestyourself/gotestsum.git
+
+[submodule "contracts/protobuf/deps/googleapis"]
+	path = contracts/protobuf/deps/googleapis
+	url = https://github.com/googleapis/googleapis.git
+
+[submodule "contracts/protobuf/deps/protobuf"]
+	path = contracts/protobuf/deps/protobuf
+	url = https://github.com/protocolbuffers/protobuf.git
+
+[submodule "contracts/protobuf/deps/protoc-gen-validate"]
+	path = contracts/protobuf/deps/protoc-gen-validate
+	url = https://github.com/bufbuild/protoc-gen-validate.git
+
+[submodule "contracts/protobuf/deps/grpc-gateway"]
+	path = contracts/protobuf/deps/grpc-gateway
+	url = https://github.com/grpc-ecosystem/grpc-gateway.git

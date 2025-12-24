@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package file.v1;
+
+option go_package = "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1;file";
+
+message File {
+    Metadata metadata = 1;
+}
+
+message Metadata {
+    string id = 1;
+    string name = 2;
+    string content_type = 3;
+    int64 size = 4;
+}
