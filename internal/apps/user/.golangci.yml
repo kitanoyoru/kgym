@@ -66,3 +66,4 @@ formatters:
       - third_party$
       - builtin$
       - examples$
+      - internal/apps/user/internal/repository/postgres/mocks$

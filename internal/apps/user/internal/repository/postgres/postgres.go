@@ -13,6 +13,8 @@ type Repository struct {
 	db *pgxpool.Pool
 }
 
+var _ IRepository = (*Repository)(nil)
+
 func New(db *pgxpool.Pool) *Repository {
 	return &Repository{
 		db,

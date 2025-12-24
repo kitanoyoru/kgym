@@ -9,3 +9,7 @@ lint:
 .PHONY: docker-build
 docker-build:
 	docker build -t kgym-user-service .
+
+.PHONY: generate-mocks
+generate-mocks:
+	mockgen -source=internal/repository/postgres/repository.go -destination=internal/repository/postgres/mocks/repository_mock.go -package=mocks

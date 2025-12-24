@@ -10,11 +10,10 @@ import (
 )
 
 type Service struct {
-	// TODO: Create reverse dependency between service and repository
-	repository *postgres.Repository
+	repository postgres.IRepository
 }
 
-func New(repository *postgres.Repository) *Service {
+func New(repository postgres.IRepository) *Service {
 	return &Service{
 		repository,
 	}
