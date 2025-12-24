@@ -7,6 +7,8 @@ import (
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/postgres"
+	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics"
+	servicemetrics "github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics/service"
 )
 
 type Service struct {
@@ -27,6 +29,8 @@ type CreateUserRequest struct {
 }
 
 func (s *Service) Create(ctx context.Context, req CreateUserRequest) (string, error) {
+	metrics.GlobalRegistry.GetMetric(servicemetrics.UserCreatedMetricName).Counter.WithLabelValues().Inc()
+
 	userEntity := userentity.User{
 		ID:       uuid.New().String(),
 		Email:    req.Email,
@@ -56,6 +60,8 @@ func (s *Service) Create(ctx context.Context, req CreateUserRequest) (string, er
 }
 
 func (s *Service) List(ctx context.Context, options ...ListOption) ([]userentity.User, error) {
+	metrics.GlobalRegistry.GetMetric(servicemetrics.UserListMetricName).Counter.WithLabelValues().Inc()
+
 	var opts ListOptions
 	for _, option := range options {
 		option(&opts)
