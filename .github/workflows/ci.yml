@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master 
+      - develop
+  pull_request:
+    branches:
+      - master 
+      - develop
+
+env:
+  GO_VERSION: "1.25"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: amd64
+            goos: linux
+            goarch: amd64
+          - os: linux
+            arch: arm64
+            goos: linux
+            goarch: arm64
+          - os: darwin
+            arch: amd64
+            goos: darwin
+            goarch: amd64
+          - os: darwin
+            arch: arm64
+            goos: darwin
+            goarch: arm64
+          - os: windows
+            arch: amd64
+            goos: windows
+            goarch: amd64
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Build tools
+        run: make tools-install
+
+      - name: Build user service
+        working-directory: ./internal/apps/user
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          CGO_ENABLED: 0
+        run: |
+          go build -o kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }} ./cmd/main.go
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
+        with:
+          name: kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}
+          path: internal/apps/user/kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+          retention-days: 7
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Build golangci-lint
+        run: make tools-install
+
+      - name: Run golangci-lint on user service
+        run: |
+          export PATH="$PWD/bin:$PATH"
+          cd internal/apps/user
+          golangci-lint run ./...
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Build gotestsum
+        run: make tools-install
+
+      - name: Run tests for user service
+        run: |
+          export PATH="$PWD/bin:$PATH"
+          cd internal/apps/user
+          gotestsum --format short-verbose -- ./internal/... ./migrations/...
+
