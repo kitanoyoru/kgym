@@ -48,23 +48,42 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      - name: Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          protoc --version
+
+      - name: Install protoc plugins
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+          go install github.com/envoyproxy/protoc-gen-validate@latest
+
+      - name: Initialize contracts dependencies
+        run: make contracts-deps
+
+      - name: Generate contracts
+        run: make contracts-generate
+
       - name: Build tools
         run: make tools-install
 
       - name: Build user service
-        working-directory: ./internal/apps/user
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
-        run: |
-          go build -o kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }} ./cmd/main.go
+        run: make user-build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -73,6 +92,7 @@ jobs:
           name: kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}
           path: internal/apps/user/kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
           retention-days: 7
+        if: always()
 
   lint:
     name: Lint
@@ -81,20 +101,40 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Build golangci-lint
+      - name: Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          protoc --version
+
+      - name: Install protoc plugins
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+          go install github.com/envoyproxy/protoc-gen-validate@latest
+
+      - name: Initialize contracts dependencies
+        run: make contracts-deps
+
+      - name: Generate contracts
+        run: make contracts-generate
+
+      - name: Build tools
         run: make tools-install
 
       - name: Run golangci-lint on user service
         run: |
           export PATH="$PWD/bin:$PATH"
-          cd internal/apps/user
-          golangci-lint run ./...
+          make user-lint
 
   test:
     name: Test
@@ -103,18 +143,38 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
 
-      - name: Build gotestsum
+      - name: Install protoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y protobuf-compiler
+          protoc --version
+
+      - name: Install protoc plugins
+        run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+          go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+          go install github.com/envoyproxy/protoc-gen-validate@latest
+
+      - name: Initialize contracts dependencies
+        run: make contracts-deps
+
+      - name: Generate contracts
+        run: make contracts-generate
+
+      - name: Build tools
         run: make tools-install
 
       - name: Run tests for user service
         run: |
           export PATH="$PWD/bin:$PATH"
-          cd internal/apps/user
-          gotestsum --format short-verbose -- ./internal/... ./migrations/...
+          make user-test
 
