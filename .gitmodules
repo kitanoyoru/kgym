@@ -1,3 +1,5 @@
+# Tools
+
 [submodule "tools/mockgen"]
 	path = tools/mockgen
 	url = https://github.com/golang/mock.git
@@ -9,6 +11,8 @@
 [submodule "tools/gotestsum"]
 	path = tools/gotestsum
 	url = https://github.com/gotestyourself/gotestsum.git
+
+# Contracts protobuf dependencies
 
 [submodule "contracts/protobuf/deps/googleapis"]
 	path = contracts/protobuf/deps/googleapis

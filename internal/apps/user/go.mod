@@ -10,7 +10,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251224100050-18a6beb5f3f6
 	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20251224100050-18a6beb5f3f6
-	github.com/kitanoyoru/kgym/pkg/logger v0.0.0-20251224100050-18a6beb5f3f6
+	github.com/kitanoyoru/kgym/pkg/logger v0.0.0-20251224135906-736e0909d07d
 	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20251224100050-18a6beb5f3f6
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224100050-18a6beb5f3f6
 	github.com/pressly/goose/v3 v3.26.0

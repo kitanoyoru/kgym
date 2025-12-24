@@ -6,14 +6,16 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
-	"github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
-	"github.com/kitanoyoru/kgym/internal/gateway/internal/middlewares"
 	"github.com/rs/cors"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
+
+	pbFile "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
+	pbUser "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
+	"github.com/kitanoyoru/kgym/internal/gateway/internal/handlers/file"
+	"github.com/kitanoyoru/kgym/internal/gateway/internal/middlewares"
 )
 
 func New(ctx context.Context, cfg Config) (*Gateway, error) {
@@ -46,8 +48,25 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 	}
 
 	err := multierr.Combine(
-		user.RegisterUserServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
-		file.RegisterFileServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
+		pbUser.RegisterUserServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
+		pbFile.RegisterFileServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	fileHandler, err := file.New(ctx, mux, file.Config{
+		GRPCEndpoint:    cfg.GRPCEndpoint,
+		GRPCDialOptions: opts,
+		BodyLimit:       cfg.BodyLimit,
+		ChunkSize:       10 * 1024, // 10KB
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = multierr.Combine(
+		mux.HandlePath(http.MethodPost, "/api/v1/files/user-avatar", fileHandler.UploadUserAvatar()),
 	)
 	if err != nil {
 		return nil, err

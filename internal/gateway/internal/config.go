@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/caarlos0/env/v11"
-	"github.com/go-playground/validator/v10"
+	pkgValidator "github.com/kitanoyoru/kgym/internal/gateway/pkg/validator"
 )
 
 type Config struct {
@@ -20,10 +20,5 @@ func ParseAndValidate(ctx context.Context, cfg *Config) error {
 		return err
 	}
 
-	validate := validator.New(
-		validator.WithPrivateFieldValidation(),
-		validator.WithRequiredStructEnabled(),
-	)
-
-	return validate.StructCtx(ctx, cfg)
+	return pkgValidator.Validate.StructCtx(ctx, cfg)
 }

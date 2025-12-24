@@ -3,10 +3,11 @@ package cmd
 import (
 	"log"
 
+	"github.com/spf13/cobra"
+
 	"github.com/kitanoyoru/kgym/internal/apps/user/cmd/run"
 	"github.com/kitanoyoru/kgym/internal/apps/user/cmd/shutdown"
 	pkgLogger "github.com/kitanoyoru/kgym/pkg/logger"
-	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{
