@@ -1,0 +1,14 @@
+{
+  "protoc": {
+    "path": "protoc",
+    "compile_on_save": false,
+    "options": [
+      "-I=${workspaceFolder}/contracts/protobuf",
+      "-I=${workspaceFolder}/contracts/protobuf/user/v1",
+      "-I=${workspaceFolder}/contracts/protobuf/deps/googleapis",
+      "-I=${workspaceFolder}/contracts/protobuf/deps/protobuf/src",
+      "-I=${workspaceFolder}/contracts/protobuf/deps/protoc-gen-validate"
+    ]
+  },
+}
+

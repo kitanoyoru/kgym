@@ -1,0 +1,72 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+option go_package = "github.com/kitanoyoru/kgym/internal/apps/contracts/protobuf/user/v1;user";
+
+service UserService {
+  rpc CreateUser(CreateUser.Request) returns (CreateUser.Response) {
+    option (google.api.http) = {
+      post: "/v1/users"
+      body: "*"
+    };
+  }
+
+  rpc ListUsers(ListUsers.Request) returns (ListUsers.Response) {
+    option (google.api.http) = {
+      get: "/v1/users"
+    };
+  }
+
+  rpc DeleteUser(DeleteUser.Request) returns (DeleteUser.Response) {
+    option (google.api.http) = {
+      delete: "/v1/users/{id}"
+    };
+  }
+}
+
+message CreateUser {
+  message Request {
+    string email = 1 [(validate.rules).string.email = true];
+    string role = 2 [(validate.rules).string = {in: ["admin", "user"]}];
+    string username = 3 [(validate.rules).string = {min_len: 3, max_len: 32}];
+    string password = 4 [(validate.rules).string = {min_len: 8, max_len: 64}];
+  }
+
+  message Response {
+    string id = 1 [(validate.rules).string.uuid = true];
+  }
+}
+
+message ListUsers {
+  message Request {
+    optional string email = 1 [(validate.rules).string.email = true];
+    optional string role = 2 [(validate.rules).string.in = "admin,user"];
+    optional string username = 3 [(validate.rules).string = {min_len: 3, max_len: 32}];
+  }
+
+  message Response {
+    repeated User users = 1;
+  }
+}
+
+message DeleteUser {
+  message Request {
+    string id = 1 [(validate.rules).string.uuid = true];
+  }
+
+  message Response {}
+}
+
+message User {
+  string id = 1 [(validate.rules).string.uuid = true];
+  string email = 2 [(validate.rules).string.email = true];
+  string role = 3 [(validate.rules).string.in = "admin,user"];
+  string username = 4 [(validate.rules).string = {min_len: 3, max_len: 32}];
+  string password = 5 [(validate.rules).string = {min_len: 8, max_len: 64}];
+  google.protobuf.Timestamp created_at = 6;
+}
