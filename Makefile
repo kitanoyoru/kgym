@@ -1,4 +1,4 @@
-.PHONY: help user-% gym-% subscription-% tools tools-install tools-update test-ci
+.PHONY: help user-% gym-% subscription-% tools tools-install tools-update ci-test
 
 SERVICES := user gym subscription
 
@@ -11,14 +11,14 @@ help:
 	@echo "  make contracts-generate  - Generate protobuf files"
 	@echo "  make tools-install       - Install tools from submodules"
 	@echo "  make tools-update        - Update tool submodules"
-	@echo "  make test-ci             - Test CI pipeline locally with act"
+	@echo "  make ci-test             - Test CI pipeline locally with act"
 	@echo ""
 	@echo "Examples:"
 	@echo "  make user-test          - Run tests in user service"
 	@echo "  make gym-build          - Build gym service"
 	@echo "  make contracts-generate  - Generate protobuf code"
 	@echo "  make tools-install      - Build and install all tools"
-	@echo "  make test-ci             - Test CI pipeline locally"
+	@echo "  make ci-test             - Test CI pipeline locally"
 	@echo ""
 	@echo "Available services: $(SERVICES)"
 
@@ -51,7 +51,7 @@ $(BIN_DIR)/golangci-lint: $(BIN_DIR) | tools-update
 
 tools: tools-install
 
-test-ci:
+ci-test:
 	@echo "Testing CI pipeline with act..."
 	@act push
 

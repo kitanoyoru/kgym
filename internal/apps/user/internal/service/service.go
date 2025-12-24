@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
@@ -22,21 +23,31 @@ func New(repository postgres.IRepository) *Service {
 }
 
 type CreateUserRequest struct {
-	Email    string
-	Role     string
-	Username string
-	Password string
+	Email     string
+	Role      string
+	Username  string
+	Password  string
+	AvatarURL string
+	Mobile    string
+	FirstName string
+	LastName  string
+	BirthDate time.Time
 }
 
 func (s *Service) Create(ctx context.Context, req CreateUserRequest) (string, error) {
 	metrics.GlobalRegistry.GetMetric(servicemetrics.UserCreatedMetricName).Counter.WithLabelValues().Inc()
 
 	userEntity := userentity.User{
-		ID:       uuid.New().String(),
-		Email:    req.Email,
-		Role:     userentity.Role(req.Role),
-		Username: req.Username,
-		Password: req.Password,
+		ID:        uuid.New().String(),
+		Email:     req.Email,
+		Role:      userentity.Role(req.Role),
+		Username:  req.Username,
+		Password:  req.Password,
+		AvatarURL: req.AvatarURL,
+		Mobile:    req.Mobile,
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		BirthDate: req.BirthDate,
 	}
 
 	if err := userEntity.Validate(ctx); err != nil {
@@ -44,11 +55,16 @@ func (s *Service) Create(ctx context.Context, req CreateUserRequest) (string, er
 	}
 
 	userModel := usermodel.User{
-		ID:       userEntity.ID,
-		Email:    userEntity.Email,
-		Role:     usermodel.Role(userEntity.Role),
-		Username: userEntity.Username,
-		Password: userEntity.Password,
+		ID:        userEntity.ID,
+		Email:     userEntity.Email,
+		Role:      usermodel.Role(userEntity.Role),
+		Username:  userEntity.Username,
+		Password:  userEntity.Password,
+		AvatarURL: userEntity.AvatarURL,
+		Mobile:    userEntity.Mobile,
+		FirstName: userEntity.FirstName,
+		LastName:  userEntity.LastName,
+		BirthDate: userEntity.BirthDate,
 	}
 
 	err := s.repository.Create(ctx, userModel)
@@ -85,12 +101,18 @@ func (s *Service) List(ctx context.Context, options ...Option) ([]userentity.Use
 
 	users := make([]userentity.User, len(userModels))
 	for i, model := range userModels {
+		// TODO: Create serializer.go for service and move this to there
 		users[i] = userentity.User{
-			ID:       model.ID,
-			Email:    model.Email,
-			Role:     userentity.Role(model.Role),
-			Username: model.Username,
-			Password: model.Password,
+			ID:        model.ID,
+			Email:     model.Email,
+			Role:      userentity.Role(model.Role),
+			Username:  model.Username,
+			Password:  model.Password,
+			AvatarURL: model.AvatarURL,
+			Mobile:    model.Mobile,
+			FirstName: model.FirstName,
+			LastName:  model.LastName,
+			BirthDate: model.BirthDate,
 		}
 	}
 

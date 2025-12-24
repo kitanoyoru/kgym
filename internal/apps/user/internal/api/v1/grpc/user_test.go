@@ -21,6 +21,7 @@ import (
 	"go.uber.org/goleak"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UserServiceTestSuite struct {
@@ -51,7 +52,8 @@ func (s *UserServiceTestSuite) SetupSuite() {
 
 	repository := postgres.New(s.db)
 	userService := service.New(repository)
-	grpcServer := NewUserService(userService)
+	grpcServer, err := NewUserService(userService)
+	require.NoError(s.T(), err, "failed to create gRPC server")
 
 	s.server = grpc.NewServer()
 	pb.RegisterUserServiceServer(s.server, grpcServer)
@@ -107,17 +109,37 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
+		birthDate := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
 		req := &pb.CreateUser_Request{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "testuser",
-			Password: "password123",
+			Email:     "test@example.com",
+			Role:      pb.Role_USER,
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(birthDate),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
 		require.NoError(s.T(), err)
 		assert.NotEmpty(s.T(), resp.Id)
 		assert.Regexp(s.T(), `^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`, resp.Id)
+
+		listReq := &pb.ListUsers_Request{}
+		listResp, err := s.client.ListUsers(ctx, listReq)
+		require.NoError(s.T(), err)
+		assert.Len(s.T(), listResp.Users, 1)
+		user := listResp.Users[0]
+		assert.Equal(s.T(), "test@example.com", user.Email)
+		assert.Equal(s.T(), "testuser", user.Username)
+		assert.Equal(s.T(), "https://example.com/avatar.jpg", user.AvatarUrl)
+		assert.Equal(s.T(), "+1234567890", user.Mobile)
+		assert.Equal(s.T(), "John", user.FirstName)
+		assert.Equal(s.T(), "Doe", user.LastName)
+		assert.NotNil(s.T(), user.BirthDate)
+		assert.Equal(s.T(), birthDate.Unix(), user.BirthDate.AsTime().Unix())
 	})
 
 	s.Run("should not create a user because of invalid email", func() {
@@ -125,10 +147,15 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 		defer cancel()
 
 		req := &pb.CreateUser_Request{
-			Email:    "invalid-email",
-			Role:     "default",
-			Username: "testuser",
-			Password: "password123",
+			Email:     "invalid-email",
+			Role:      pb.Role_USER,
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -141,10 +168,15 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 		defer cancel()
 
 		req := &pb.CreateUser_Request{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "testuser",
-			Password: "",
+			Email:     "test@example.com",
+			Role:      pb.Role_USER,
+			Username:  "testuser",
+			Password:  "",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -157,10 +189,15 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 		defer cancel()
 
 		req := &pb.CreateUser_Request{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "testuser",
-			Password: "short",
+			Email:     "test@example.com",
+			Role:      pb.Role_USER,
+			Username:  "testuser",
+			Password:  "short",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -173,10 +210,15 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 		defer cancel()
 
 		req := &pb.CreateUser_Request{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "ab",
-			Password: "password123",
+			Email:     "test@example.com",
+			Role:      pb.Role_USER,
+			Username:  "ab",
+			Password:  "password123",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -189,10 +231,99 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 		defer cancel()
 
 		req := &pb.CreateUser_Request{
-			Email:    "test@example.com",
-			Role:     "invalid-role",
-			Username: "testuser",
-			Password: "password123",
+			Email:     "test@example.com",
+			Role:      pb.Role(999),
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+		}
+
+		resp, err := s.client.CreateUser(ctx, req)
+		assert.Error(s.T(), err)
+		assert.Nil(s.T(), resp)
+	})
+
+	s.Run("should not create a user because of invalid avatar URL", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		req := &pb.CreateUser_Request{
+			Email:     "test@example.com",
+			Role:      pb.Role_USER,
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarUrl: "not-a-valid-url",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+		}
+
+		resp, err := s.client.CreateUser(ctx, req)
+		assert.Error(s.T(), err)
+		assert.Nil(s.T(), resp)
+	})
+
+	s.Run("should not create a user because of invalid mobile", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		req := &pb.CreateUser_Request{
+			Email:     "test@example.com",
+			Role:      pb.Role_USER,
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "123",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+		}
+
+		resp, err := s.client.CreateUser(ctx, req)
+		assert.Error(s.T(), err)
+		assert.Nil(s.T(), resp)
+	})
+
+	s.Run("should not create a user because of empty first name", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		req := &pb.CreateUser_Request{
+			Email:     "test@example.com",
+			Role:      pb.Role_USER,
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "",
+			LastName:  "Doe",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+		}
+
+		resp, err := s.client.CreateUser(ctx, req)
+		assert.Error(s.T(), err)
+		assert.Nil(s.T(), resp)
+	})
+
+	s.Run("should not create a user because of empty last name", func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		req := &pb.CreateUser_Request{
+			Email:     "test@example.com",
+			Role:      pb.Role_USER,
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarUrl: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "",
+			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -211,8 +342,8 @@ func (s *UserServiceTestSuite) TestListUsers() {
 
 		_, _ = s.db.Exec(ctx, "DELETE FROM users")
 
-		user1ID := s.createTestUser(ctx, "user1@example.com", "default", "user1", "password123")
-		user2ID := s.createTestUser(ctx, "user2@example.com", "admin", "user2", "password123")
+		user1ID := s.createTestUser(ctx, "user1@example.com", pb.Role_USER, "user1", "password123")
+		user2ID := s.createTestUser(ctx, "user2@example.com", pb.Role_ADMIN, "user2", "password123")
 
 		req := &pb.ListUsers_Request{}
 
@@ -235,8 +366,8 @@ func (s *UserServiceTestSuite) TestListUsers() {
 		_, _ = s.db.Exec(ctx, "DELETE FROM users")
 
 		email := "filter@example.com"
-		userID := s.createTestUser(ctx, email, "default", "emailfilteruser", "password123")
-		s.createTestUser(ctx, "other@example.com", "default", "otheruser", "password123")
+		userID := s.createTestUser(ctx, email, pb.Role_USER, "emailfilteruser", "password123")
+		s.createTestUser(ctx, "other@example.com", pb.Role_USER, "otheruser", "password123")
 
 		req := &pb.ListUsers_Request{
 			Email: &email,
@@ -247,6 +378,11 @@ func (s *UserServiceTestSuite) TestListUsers() {
 		assert.Len(s.T(), resp.Users, 1)
 		assert.Equal(s.T(), userID, resp.Users[0].Id)
 		assert.Equal(s.T(), email, resp.Users[0].Email)
+		assert.NotEmpty(s.T(), resp.Users[0].AvatarUrl)
+		assert.NotEmpty(s.T(), resp.Users[0].Mobile)
+		assert.NotEmpty(s.T(), resp.Users[0].FirstName)
+		assert.NotEmpty(s.T(), resp.Users[0].LastName)
+		assert.NotNil(s.T(), resp.Users[0].BirthDate)
 	})
 
 	s.Run("should return list of users successfully with username filter", func() {
@@ -256,8 +392,8 @@ func (s *UserServiceTestSuite) TestListUsers() {
 		_, _ = s.db.Exec(ctx, "DELETE FROM users")
 
 		username := "usernamefilteruser"
-		userID := s.createTestUser(ctx, "usernamefilter@example.com", "default", username, "password123")
-		s.createTestUser(ctx, "otheruser@example.com", "default", "otheruser2", "password123")
+		userID := s.createTestUser(ctx, "usernamefilter@example.com", pb.Role_USER, username, "password123")
+		s.createTestUser(ctx, "otheruser@example.com", pb.Role_USER, "otheruser2", "password123")
 
 		req := &pb.ListUsers_Request{
 			Username: &username,
@@ -268,6 +404,11 @@ func (s *UserServiceTestSuite) TestListUsers() {
 		assert.Len(s.T(), resp.Users, 1)
 		assert.Equal(s.T(), userID, resp.Users[0].Id)
 		assert.Equal(s.T(), username, resp.Users[0].Username)
+		assert.NotEmpty(s.T(), resp.Users[0].AvatarUrl)
+		assert.NotEmpty(s.T(), resp.Users[0].Mobile)
+		assert.NotEmpty(s.T(), resp.Users[0].FirstName)
+		assert.NotEmpty(s.T(), resp.Users[0].LastName)
+		assert.NotNil(s.T(), resp.Users[0].BirthDate)
 	})
 
 	s.Run("should return list of users successfully with role filter", func() {
@@ -276,10 +417,10 @@ func (s *UserServiceTestSuite) TestListUsers() {
 
 		_, _ = s.db.Exec(ctx, "DELETE FROM users")
 
-		role := "admin"
+		role := pb.Role_ADMIN
 		user1ID := s.createTestUser(ctx, "admin1@example.com", role, "admin1", "password123")
 		user2ID := s.createTestUser(ctx, "admin2@example.com", role, "admin2", "password123")
-		s.createTestUser(ctx, "user@example.com", "default", "user", "password123")
+		s.createTestUser(ctx, "user@example.com", pb.Role_USER, "user", "password123")
 
 		req := &pb.ListUsers_Request{
 			Role: &role,
@@ -293,6 +434,11 @@ func (s *UserServiceTestSuite) TestListUsers() {
 		for _, u := range resp.Users {
 			ids = append(ids, u.Id)
 			assert.Equal(s.T(), role, u.Role)
+			assert.NotEmpty(s.T(), u.AvatarUrl)
+			assert.NotEmpty(s.T(), u.Mobile)
+			assert.NotEmpty(s.T(), u.FirstName)
+			assert.NotEmpty(s.T(), u.LastName)
+			assert.NotNil(s.T(), u.BirthDate)
 		}
 		assert.Contains(s.T(), ids, user1ID)
 		assert.Contains(s.T(), ids, user2ID)
@@ -322,7 +468,7 @@ func (s *UserServiceTestSuite) TestDeleteUser() {
 
 		_, _ = s.db.Exec(ctx, "DELETE FROM users")
 
-		userID := s.createTestUser(ctx, "delete@example.com", "default", "deleteuser", "password123")
+		userID := s.createTestUser(ctx, "delete@example.com", pb.Role_USER, "deleteuser", "password123")
 
 		req := &pb.DeleteUser_Request{
 			Id: userID,
@@ -359,12 +505,21 @@ func (s *UserServiceTestSuite) TestDeleteUser() {
 	})
 }
 
-func (s *UserServiceTestSuite) createTestUser(ctx context.Context, email, role, username, password string) string {
+func (s *UserServiceTestSuite) createTestUser(ctx context.Context, email string, role pb.Role, username, password string) string {
+	return s.createTestUserWithFields(ctx, email, role, username, password, "https://example.com/avatar.jpg", "+1234567890", "John", "Doe", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC))
+}
+
+func (s *UserServiceTestSuite) createTestUserWithFields(ctx context.Context, email string, role pb.Role, username, password, avatarURL, mobile, firstName, lastName string, birthDate time.Time) string {
 	req := &pb.CreateUser_Request{
-		Email:    email,
-		Role:     role,
-		Username: username,
-		Password: password,
+		Email:     email,
+		Role:      role,
+		Username:  username,
+		Password:  password,
+		AvatarUrl: avatarURL,
+		Mobile:    mobile,
+		FirstName: firstName,
+		LastName:  lastName,
+		BirthDate: timestamppb.New(birthDate),
 	}
 
 	resp, err := s.client.CreateUser(ctx, req)

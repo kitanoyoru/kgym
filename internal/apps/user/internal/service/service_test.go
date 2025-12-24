@@ -39,19 +39,30 @@ func (s *ServiceTestSuite) TearDownTest() {
 
 func (s *ServiceTestSuite) TestCreate() {
 	s.Run("should create a user successfully", func() {
+		birthDate := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
 		req := CreateUserRequest{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "testuser",
-			Password: "password123",
+			Email:     "test@example.com",
+			Role:      "default",
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: birthDate,
 		}
 
 		expectedUserModel := usermodel.User{
-			ID:       "",
-			Email:    req.Email,
-			Role:     usermodel.RoleDefault,
-			Username: req.Username,
-			Password: req.Password,
+			ID:        "",
+			Email:     req.Email,
+			Role:      usermodel.RoleDefault,
+			Username:  req.Username,
+			Password:  req.Password,
+			AvatarURL: req.AvatarURL,
+			Mobile:    req.Mobile,
+			FirstName: req.FirstName,
+			LastName:  req.LastName,
+			BirthDate: req.BirthDate,
 		}
 
 		s.mockRepo.EXPECT().
@@ -62,6 +73,11 @@ func (s *ServiceTestSuite) TestCreate() {
 				assert.Equal(s.T(), expectedUserModel.Role, user.Role)
 				assert.Equal(s.T(), expectedUserModel.Username, user.Username)
 				assert.Equal(s.T(), expectedUserModel.Password, user.Password)
+				assert.Equal(s.T(), expectedUserModel.AvatarURL, user.AvatarURL)
+				assert.Equal(s.T(), expectedUserModel.Mobile, user.Mobile)
+				assert.Equal(s.T(), expectedUserModel.FirstName, user.FirstName)
+				assert.Equal(s.T(), expectedUserModel.LastName, user.LastName)
+				assert.Equal(s.T(), expectedUserModel.BirthDate, user.BirthDate)
 				return nil
 			})
 
@@ -72,10 +88,15 @@ func (s *ServiceTestSuite) TestCreate() {
 
 	s.Run("should not create a user because of empty email", func() {
 		req := CreateUserRequest{
-			Email:    "",
-			Role:     "default",
-			Username: "testuser",
-			Password: "password123",
+			Email:     "",
+			Role:      "default",
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -85,10 +106,15 @@ func (s *ServiceTestSuite) TestCreate() {
 
 	s.Run("should not create a user because of invalid email", func() {
 		req := CreateUserRequest{
-			Email:    "invalid-email",
-			Role:     "default",
-			Username: "testuser",
-			Password: "password123",
+			Email:     "invalid-email",
+			Role:      "default",
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -98,10 +124,15 @@ func (s *ServiceTestSuite) TestCreate() {
 
 	s.Run("should not create a user because of empty password", func() {
 		req := CreateUserRequest{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "testuser",
-			Password: "",
+			Email:     "test@example.com",
+			Role:      "default",
+			Username:  "testuser",
+			Password:  "",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -111,10 +142,15 @@ func (s *ServiceTestSuite) TestCreate() {
 
 	s.Run("should not create a user because of password too short", func() {
 		req := CreateUserRequest{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "testuser",
-			Password: "short",
+			Email:     "test@example.com",
+			Role:      "default",
+			Username:  "testuser",
+			Password:  "short",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -124,10 +160,15 @@ func (s *ServiceTestSuite) TestCreate() {
 
 	s.Run("should not create a user because of username too short", func() {
 		req := CreateUserRequest{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "ab",
-			Password: "password123",
+			Email:     "test@example.com",
+			Role:      "default",
+			Username:  "ab",
+			Password:  "password123",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -137,10 +178,15 @@ func (s *ServiceTestSuite) TestCreate() {
 
 	s.Run("should not create a user because of invalid role", func() {
 		req := CreateUserRequest{
-			Email:    "test@example.com",
-			Role:     "invalid-role",
-			Username: "testuser",
-			Password: "password123",
+			Email:     "test@example.com",
+			Role:      "invalid-role",
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -150,10 +196,15 @@ func (s *ServiceTestSuite) TestCreate() {
 
 	s.Run("should not create a user because of repository error", func() {
 		req := CreateUserRequest{
-			Email:    "test@example.com",
-			Role:     "default",
-			Username: "testuser",
-			Password: "password123",
+			Email:     "test@example.com",
+			Role:      "default",
+			Username:  "testuser",
+			Password:  "password123",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		expectedError := errors.New("repository error")
@@ -177,6 +228,11 @@ func (s *ServiceTestSuite) TestList() {
 				Role:      usermodel.RoleDefault,
 				Username:  "user1",
 				Password:  "password123",
+				AvatarURL: "https://example.com/avatar1.jpg",
+				Mobile:    "+1234567890",
+				FirstName: "John",
+				LastName:  "Doe",
+				BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
@@ -186,6 +242,11 @@ func (s *ServiceTestSuite) TestList() {
 				Role:      usermodel.RoleAdmin,
 				Username:  "user2",
 				Password:  "password123",
+				AvatarURL: "https://example.com/avatar2.jpg",
+				Mobile:    "+1234567891",
+				FirstName: "Jane",
+				LastName:  "Smith",
+				BirthDate: time.Date(1991, 2, 2, 0, 0, 0, 0, time.UTC),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
@@ -216,6 +277,11 @@ func (s *ServiceTestSuite) TestList() {
 				Role:      usermodel.RoleDefault,
 				Username:  "filteruser",
 				Password:  "password123",
+				AvatarURL: "https://example.com/avatar.jpg",
+				Mobile:    "+1234567890",
+				FirstName: "John",
+				LastName:  "Doe",
+				BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
@@ -248,6 +314,11 @@ func (s *ServiceTestSuite) TestList() {
 				Role:      usermodel.RoleDefault,
 				Username:  username,
 				Password:  "password123",
+				AvatarURL: "https://example.com/avatar.jpg",
+				Mobile:    "+1234567890",
+				FirstName: "John",
+				LastName:  "Doe",
+				BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
@@ -280,6 +351,11 @@ func (s *ServiceTestSuite) TestList() {
 				Role:      usermodel.RoleAdmin,
 				Username:  "admin1",
 				Password:  "password123",
+				AvatarURL: "https://example.com/avatar1.jpg",
+				Mobile:    "+1234567890",
+				FirstName: "Admin",
+				LastName:  "One",
+				BirthDate: time.Date(1985, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
@@ -289,6 +365,11 @@ func (s *ServiceTestSuite) TestList() {
 				Role:      usermodel.RoleAdmin,
 				Username:  "admin2",
 				Password:  "password123",
+				AvatarURL: "https://example.com/avatar2.jpg",
+				Mobile:    "+1234567891",
+				FirstName: "Admin",
+				LastName:  "Two",
+				BirthDate: time.Date(1986, 2, 2, 0, 0, 0, 0, time.UTC),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
@@ -325,6 +406,11 @@ func (s *ServiceTestSuite) TestList() {
 				Role:      usermodel.RoleDefault,
 				Username:  username,
 				Password:  "password123",
+				AvatarURL: "https://example.com/avatar.jpg",
+				Mobile:    "+1234567890",
+				FirstName: "John",
+				LastName:  "Doe",
+				BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},

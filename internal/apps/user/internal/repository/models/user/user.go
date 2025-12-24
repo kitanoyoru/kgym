@@ -14,6 +14,11 @@ var Columns = []string{
 	"role",
 	"username",
 	"password",
+	"avatar_url",
+	"mobile",
+	"first_name",
+	"last_name",
+	"birth_date",
 	"created_at",
 	"updated_at",
 	"deleted_at",
@@ -32,6 +37,11 @@ type User struct {
 	Role      Role       `db:"role"`
 	Username  string     `db:"username"`
 	Password  string     `db:"password"`
+	AvatarURL string     `db:"avatar_url"`
+	Mobile    string     `db:"mobile"`
+	FirstName string     `db:"first_name"`
+	LastName  string     `db:"last_name"`
+	BirthDate time.Time  `db:"birth_date"`
 	CreatedAt time.Time  `db:"created_at"`
 	UpdatedAt time.Time  `db:"updated_at"`
 	DeletedAt *time.Time `db:"deleted_at"`
@@ -44,6 +54,11 @@ func (u User) Values() []any {
 		u.Role,
 		u.Username,
 		u.Password,
+		u.AvatarURL,
+		u.Mobile,
+		u.FirstName,
+		u.LastName,
+		u.BirthDate,
 		u.CreatedAt,
 		u.UpdatedAt,
 		u.DeletedAt,

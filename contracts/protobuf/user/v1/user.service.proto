@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package user.v1;
+
+import "user/v1/user.proto";
+
+import "google/api/annotations.proto";
+import "validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1;user";
+
+service UserService {
+  rpc CreateUser(CreateUser.Request) returns (CreateUser.Response) {
+    option (google.api.http) = {
+      post: "/v1/users"
+      body: "*"
+    };
+  }
+
+  rpc ListUsers(ListUsers.Request) returns (ListUsers.Response) {
+    option (google.api.http) = {
+      get: "/v1/users"
+    };
+  }
+
+  rpc DeleteUser(DeleteUser.Request) returns (DeleteUser.Response) {
+    option (google.api.http) = {
+      delete: "/v1/users/{id}"
+    };
+  }
+}
+
+message CreateUser {
+  message Request {
+    string email = 1 [(validate.rules).string.email = true];
+    user.v1.Role role = 2;
+    string username = 3 [(validate.rules).string = {min_len: 3, max_len: 32}];
+    string password = 4 [(validate.rules).string = {min_len: 8, max_len: 64}];
+    string avatar_url = 5 [(validate.rules).string.uri = true];
+    string mobile = 6 [(validate.rules).string = {min_len: 10, max_len: 15}];
+    string first_name = 7 [(validate.rules).string = {min_len: 1, max_len: 32}];
+    string last_name = 8 [(validate.rules).string = {min_len: 1, max_len: 32}];
+    google.protobuf.Timestamp birth_date = 9;
+  }
+
+  message Response {
+    string id = 1 [(validate.rules).string.uuid = true];
+  }
+}
+
+message ListUsers {
+  message Request {
+    optional string email = 1 [(validate.rules).string.email = true];
+    optional user.v1.Role role = 2;
+    optional string username = 3 [(validate.rules).string = {min_len: 3, max_len: 32}];
+  }
+
+  message Response {
+    repeated user.v1.User users = 1;
+  }
+}
+
+message DeleteUser {
+  message Request {
+    string id = 1 [(validate.rules).string.uuid = true];
+  }
+
+  message Response {}
+}
