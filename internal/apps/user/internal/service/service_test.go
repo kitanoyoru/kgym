@@ -376,6 +376,48 @@ func (s *ServiceTestSuite) TestList() {
 	})
 }
 
+func (s *ServiceTestSuite) TestDelete() {
+	s.Run("should delete a user successfully", func() {
+		userID := uuid.New().String()
+
+		s.mockRepo.EXPECT().
+			Delete(s.ctx, gomock.Any()).
+			DoAndReturn(func(ctx context.Context, filters ...postgres.Filter) error {
+				var dbFilters postgres.Filters
+				for _, f := range filters {
+					f(&dbFilters)
+				}
+				assert.NotNil(s.T(), dbFilters.ID)
+				assert.Equal(s.T(), userID, *dbFilters.ID)
+				return nil
+			})
+
+		err := s.service.Delete(s.ctx, userID)
+		require.NoError(s.T(), err)
+	})
+
+	s.Run("should return error when repository fails", func() {
+		userID := uuid.New().String()
+		expectedError := errors.New("repository error")
+
+		s.mockRepo.EXPECT().
+			Delete(s.ctx, gomock.Any()).
+			DoAndReturn(func(ctx context.Context, filters ...postgres.Filter) error {
+				var dbFilters postgres.Filters
+				for _, f := range filters {
+					f(&dbFilters)
+				}
+				assert.NotNil(s.T(), dbFilters.ID)
+				assert.Equal(s.T(), userID, *dbFilters.ID)
+				return expectedError
+			})
+
+		err := s.service.Delete(s.ctx, userID)
+		assert.Error(s.T(), err)
+		assert.Equal(s.T(), expectedError, err)
+	})
+}
+
 func TestServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(ServiceTestSuite))
 }

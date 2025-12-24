@@ -59,10 +59,10 @@ func (s *Service) Create(ctx context.Context, req CreateUserRequest) (string, er
 	return userEntity.ID, nil
 }
 
-func (s *Service) List(ctx context.Context, options ...ListOption) ([]userentity.User, error) {
+func (s *Service) List(ctx context.Context, options ...Option) ([]userentity.User, error) {
 	metrics.GlobalRegistry.GetMetric(servicemetrics.UserListMetricName).Counter.WithLabelValues().Inc()
 
-	var opts ListOptions
+	var opts Options
 	for _, option := range options {
 		option(&opts)
 	}
@@ -95,4 +95,10 @@ func (s *Service) List(ctx context.Context, options ...ListOption) ([]userentity
 	}
 
 	return users, nil
+}
+
+func (s *Service) Delete(ctx context.Context, id string) error {
+	metrics.GlobalRegistry.GetMetric(servicemetrics.UserDeletedMetricName).Counter.WithLabelValues().Inc()
+
+	return s.repository.Delete(ctx, postgres.WithID(id))
 }
