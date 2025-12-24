@@ -8,6 +8,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251224130539-0821f3d3e6a0
 	github.com/kitanoyoru/kgym/pkg/logger v0.0.0-20251224130539-0821f3d3e6a0
+	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.11.1
 	github.com/spf13/cobra v1.10.2
 	go.uber.org/multierr v1.11.0
@@ -22,7 +23,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.39.0 // indirect
