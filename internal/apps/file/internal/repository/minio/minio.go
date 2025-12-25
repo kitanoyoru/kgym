@@ -31,7 +31,6 @@ func (r *Repository) Upload(ctx context.Context, req UploadRequest) (UploadRespo
 
 	uploadInfo, err := r.minioClient.PutObject(ctx, req.Bucket, name, req.Reader, -1, minio.PutObjectOptions{
 		ContentType: req.ContentType,
-		PartSize:    10 * 1024, // 10KB (Must be the same with the gateway file handler)
 	})
 	if err != nil {
 		return UploadResponse{}, err

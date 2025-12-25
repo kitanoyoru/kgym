@@ -53,6 +53,7 @@ func SetupTestContainer(ctx context.Context, options ...Option) (*MinioContainer
 	req := testcontainers.ContainerRequest{
 		Image:        "minio/minio:latest",
 		ExposedPorts: []string{"9000/tcp"},
+		Cmd:          []string{"server", "/data"},
 		WaitingFor: wait.ForHTTP("/minio/health/live").
 			WithPort("9000").
 			WithStartupTimeout(120 * time.Second),
@@ -82,7 +83,7 @@ func SetupTestContainer(ctx context.Context, options ...Option) (*MinioContainer
 		return nil, err
 	}
 
-	endpoint := fmt.Sprintf("http://%s:%s", host, port.Port())
+	endpoint := fmt.Sprintf("%s:%s", host, port.Port())
 
 	return &MinioContainer{
 		Container: container,

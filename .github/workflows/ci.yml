@@ -177,4 +177,6 @@ jobs:
         run: |
           export PATH="$PWD/bin:$PATH"
           make user-test
+          make file-test
+          make gateway-test
 

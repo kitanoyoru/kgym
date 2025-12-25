@@ -1,6 +1,6 @@
 .PHONY: help user-% gym-% subscription-% gateway-% tools tools-install tools-update ci-test
 
-SERVICES := user gym subscription gateway
+SERVICES := user gym file subscription gateway
 
 TOOLS_DIR := $(CURDIR)/tools
 BIN_DIR := $(CURDIR)/bin

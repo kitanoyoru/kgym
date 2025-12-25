@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS files (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
     deleted_at TIMESTAMP WITH TIME ZONE NULL,
 
-    CONSTRAINT files_path_unique UNIQUE (path),
+    CONSTRAINT files_path_unique UNIQUE (path)
 );
 -- +goose StatementEnd
 
