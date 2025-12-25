@@ -110,6 +110,20 @@ func (mr *MockIRepositoryMockRecorder) List(ctx any, filters ...any) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockIRepository)(nil).List), varargs...)
 }
 
+// UpdateSize mocks base method.
+func (m *MockIRepository) UpdateSize(ctx context.Context, id string, size int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateSize", ctx, id, size)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateSize indicates an expected call of UpdateSize.
+func (mr *MockIRepositoryMockRecorder) UpdateSize(ctx, id, size any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateSize", reflect.TypeOf((*MockIRepository)(nil).UpdateSize), ctx, id, size)
+}
+
 // UpdateState mocks base method.
 func (m *MockIRepository) UpdateState(ctx context.Context, id string, state file.State) error {
 	m.ctrl.T.Helper()

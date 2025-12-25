@@ -11,6 +11,7 @@ import (
 	filemodel "github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/models/file"
 	"github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/postgres"
 	pkgValidator "github.com/kitanoyoru/kgym/internal/apps/file/pkg/validator"
+	"go.uber.org/multierr"
 )
 
 type Service struct {
@@ -60,7 +61,7 @@ func (s *Service) Upload(ctx context.Context, req UploadRequest) (UploadResponse
 	}
 
 	if err := s.postgresRepository.Create(ctx, file); err != nil {
-		return UploadResponse{}, fmt.Errorf("failed to create file record: %w", err)
+		return UploadResponse{}, err
 	}
 
 	minioReq := minio.UploadRequest{
@@ -70,16 +71,21 @@ func (s *Service) Upload(ctx context.Context, req UploadRequest) (UploadResponse
 		Reader:      req.Reader,
 	}
 
-	if _, err := s.minioRepository.Upload(ctx, minioReq); err != nil {
+	minioResp, err := s.minioRepository.Upload(ctx, minioReq)
+	if err != nil {
 		if updateErr := s.postgresRepository.UpdateState(ctx, fileID, filemodel.StateFailed); updateErr != nil {
-			return UploadResponse{}, fmt.Errorf("upload failed: %w; state update failed: %w", err, updateErr)
+			return UploadResponse{}, updateErr
 		}
 
-		return UploadResponse{}, fmt.Errorf("upload failed: %w", err)
+		return UploadResponse{}, err
 	}
 
-	if err := s.postgresRepository.UpdateState(ctx, fileID, filemodel.StateCompleted); err != nil {
-		return UploadResponse{}, fmt.Errorf("failed to update file state to completed: %w", err)
+	err = multierr.Combine(
+		s.postgresRepository.UpdateState(ctx, fileID, filemodel.StateCompleted),
+		s.postgresRepository.UpdateSize(ctx, fileID, minioResp.Size),
+	)
+	if err != nil {
+		return UploadResponse{}, err
 	}
 
 	return UploadResponse{
@@ -90,12 +96,12 @@ func (s *Service) Upload(ctx context.Context, req UploadRequest) (UploadResponse
 func (s *Service) GetURL(ctx context.Context, id string) (string, error) {
 	file, err := s.postgresRepository.Get(ctx, id)
 	if err != nil {
-		return "", fmt.Errorf("failed to get file from database: %w", err)
+		return "", err
 	}
 
 	url, err := s.minioRepository.GetURL(ctx, file.Path)
 	if err != nil {
-		return "", fmt.Errorf("failed to get file URL from static storage: %w", err)
+		return "", err
 	}
 
 	return url, nil
@@ -104,16 +110,11 @@ func (s *Service) GetURL(ctx context.Context, id string) (string, error) {
 func (s *Service) Delete(ctx context.Context, id string) error {
 	file, err := s.postgresRepository.Get(ctx, id)
 	if err != nil {
-		return fmt.Errorf("failed to get file from database: %w", err)
+		return err
 	}
 
-	if err := s.minioRepository.Delete(ctx, file.Path); err != nil {
-		return fmt.Errorf("failed to delete file from static storage: %w", err)
-	}
-
-	if err := s.postgresRepository.Delete(ctx, postgres.WithID(file.ID)); err != nil {
-		return fmt.Errorf("failed to delete file record from database: %w", err)
-	}
-
-	return nil
+	return multierr.Combine(
+		s.minioRepository.Delete(ctx, file.Path),
+		s.postgresRepository.Delete(ctx, postgres.WithID(file.ID)),
+	)
 }

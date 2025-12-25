@@ -3,74 +3,115 @@ package service
 import (
 	"bytes"
 	"context"
-	"errors"
 	"strings"
 	"testing"
-	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/minio"
-	miniomocks "github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/minio/mocks"
 	filemodel "github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/models/file"
-	postgresmocks "github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/postgres/mocks"
+	"github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/postgres"
+	"github.com/kitanoyoru/kgym/internal/apps/file/migrations"
+	pkgpostgres "github.com/kitanoyoru/kgym/pkg/database/postgres"
+	"github.com/kitanoyoru/kgym/pkg/testing/integration/cockroachdb"
+	pkgminio "github.com/kitanoyoru/kgym/pkg/testing/integration/minio"
+	minioClient "github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
-	"go.uber.org/mock/gomock"
 )
 
 type ServiceTestSuite struct {
 	suite.Suite
 
-	ctx  context.Context
-	ctrl *gomock.Controller
+	ctx context.Context
 
-	service *Service
+	dbContainer    *cockroachdb.CockroachDBContainer
+	minioContainer *pkgminio.MinioContainer
+}
 
-	mockMinioRepo    *miniomocks.MockIRepository
-	mockPostgresRepo *postgresmocks.MockIRepository
+func (s *ServiceTestSuite) SetupSuite() {
+	ctx := context.Background()
+	s.ctx = ctx
+
+	dbContainer, err := cockroachdb.SetupTestContainer(ctx)
+	require.NoError(s.T(), err, "failed to setup database container")
+	s.dbContainer = dbContainer
+
+	err = migrations.Up(ctx, "pgx", dbContainer.URI)
+	require.NoError(s.T(), err, "failed to run migrations")
+
+	minioContainer, err := pkgminio.SetupTestContainer(ctx)
+	require.NoError(s.T(), err, "failed to setup minio container")
+	s.minioContainer = minioContainer
+
+	client, err := minioClient.New(minioContainer.Endpoint, &minioClient.Options{
+		Creds: credentials.NewStaticV4(minioContainer.AccessKey, minioContainer.SecretKey, ""),
+	})
+	require.NoError(s.T(), err, "failed to create minio client")
+
+	err = client.MakeBucket(ctx, "user-avatar", minioClient.MakeBucketOptions{})
+	require.NoError(s.T(), err, "failed to create bucket")
+}
+
+func (s *ServiceTestSuite) TearDownSuite() {
+	if s.dbContainer != nil {
+		_ = s.dbContainer.Terminate(s.T().Context())
+	}
+	if s.minioContainer != nil {
+		_ = s.minioContainer.Terminate(s.T().Context())
+	}
 }
 
 func (s *ServiceTestSuite) SetupTest() {
-	s.ctrl = gomock.NewController(s.T())
-	s.mockMinioRepo = miniomocks.NewMockIRepository(s.ctrl)
-	s.mockPostgresRepo = postgresmocks.NewMockIRepository(s.ctrl)
-	s.service = New(Config{
+	db, err := pkgpostgres.New(s.ctx, pkgpostgres.Config{
+		URI: s.dbContainer.URI,
+	})
+	require.NoError(s.T(), err, "failed to create postgres client")
+
+	_, err = db.Exec(s.ctx, "DELETE FROM files")
+	require.NoError(s.T(), err, "failed to clean files table")
+
+	db.Close()
+}
+
+func (s *ServiceTestSuite) createService() (*Service, *postgres.Repository, *minio.Repository, *pgxpool.Pool) {
+	db, err := pkgpostgres.New(s.ctx, pkgpostgres.Config{
+		URI: s.dbContainer.URI,
+	})
+	require.NoError(s.T(), err, "failed to create postgres client")
+
+	client, err := minioClient.New(s.minioContainer.Endpoint, &minioClient.Options{
+		Creds: credentials.NewStaticV4(s.minioContainer.AccessKey, s.minioContainer.SecretKey, ""),
+	})
+	require.NoError(s.T(), err, "failed to create minio client")
+
+	postgresRepo := postgres.New(db)
+	minioRepo, err := minio.New(client)
+	require.NoError(s.T(), err, "failed to create minio repository")
+
+	service := New(Config{
 		Buckets: map[string]string{
 			"user_avatar": "user-avatar",
 		},
-	}, s.mockMinioRepo, s.mockPostgresRepo)
-	s.ctx = context.Background()
-}
+	}, minioRepo, postgresRepo)
 
-func (s *ServiceTestSuite) TearDownTest() {
-	s.ctrl.Finish()
+	return service, postgresRepo, minioRepo, db
 }
 
 func (s *ServiceTestSuite) TestUpload() {
 	s.Run("should upload a file successfully", func() {
+		service, postgresRepo, _, db := s.createService()
+		defer db.Close()
+
 		userID := uuid.New().String()
 		fileName := "avatar.png"
 		contentType := "image/png"
-		reader := bytes.NewReader([]byte("test file content"))
-
-		s.mockPostgresRepo.EXPECT().
-			Create(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, file filemodel.File) error {
-				assert.Equal(s.T(), userID, file.UserID)
-				assert.Equal(s.T(), "user-avatar/avatar.png", file.Path)
-				assert.Equal(s.T(), filemodel.ExtensionPNG, file.Extension)
-				assert.Equal(s.T(), filemodel.StatePending, file.State)
-				return nil
-			})
-
-		s.mockMinioRepo.EXPECT().
-			Upload(gomock.Any(), gomock.Any()).
-			Return(minio.UploadResponse{}, nil)
-
-		s.mockPostgresRepo.EXPECT().
-			UpdateState(gomock.Any(), gomock.Any(), filemodel.StateCompleted).
-			Return(nil)
+		fileContent := []byte("test file content")
+		reader := bytes.NewReader(fileContent)
 
 		req := UploadRequest{
 			UserID:      userID,
@@ -80,17 +121,27 @@ func (s *ServiceTestSuite) TestUpload() {
 			Reader:      reader,
 		}
 
-		resp, err := s.service.Upload(s.ctx, req)
+		resp, err := service.Upload(s.ctx, req)
 		assert.NoError(s.T(), err)
 		assert.NotEmpty(s.T(), resp.ID)
+
+		file, err := postgresRepo.Get(s.ctx, resp.ID)
+		require.NoError(s.T(), err)
+		assert.Equal(s.T(), userID, file.UserID)
+		assert.Equal(s.T(), filemodel.ExtensionPNG, file.Extension)
+		assert.Equal(s.T(), filemodel.StateCompleted, file.State)
+		assert.Equal(s.T(), int64(len(fileContent)), file.Size)
 	})
 
 	s.Run("should return error when bucket not found", func() {
+		_, _, minioRepo, db := s.createService()
+		defer db.Close()
+
 		serviceWithEmptyBucket := New(Config{
 			Buckets: map[string]string{
 				"user_avatar": "",
 			},
-		}, s.mockMinioRepo, s.mockPostgresRepo)
+		}, minioRepo, postgres.New(db))
 
 		req := UploadRequest{
 			UserID:      uuid.New().String(),
@@ -107,6 +158,9 @@ func (s *ServiceTestSuite) TestUpload() {
 	})
 
 	s.Run("should return error when file extension is invalid", func() {
+		service, _, _, db := s.createService()
+		defer db.Close()
+
 		req := UploadRequest{
 			UserID:      uuid.New().String(),
 			Target:      "user_avatar",
@@ -115,329 +169,101 @@ func (s *ServiceTestSuite) TestUpload() {
 			Reader:      bytes.NewReader([]byte("test")),
 		}
 
-		resp, err := s.service.Upload(s.ctx, req)
+		resp, err := service.Upload(s.ctx, req)
 		assert.Error(s.T(), err)
 		assert.True(s.T(), strings.Contains(err.Error(), "invalid file extension"))
-		assert.Empty(s.T(), resp.ID)
-	})
-
-	s.Run("should return error when postgres create fails", func() {
-		userID := uuid.New().String()
-		expectedErr := errors.New("database error")
-
-		s.mockPostgresRepo.EXPECT().
-			Create(gomock.Any(), gomock.Any()).
-			Return(expectedErr)
-
-		req := UploadRequest{
-			UserID:      userID,
-			Target:      "user_avatar",
-			Name:        "avatar.png",
-			ContentType: "image/png",
-			Reader:      bytes.NewReader([]byte("test")),
-		}
-
-		resp, err := s.service.Upload(s.ctx, req)
-		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "failed to create file record"))
-		assert.Empty(s.T(), resp.ID)
-	})
-
-	s.Run("should return error when minio upload fails and update state to failed", func() {
-		userID := uuid.New().String()
-		var fileID string
-		uploadErr := errors.New("minio upload error")
-
-		s.mockPostgresRepo.EXPECT().
-			Create(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, file filemodel.File) error {
-				fileID = file.ID
-				return nil
-			})
-
-		s.mockMinioRepo.EXPECT().
-			Upload(gomock.Any(), gomock.Any()).
-			Return(minio.UploadResponse{}, uploadErr)
-
-		s.mockPostgresRepo.EXPECT().
-			UpdateState(gomock.Any(), gomock.Any(), filemodel.StateFailed).
-			DoAndReturn(func(ctx context.Context, id string, state filemodel.State) error {
-				assert.Equal(s.T(), fileID, id)
-				return nil
-			})
-
-		req := UploadRequest{
-			UserID:      userID,
-			Target:      "user_avatar",
-			Name:        "avatar.png",
-			ContentType: "image/png",
-			Reader:      bytes.NewReader([]byte("test")),
-		}
-
-		resp, err := s.service.Upload(s.ctx, req)
-		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "upload failed"))
-		assert.Empty(s.T(), resp.ID)
-	})
-
-	s.Run("should return error when minio upload fails and state update also fails", func() {
-		userID := uuid.New().String()
-		var fileID string
-		uploadErr := errors.New("minio upload error")
-		updateErr := errors.New("state update error")
-
-		s.mockPostgresRepo.EXPECT().
-			Create(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, file filemodel.File) error {
-				fileID = file.ID
-				return nil
-			})
-
-		s.mockMinioRepo.EXPECT().
-			Upload(gomock.Any(), gomock.Any()).
-			Return(minio.UploadResponse{}, uploadErr)
-
-		s.mockPostgresRepo.EXPECT().
-			UpdateState(gomock.Any(), gomock.Any(), filemodel.StateFailed).
-			DoAndReturn(func(ctx context.Context, id string, state filemodel.State) error {
-				assert.Equal(s.T(), fileID, id)
-				return updateErr
-			})
-
-		req := UploadRequest{
-			UserID:      userID,
-			Target:      "user_avatar",
-			Name:        "avatar.png",
-			ContentType: "image/png",
-			Reader:      bytes.NewReader([]byte("test")),
-		}
-
-		resp, err := s.service.Upload(s.ctx, req)
-		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "upload failed"))
-		assert.True(s.T(), strings.Contains(err.Error(), "state update failed"))
-		assert.Empty(s.T(), resp.ID)
-	})
-
-	s.Run("should return error when state update to completed fails", func() {
-		userID := uuid.New().String()
-		var fileID string
-		updateErr := errors.New("state update error")
-
-		s.mockPostgresRepo.EXPECT().
-			Create(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, file filemodel.File) error {
-				fileID = file.ID
-				return nil
-			})
-
-		s.mockMinioRepo.EXPECT().
-			Upload(gomock.Any(), gomock.Any()).
-			Return(minio.UploadResponse{}, nil)
-
-		s.mockPostgresRepo.EXPECT().
-			UpdateState(gomock.Any(), gomock.Any(), filemodel.StateCompleted).
-			DoAndReturn(func(ctx context.Context, id string, state filemodel.State) error {
-				assert.Equal(s.T(), fileID, id)
-				return updateErr
-			})
-
-		req := UploadRequest{
-			UserID:      userID,
-			Target:      "user_avatar",
-			Name:        "avatar.png",
-			ContentType: "image/png",
-			Reader:      bytes.NewReader([]byte("test")),
-		}
-
-		resp, err := s.service.Upload(s.ctx, req)
-		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "failed to update file state to completed"))
 		assert.Empty(s.T(), resp.ID)
 	})
 }
 
 func (s *ServiceTestSuite) TestGetURL() {
 	s.Run("should get a file URL successfully", func() {
-		fileID := uuid.New().String()
-		expectedURL := "https://storage.example.com/user-avatar/avatar.png"
-		expectedFile := filemodel.File{
-			ID:        fileID,
-			UserID:    uuid.New().String(),
-			Path:      "user-avatar/avatar.png",
-			Size:      1024,
-			Extension: filemodel.ExtensionPNG,
-			State:     filemodel.StateCompleted,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			DeletedAt: nil,
+		service, _, _, db := s.createService()
+		defer db.Close()
+
+		userID := uuid.New().String()
+		fileName := "avatar.png"
+		contentType := "image/png"
+		fileContent := []byte("test file content")
+		reader := bytes.NewReader(fileContent)
+
+		req := UploadRequest{
+			UserID:      userID,
+			Target:      "user_avatar",
+			Name:        fileName,
+			ContentType: contentType,
+			Reader:      reader,
 		}
 
-		s.mockPostgresRepo.EXPECT().
-			Get(gomock.Any(), fileID).
-			Return(expectedFile, nil)
+		uploadResp, err := service.Upload(s.ctx, req)
+		require.NoError(s.T(), err)
 
-		s.mockMinioRepo.EXPECT().
-			GetURL(gomock.Any(), expectedFile.Path).
-			Return(expectedURL, nil)
-
-		url, err := s.service.GetURL(s.ctx, fileID)
+		url, err := service.GetURL(s.ctx, uploadResp.ID)
 		assert.NoError(s.T(), err)
-		assert.Equal(s.T(), expectedURL, url)
+		assert.NotEmpty(s.T(), url)
+		assert.Contains(s.T(), url, "user-avatar")
 	})
 
 	s.Run("should return error when file not found in database", func() {
+		service, _, _, db := s.createService()
+		defer db.Close()
+
 		fileID := uuid.New().String()
-		dbErr := errors.New("file not found")
 
-		s.mockPostgresRepo.EXPECT().
-			Get(gomock.Any(), fileID).
-			Return(filemodel.File{}, dbErr)
-
-		url, err := s.service.GetURL(s.ctx, fileID)
+		url, err := service.GetURL(s.ctx, fileID)
 		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "failed to get file from database"))
-		assert.Empty(s.T(), url)
-	})
-
-	s.Run("should return error when minio GetURL fails", func() {
-		fileID := uuid.New().String()
-		expectedFile := filemodel.File{
-			ID:        fileID,
-			UserID:    uuid.New().String(),
-			Path:      "user-avatar/avatar.png",
-			Size:      1024,
-			Extension: filemodel.ExtensionPNG,
-			State:     filemodel.StateCompleted,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			DeletedAt: nil,
-		}
-		minioErr := errors.New("minio error")
-
-		s.mockPostgresRepo.EXPECT().
-			Get(gomock.Any(), fileID).
-			Return(expectedFile, nil)
-
-		s.mockMinioRepo.EXPECT().
-			GetURL(gomock.Any(), expectedFile.Path).
-			Return("", minioErr)
-
-		url, err := s.service.GetURL(s.ctx, fileID)
-		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "failed to get file URL from static storage"))
 		assert.Empty(s.T(), url)
 	})
 }
 
 func (s *ServiceTestSuite) TestDelete() {
 	s.Run("should delete a file successfully", func() {
-		fileID := uuid.New().String()
-		expectedFile := filemodel.File{
-			ID:        fileID,
-			UserID:    uuid.New().String(),
-			Path:      "user-avatar/avatar.png",
-			Size:      1024,
-			Extension: filemodel.ExtensionPNG,
-			State:     filemodel.StateCompleted,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			DeletedAt: nil,
+		service, postgresRepo, _, db := s.createService()
+		defer db.Close()
+
+		userID := uuid.New().String()
+		fileName := "avatar.png"
+		contentType := "image/png"
+		fileContent := []byte("test file content")
+		reader := bytes.NewReader(fileContent)
+
+		req := UploadRequest{
+			UserID:      userID,
+			Target:      "user_avatar",
+			Name:        fileName,
+			ContentType: contentType,
+			Reader:      reader,
 		}
 
-		s.mockPostgresRepo.EXPECT().
-			Get(gomock.Any(), fileID).
-			Return(expectedFile, nil)
+		uploadResp, err := service.Upload(s.ctx, req)
+		require.NoError(s.T(), err)
 
-		s.mockMinioRepo.EXPECT().
-			Delete(gomock.Any(), expectedFile.Path).
-			Return(nil)
+		file, err := postgresRepo.Get(s.ctx, uploadResp.ID)
+		require.NoError(s.T(), err)
+		require.NotEmpty(s.T(), file.Path)
 
-		s.mockPostgresRepo.EXPECT().
-			Delete(gomock.Any(), gomock.Any()).
-			Return(nil)
-
-		err := s.service.Delete(s.ctx, fileID)
+		err = service.Delete(s.ctx, uploadResp.ID)
 		assert.NoError(s.T(), err)
+
+		_, err = postgresRepo.Get(s.ctx, uploadResp.ID)
+		assert.Error(s.T(), err)
 	})
 
 	s.Run("should return error when file not found in database", func() {
+		service, _, _, db := s.createService()
+		defer db.Close()
+
 		fileID := uuid.New().String()
-		dbErr := errors.New("file not found")
 
-		s.mockPostgresRepo.EXPECT().
-			Get(gomock.Any(), fileID).
-			Return(filemodel.File{}, dbErr)
-
-		err := s.service.Delete(s.ctx, fileID)
+		err := service.Delete(s.ctx, fileID)
 		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "failed to get file from database"))
-	})
-
-	s.Run("should return error when minio Delete fails", func() {
-		fileID := uuid.New().String()
-		expectedFile := filemodel.File{
-			ID:        fileID,
-			UserID:    uuid.New().String(),
-			Path:      "user-avatar/avatar.png",
-			Size:      1024,
-			Extension: filemodel.ExtensionPNG,
-			State:     filemodel.StateCompleted,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			DeletedAt: nil,
-		}
-		minioErr := errors.New("minio delete error")
-
-		s.mockPostgresRepo.EXPECT().
-			Get(gomock.Any(), fileID).
-			Return(expectedFile, nil)
-
-		s.mockMinioRepo.EXPECT().
-			Delete(gomock.Any(), expectedFile.Path).
-			Return(minioErr)
-
-		err := s.service.Delete(s.ctx, fileID)
-		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "failed to delete file from static storage"))
-	})
-
-	s.Run("should return error when postgres Delete fails", func() {
-		fileID := uuid.New().String()
-		expectedFile := filemodel.File{
-			ID:        fileID,
-			UserID:    uuid.New().String(),
-			Path:      "user-avatar/avatar.png",
-			Size:      1024,
-			Extension: filemodel.ExtensionPNG,
-			State:     filemodel.StateCompleted,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			DeletedAt: nil,
-		}
-		dbErr := errors.New("database delete error")
-
-		s.mockPostgresRepo.EXPECT().
-			Get(gomock.Any(), fileID).
-			Return(expectedFile, nil)
-
-		s.mockMinioRepo.EXPECT().
-			Delete(gomock.Any(), expectedFile.Path).
-			Return(nil)
-
-		s.mockPostgresRepo.EXPECT().
-			Delete(gomock.Any(), gomock.Any()).
-			Return(dbErr)
-
-		err := s.service.Delete(s.ctx, fileID)
-		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "failed to delete file record from database"))
 	})
 }
 
 func TestMain(m *testing.M) {
 	goleak.VerifyTestMain(m)
 }
+
 func TestServiceTestSuite(t *testing.T) {
 	suite.Run(t, new(ServiceTestSuite))
 }

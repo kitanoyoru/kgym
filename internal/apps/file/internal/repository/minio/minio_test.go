@@ -45,7 +45,8 @@ func (s *RepositoryTestSuite) TestUpload() {
 	})
 	require.NoError(s.T(), err, "failed to create minio client")
 
-	repository := New(minioClient)
+	repository, repoErr := New(minioClient)
+	require.NoError(s.T(), repoErr, "failed to create repository")
 
 	s.Run("should upload a file successfully", func() {
 		bucketName := "test-bucket-" + uuid.New().String()
@@ -69,7 +70,7 @@ func (s *RepositoryTestSuite) TestUpload() {
 		assert.Equal(s.T(), "png", resp.Extension)
 		assert.Equal(s.T(), int64(len(fileContent)), resp.Size)
 		assert.Contains(s.T(), resp.URL, bucketName)
-		assert.Contains(s.T(), resp.URL, fileName)
+		assert.Contains(s.T(), resp.URL, ".png")
 	})
 }
 
@@ -81,7 +82,8 @@ func (s *RepositoryTestSuite) TestGetURL() {
 	})
 	require.NoError(s.T(), err, "failed to create minio client")
 
-	repository := New(minioClient)
+	repository, repoErr := New(minioClient)
+	require.NoError(s.T(), repoErr, "failed to create repository")
 
 	s.Run("should get a file URL successfully", func() {
 		bucketName := "test-bucket-" + uuid.New().String()
@@ -128,7 +130,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 	})
 	require.NoError(s.T(), err, "failed to create minio client")
 
-	repository := New(minioClient)
+	repository, repoErr := New(minioClient)
+	require.NoError(s.T(), repoErr, "failed to create repository")
 
 	s.Run("should delete a file successfully", func() {
 		bucketName := "test-bucket-" + uuid.New().String()

@@ -2,8 +2,33 @@ package minio
 
 import (
 	"context"
+	"errors"
 	"io"
+	"time"
 )
+
+const (
+	presignedURLExpiration     = 24 * time.Hour
+	expectedPathPartsCount     = 2
+	responseContentDisposition = "response-content-disposition"
+)
+
+var (
+	ErrInvalidPath       = errors.New("invalid path: must be in format 'bucket/object'")
+	ErrUnableToDetectExt = errors.New("unable to determine file extension")
+)
+
+type ConstructorOption func(*ConstructorOptions)
+
+type ConstructorOptions struct {
+	Buckets []string
+}
+
+func WithBuckets(buckets ...string) ConstructorOption {
+	return func(o *ConstructorOptions) {
+		o.Buckets = buckets
+	}
+}
 
 type UploadRequest struct {
 	Bucket, Name, ContentType string

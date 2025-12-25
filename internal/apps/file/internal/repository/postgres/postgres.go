@@ -164,3 +164,23 @@ func (r *Repository) UpdateState(ctx context.Context, id string, state filemodel
 
 	return nil
 }
+
+func (r *Repository) UpdateSize(ctx context.Context, id string, size int64) error {
+	query := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
+		Update(filemodel.Table).
+		Set("size", size).
+		Set("updated_at", sq.Expr("now()")).
+		Where(sq.Eq{"id": id, "deleted_at": nil})
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = r.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -2,15 +2,14 @@ package minio
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
+	"golang.org/x/sync/errgroup"
 )
 
 type Repository struct {
@@ -19,79 +18,141 @@ type Repository struct {
 
 var _ IRepository = (*Repository)(nil)
 
-func New(minioClient *minio.Client) *Repository {
-	return &Repository{minioClient}
+func New(minioClient *minio.Client, options ...ConstructorOption) (*Repository, error) {
+	var opts ConstructorOptions
+	for _, option := range options {
+		option(&opts)
+	}
+
+	repository := &Repository{minioClient: minioClient}
+
+	if len(opts.Buckets) > 0 {
+		if err := repository.makeBuckets(context.Background(), opts.Buckets...); err != nil {
+			return nil, err
+		}
+	}
+
+	return repository, nil
 }
 
 func (r *Repository) Upload(ctx context.Context, req UploadRequest) (UploadResponse, error) {
-	name, err := r.getFileName(req.Name)
+	objectName, err := r.generateObjectName(req.Name)
 	if err != nil {
 		return UploadResponse{}, err
 	}
 
-	uploadInfo, err := r.minioClient.PutObject(ctx, req.Bucket, name, req.Reader, -1, minio.PutObjectOptions{
+	uploadInfo, err := r.minioClient.PutObject(ctx, req.Bucket, objectName, req.Reader, -1, minio.PutObjectOptions{
 		ContentType: req.ContentType,
 	})
 	if err != nil {
 		return UploadResponse{}, err
 	}
 
-	extension := filepath.Ext(req.Name)
-	if len(extension) > 0 {
-		extension = strings.TrimPrefix(extension, ".")
-	}
-
-	path := fmt.Sprintf("%s/%s", req.Bucket, req.Name)
+	extension := r.extractExtension(uploadInfo.Key, req.Name)
+	filePath := r.buildPath(req.Bucket, uploadInfo.Key)
+	fileURL := r.buildFileURL(filePath)
 
 	return UploadResponse{
-		URL:       r.getFileURL(path),
+		URL:       fileURL,
 		Extension: extension,
 		Size:      uploadInfo.Size,
 	}, nil
 }
 
 func (r *Repository) GetURL(ctx context.Context, path string) (string, error) {
-	parts := strings.Split(path, "/")
-	if len(parts) != 2 {
-		return "", errors.New("invalid path")
-	}
-
-	bucket, object := parts[0], parts[1]
-
-	params := make(url.Values)
-	params.Set("response-content-disposition", fmt.Sprintf("attachment; filename=\"%s\"", object))
-
-	u, err := r.minioClient.PresignedGetObject(ctx, bucket, object, time.Hour*24, params)
+	bucket, object, err := r.parsePath(path)
 	if err != nil {
 		return "", err
 	}
 
-	return u.String(), nil
+	params := make(url.Values)
+	params.Set(responseContentDisposition, fmt.Sprintf("attachment; filename=\"%s\"", object))
+
+	presignedURL, err := r.minioClient.PresignedGetObject(ctx, bucket, object, presignedURLExpiration, params)
+	if err != nil {
+		return "", err
+	}
+
+	return presignedURL.String(), nil
 }
 
 func (r *Repository) Delete(ctx context.Context, path string) error {
-	parts := strings.Split(path, "/")
-	if len(parts) != 2 {
-		return errors.New("invalid path")
+	bucket, object, err := r.parsePath(path)
+	if err != nil {
+		return err
 	}
-
-	bucket, object := parts[0], parts[1]
 
 	return r.minioClient.RemoveObject(ctx, bucket, object, minio.RemoveObjectOptions{})
 }
 
-func (r *Repository) getFileName(src string) (string, error) {
-	index := strings.LastIndex(src, ".")
-	if index < 0 {
-		return "", errors.New("unable to determine file type")
+func (r *Repository) generateObjectName(fileName string) (string, error) {
+	ext := filepath.Ext(fileName)
+	if ext == "" {
+		return "", ErrUnableToDetectExt
 	}
 
-	name := strings.Replace(uuid.New().String(), "-", "", -1)
-	name += src[index:]
-
-	return name, nil
+	uniqueID := strings.ReplaceAll(uuid.New().String(), "-", "")
+	return uniqueID + ext, nil
 }
 
-func (r *Repository) getFileURL(path string) string {
-	return fmt.Sprintf("%s/%s", r.minioClient.EndpointURL(), path)
+func (r *Repository) extractExtension(objectKey, originalFileName string) string {
+	ext := filepath.Ext(objectKey)
+	if ext != "" {
+		return strings.TrimPrefix(ext, ".")
+	}
+
+	ext = filepath.Ext(originalFileName)
+	if ext != "" {
+		return strings.TrimPrefix(ext, ".")
+	}
+
+	return ""
+}
+
+func (r *Repository) buildPath(bucket, objectKey string) string {
+	return bucket + "/" + objectKey
+}
+
+func (r *Repository) buildFileURL(path string) string {
+	endpoint := r.minioClient.EndpointURL()
+	if endpoint == nil {
+		return ""
+	}
+
+	return endpoint.String() + "/" + path
+}
+
+func (r *Repository) parsePath(path string) (string, string, error) {
+	if path == "" {
+		return "", "", ErrInvalidPath
+	}
+
+	path = strings.Trim(path, "/")
+	parts := strings.SplitN(path, "/", expectedPathPartsCount)
+
+	if len(parts) != expectedPathPartsCount {
+		return "", "", ErrInvalidPath
+	}
+
+	bucket := strings.TrimSpace(parts[0])
+	object := strings.TrimSpace(parts[1])
+
+	return bucket, object, nil
+}
+
+func (r *Repository) makeBuckets(ctx context.Context, buckets ...string) error {
+	if len(buckets) == 0 {
+		return nil
+	}
+
+	var errGroup errgroup.Group
+
+	for i := range buckets {
+		bucket := buckets[i]
+		errGroup.Go(func() error {
+			return r.minioClient.MakeBucket(ctx, bucket, minio.MakeBucketOptions{})
+		})
+	}
+
+	return errGroup.Wait()
 }
