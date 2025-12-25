@@ -176,7 +176,5 @@ jobs:
       - name: Run tests for user service
         run: |
           export PATH="$PWD/bin:$PATH"
-          make user-test
-          make file-test
-          make gateway-test
+          make test-all
 

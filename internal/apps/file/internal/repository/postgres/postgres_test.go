@@ -74,6 +74,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      "/test/path/image.png",
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -88,6 +89,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 		assert.Equal(s.T(), file.UserID, files[0].UserID)
 		assert.Equal(s.T(), file.Size, files[0].Size)
 		assert.Equal(s.T(), file.Extension, files[0].Extension)
+		assert.Equal(s.T(), file.State, files[0].State)
 	})
 
 	s.Run("should not create a file because of non-unique path", func() {
@@ -98,6 +100,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      path,
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -111,6 +114,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      path,
 			Size:      2048,
 			Extension: filemodel.ExtensionJPEG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -126,6 +130,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      "/test/path/image.png",
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -141,6 +146,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      "/test/path/image.png",
 			Size:      0,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -156,6 +162,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      "/test/path/image.png",
 			Size:      1024,
 			Extension: "",
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -171,6 +178,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      "/test/path/image.xyz",
 			Size:      1024,
 			Extension: filemodel.Extension("xyz"),
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -186,6 +194,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      "/test/path/image.png",
 			Size:      -1,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -201,6 +210,7 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Path:      "/test/path/image.png",
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -222,6 +232,7 @@ func (s *RepositoryTestSuite) TestList() {
 			Path:      "/test/path/image1.png",
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -232,6 +243,7 @@ func (s *RepositoryTestSuite) TestList() {
 			Path:      "/test/path/image2.jpg",
 			Size:      2048,
 			Extension: filemodel.ExtensionJPEG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -267,6 +279,7 @@ func (s *RepositoryTestSuite) TestList() {
 			Path:      "/test/path/valid.png",
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -293,6 +306,7 @@ func (s *RepositoryTestSuite) TestList() {
 			Path:      "/test/path/deleted.png",
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}
@@ -320,6 +334,7 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Path:      "/test/path/to-delete.png",
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
+			State:     filemodel.StatePending,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 		}

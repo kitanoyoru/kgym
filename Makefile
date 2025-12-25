@@ -1,6 +1,6 @@
-.PHONY: help user-% gym-% subscription-% gateway-% tools tools-install tools-update ci-test
+.PHONY: help user-% gateway-% file-% tools tools-install tools-update ci-test test-all
 
-SERVICES := user gym file subscription gateway
+SERVICES := user gateway file
 
 TOOLS_DIR := $(CURDIR)/tools
 BIN_DIR := $(CURDIR)/bin
@@ -8,6 +8,7 @@ BIN_DIR := $(CURDIR)/bin
 help:
 	@echo "Available commands:"
 	@echo "  make <service>-<target>  - Run target in specific service"
+	@echo "  make test-all            - Run all tests across all services"
 	@echo "  make contracts-generate  - Generate protobuf files"
 	@echo "  make contracts-deps      - Update contracts deps submodules"
 	@echo "  make tools-install       - Install tools from submodules"
@@ -15,7 +16,8 @@ help:
 	@echo ""
 	@echo "Examples:"
 	@echo "  make user-test          - Run tests in user service"
-	@echo "  make gym-build          - Build gym service"
+	@echo "  make file-build          - Build file service"
+	@echo "  make test-all          - Run all tests"
 	@echo ""
 	@echo "Available services: $(SERVICES)"
 
@@ -54,6 +56,16 @@ $(BIN_DIR)/golangci-lint: $(BIN_DIR) $(TOOLS_DIR)/golangci-lint | tools-update
 ci-test:
 	@echo "Testing CI pipeline with act..."
 	@act push
+
+test-all:
+	@echo "Running all tests..."
+	@for service in $(SERVICES); do \
+		echo ""; \
+		echo "=== Testing $$service service ==="; \
+		$(MAKE) $$service-test || exit 1; \
+	done
+	@echo ""
+	@echo "All tests completed successfully!"
 
 define SERVICE_TARGET
 $(1)-%:

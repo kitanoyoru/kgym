@@ -12,6 +12,7 @@ type File struct {
 	Path      string    `validate:"required,min=1,max=255"`
 	Size      int64     `validate:"required,min=1"`
 	Extension Extension `validate:"required"`
+	State     State     `validate:"required,oneof=pending completed failed"`
 }
 
 func (f File) Validate(ctx context.Context) error {

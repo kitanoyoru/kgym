@@ -1,6 +1,11 @@
 package file
 
-import "github.com/pkg/errors"
+import (
+	"path/filepath"
+	"strings"
+
+	"github.com/pkg/errors"
+)
 
 type Extension string
 
@@ -42,6 +47,10 @@ func ExtensionFromString(s string) (Extension, error) {
 	default:
 		return "", errors.New("invalid extension")
 	}
+}
+
+func ExtensionFromFileName(fileName string) (Extension, error) {
+	return ExtensionFromString(strings.TrimPrefix(filepath.Ext(fileName), "."))
 }
 
 func (e Extension) String() string {

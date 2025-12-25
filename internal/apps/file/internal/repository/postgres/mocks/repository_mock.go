@@ -75,6 +75,21 @@ func (mr *MockIRepositoryMockRecorder) Delete(ctx any, filters ...any) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockIRepository)(nil).Delete), varargs...)
 }
 
+// Get mocks base method.
+func (m *MockIRepository) Get(ctx context.Context, id string) (file.File, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", ctx, id)
+	ret0, _ := ret[0].(file.File)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockIRepositoryMockRecorder) Get(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockIRepository)(nil).Get), ctx, id)
+}
+
 // List mocks base method.
 func (m *MockIRepository) List(ctx context.Context, filters ...postgres.Filter) ([]file.File, error) {
 	m.ctrl.T.Helper()
@@ -93,4 +108,18 @@ func (mr *MockIRepositoryMockRecorder) List(ctx any, filters ...any) *gomock.Cal
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, filters...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockIRepository)(nil).List), varargs...)
+}
+
+// UpdateState mocks base method.
+func (m *MockIRepository) UpdateState(ctx context.Context, id string, state file.State) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateState", ctx, id, state)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateState indicates an expected call of UpdateState.
+func (mr *MockIRepositoryMockRecorder) UpdateState(ctx, id, state any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateState", reflect.TypeOf((*MockIRepository)(nil).UpdateState), ctx, id, state)
 }
