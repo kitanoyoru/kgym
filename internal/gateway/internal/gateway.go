@@ -59,7 +59,7 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 		GRPCEndpoint:    cfg.GRPCEndpoint,
 		GRPCDialOptions: opts,
 		BodyLimit:       cfg.BodyLimit,
-		ChunkSize:       10 * 1024, // 10KB
+		ChunkSize:       5 * 1024 * 1024, // 5MB
 	})
 	if err != nil {
 		return nil, err
@@ -87,9 +87,9 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 	return &Gateway{
 		server: &http.Server{
 			Addr:         ":" + cfg.HTTPPort,
-			ReadTimeout:  10 * time.Second,
-			WriteTimeout: 10 * time.Second,
-			IdleTimeout:  10 * time.Second,
+			ReadTimeout:  30 * time.Second,
+			WriteTimeout: 30 * time.Second,
+			IdleTimeout:  30 * time.Second,
 			Handler:      handler,
 		},
 	}, nil

@@ -17,31 +17,13 @@ var Columns = []string{
 	"deleted_at",
 }
 
-type Extension string
-
-const (
-	ExtensionJPEG Extension = "jpeg"
-	ExtensionPNG  Extension = "png"
-	ExtensionGIF  Extension = "gif"
-	ExtensionBMP  Extension = "bmp"
-	ExtensionTIFF Extension = "tiff"
-	ExtensionICO  Extension = "ico"
-	ExtensionWEBP Extension = "webp"
-	ExtensionSVG  Extension = "svg"
-	ExtensionHEIC Extension = "heic"
-	ExtensionHEIF Extension = "heif"
-)
-
-func (e Extension) String() string {
-	return string(e)
-}
-
 type File struct {
 	ID        string     `db:"id"`
 	UserID    string     `db:"user_id"`
 	Path      string     `db:"path"`
 	Size      int64      `db:"size"`
 	Extension Extension  `db:"extension"`
+	State     State      `db:"state"`
 	CreatedAt time.Time  `db:"created_at"`
 	UpdatedAt time.Time  `db:"updated_at"`
 	DeletedAt *time.Time `db:"deleted_at"`
