@@ -25,6 +25,18 @@ service FileService {
             };
         };
     }
+
+    rpc GetFileURL(GetFileURL.Request) returns (GetFileURL.Response) {
+        option (google.api.http) = {
+            get: "/api/v1/files/{id}/url"
+        };
+    }
+
+    rpc DeleteFile(DeleteFile.Request) returns (DeleteFile.Response) {
+        option (google.api.http) = {
+            delete: "/api/v1/files/{id}"
+        };
+    }
 }
 
 message UploadUserAvatar {
@@ -36,4 +48,22 @@ message UploadUserAvatar {
     message Response {
         File file = 1;
     }
+}
+
+message GetFileURL {
+    message Request {
+        string id = 1;
+    }
+
+    message Response {
+        string url = 1;
+    }
+}
+
+message DeleteFile {
+    message Request {
+        string id = 1;
+    }
+
+    message Response {}
 }

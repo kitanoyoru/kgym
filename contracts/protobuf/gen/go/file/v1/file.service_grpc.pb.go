@@ -20,6 +20,8 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	FileService_UploadUserAvatar_FullMethodName = "/file.v1.FileService/UploadUserAvatar"
+	FileService_GetFileURL_FullMethodName       = "/file.v1.FileService/GetFileURL"
+	FileService_DeleteFile_FullMethodName       = "/file.v1.FileService/DeleteFile"
 )
 
 // FileServiceClient is the client API for FileService service.
@@ -27,6 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type FileServiceClient interface {
 	UploadUserAvatar(ctx context.Context, opts ...grpc.CallOption) (grpc.ClientStreamingClient[UploadUserAvatar_Request, UploadUserAvatar_Response], error)
+	GetFileURL(ctx context.Context, in *GetFileURL_Request, opts ...grpc.CallOption) (*GetFileURL_Response, error)
+	DeleteFile(ctx context.Context, in *DeleteFile_Request, opts ...grpc.CallOption) (*DeleteFile_Response, error)
 }
 
 type fileServiceClient struct {
@@ -50,11 +54,33 @@ func (c *fileServiceClient) UploadUserAvatar(ctx context.Context, opts ...grpc.C
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type FileService_UploadUserAvatarClient = grpc.ClientStreamingClient[UploadUserAvatar_Request, UploadUserAvatar_Response]
 
+func (c *fileServiceClient) GetFileURL(ctx context.Context, in *GetFileURL_Request, opts ...grpc.CallOption) (*GetFileURL_Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFileURL_Response)
+	err := c.cc.Invoke(ctx, FileService_GetFileURL_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *fileServiceClient) DeleteFile(ctx context.Context, in *DeleteFile_Request, opts ...grpc.CallOption) (*DeleteFile_Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteFile_Response)
+	err := c.cc.Invoke(ctx, FileService_DeleteFile_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // FileServiceServer is the server API for FileService service.
 // All implementations must embed UnimplementedFileServiceServer
 // for forward compatibility.
 type FileServiceServer interface {
 	UploadUserAvatar(grpc.ClientStreamingServer[UploadUserAvatar_Request, UploadUserAvatar_Response]) error
+	GetFileURL(context.Context, *GetFileURL_Request) (*GetFileURL_Response, error)
+	DeleteFile(context.Context, *DeleteFile_Request) (*DeleteFile_Response, error)
 	mustEmbedUnimplementedFileServiceServer()
 }
 
@@ -67,6 +93,12 @@ type UnimplementedFileServiceServer struct{}
 
 func (UnimplementedFileServiceServer) UploadUserAvatar(grpc.ClientStreamingServer[UploadUserAvatar_Request, UploadUserAvatar_Response]) error {
 	return status.Error(codes.Unimplemented, "method UploadUserAvatar not implemented")
+}
+func (UnimplementedFileServiceServer) GetFileURL(context.Context, *GetFileURL_Request) (*GetFileURL_Response, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetFileURL not implemented")
+}
+func (UnimplementedFileServiceServer) DeleteFile(context.Context, *DeleteFile_Request) (*DeleteFile_Response, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteFile not implemented")
 }
 func (UnimplementedFileServiceServer) mustEmbedUnimplementedFileServiceServer() {}
 func (UnimplementedFileServiceServer) testEmbeddedByValue()                     {}
@@ -96,13 +128,58 @@ func _FileService_UploadUserAvatar_Handler(srv interface{}, stream grpc.ServerSt
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type FileService_UploadUserAvatarServer = grpc.ClientStreamingServer[UploadUserAvatar_Request, UploadUserAvatar_Response]
 
+func _FileService_GetFileURL_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFileURL_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).GetFileURL(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileService_GetFileURL_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).GetFileURL(ctx, req.(*GetFileURL_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _FileService_DeleteFile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFile_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(FileServiceServer).DeleteFile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: FileService_DeleteFile_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(FileServiceServer).DeleteFile(ctx, req.(*DeleteFile_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // FileService_ServiceDesc is the grpc.ServiceDesc for FileService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var FileService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "file.v1.FileService",
 	HandlerType: (*FileServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetFileURL",
+			Handler:    _FileService_GetFileURL_Handler,
+		},
+		{
+			MethodName: "DeleteFile",
+			Handler:    _FileService_DeleteFile_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "UploadUserAvatar",

@@ -6,14 +6,13 @@ import (
 	"net/http"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	pbFile "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/grpclog"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
-
-	pbFile "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
 )
 
 type Handler struct {

@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"context"
-	"reflect"
+	"fmt"
 
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/api/v1/grpc/serializer"
@@ -13,15 +13,9 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type MetricsPrefix string
-
 const (
-	GRPCServiceMetricsPrefix MetricsPrefix = "kgym.user.api.grpc"
+	GRPCServiceMetricsPrefix = "kgym.user.api.grpc"
 )
-
-func (p MetricsPrefix) WithMethod(method string) string {
-	return string(p) + "." + method
-}
 
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
@@ -30,17 +24,18 @@ type UserServiceServer struct {
 }
 
 func NewUserService(service *service.Service) (*UserServiceServer, error) {
-	var rpcIfaceType = reflect.TypeOf((*pb.UserServiceServer)(nil)).Elem()
-	for i := 0; i < rpcIfaceType.NumMethod(); i++ {
-		method := rpcIfaceType.Method(i)
+	methods := []string{
+		"CreateUser",
+		"ListUsers",
+		"DeleteUser",
+	}
 
-		if rpcIfaceType.Method(i).IsExported() {
-			if err := metrics.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
-				Name: GRPCServiceMetricsPrefix.WithMethod(method.Name),
-				Type: prometheus.Counter,
-			}); err != nil {
-				return nil, err
-			}
+	for _, method := range methods {
+		if err := metrics.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
+			Name: fmt.Sprintf("%s.%s", GRPCServiceMetricsPrefix, method),
+			Type: prometheus.Counter,
+		}); err != nil {
+			return nil, err
 		}
 	}
 
@@ -50,8 +45,6 @@ func NewUserService(service *service.Service) (*UserServiceServer, error) {
 }
 
 func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUser_Request) (*pb.CreateUser_Response, error) {
-	metrics.GlobalRegistry.GetMetric(GRPCServiceMetricsPrefix.WithMethod("CreateUser")).Counter.WithLabelValues().Inc()
-
 	id, err := s.service.Create(ctx, serializer.PbCreateRequestToServiceRequest(req))
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create user: %v", err)
@@ -63,8 +56,6 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUser_R
 }
 
 func (s *UserServiceServer) ListUsers(ctx context.Context, req *pb.ListUsers_Request) (*pb.ListUsers_Response, error) {
-	metrics.GlobalRegistry.GetMetric(GRPCServiceMetricsPrefix.WithMethod("ListUsers")).Counter.WithLabelValues().Inc()
-
 	options := serializer.PbListRequestToServiceOptions(req)
 
 	users, err := s.service.List(ctx, options...)
@@ -83,8 +74,6 @@ func (s *UserServiceServer) ListUsers(ctx context.Context, req *pb.ListUsers_Req
 }
 
 func (s *UserServiceServer) DeleteUser(ctx context.Context, req *pb.DeleteUser_Request) (*pb.DeleteUser_Response, error) {
-	metrics.GlobalRegistry.GetMetric(GRPCServiceMetricsPrefix.WithMethod("DeleteUser")).Counter.WithLabelValues().Inc()
-
 	err := s.service.Delete(ctx, req.Id)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to delete user: %v", err)
