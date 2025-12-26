@@ -3,8 +3,8 @@ package postgres
 import (
 	"context"
 	"testing"
-	"time"
 
+	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -74,8 +74,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "testuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, user)
@@ -95,8 +95,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "user1",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, user1)
@@ -108,8 +108,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "user2",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err = repository.Create(ctx, user2)
@@ -123,8 +123,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "testuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, user)
@@ -143,8 +143,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "testuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, user)
@@ -158,8 +158,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "testuser",
 			Password:  "",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, user)
@@ -178,8 +178,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "testuser",
 			Password:  string(longPassword),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, user)
@@ -193,8 +193,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "duplicateuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, user1)
@@ -206,8 +206,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  "duplicateuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err = repository.Create(ctx, user2)
@@ -226,8 +226,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Role:      usermodel.RoleDefault,
 			Username:  string(longUsername),
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, user)
@@ -252,8 +252,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleDefault,
 			Username:  "user1",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		u2 := usermodel.User{
 			ID:        uuid.New().String(),
@@ -261,8 +261,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleAdmin,
 			Username:  "user2",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, u1)
@@ -290,8 +290,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleDefault,
 			Username:  "alluser1",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		u2 := usermodel.User{
 			ID:        uuid.New().String(),
@@ -299,8 +299,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleAdmin,
 			Username:  "alluser2",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		_ = repository.Create(ctx, u1)
 		_ = repository.Create(ctx, u2)
@@ -332,8 +332,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleDefault,
 			Username:  "auser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		u2 := usermodel.User{
 			ID:        uuid.New().String(),
@@ -341,8 +341,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleDefault,
 			Username:  "buser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, u1)
@@ -366,8 +366,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleDefault,
 			Username:  "uniqueuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		u2 := usermodel.User{
 			ID:        uuid.New().String(),
@@ -375,8 +375,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleDefault,
 			Username:  "otheruser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		_ = repository.Create(ctx, u1)
 		_ = repository.Create(ctx, u2)
@@ -396,8 +396,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleDefault,
 			Username:  "roleuser1",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		u2 := usermodel.User{
 			ID:        uuid.New().String(),
@@ -405,8 +405,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleAdmin,
 			Username:  "roleuser2",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		u3 := usermodel.User{
 			ID:        uuid.New().String(),
@@ -414,8 +414,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Role:      usermodel.RoleAdmin,
 			Username:  "roleuser3",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		_ = repository.Create(ctx, u1)
 		_ = repository.Create(ctx, u2)
@@ -447,8 +447,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Role:      usermodel.RoleDefault,
 			Username:  "deleteuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, u)
@@ -472,8 +472,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Role:      usermodel.RoleDefault,
 			Username:  "byiduser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, u)
@@ -496,8 +496,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Role:      usermodel.RoleDefault,
 			Username:  "byemailuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, u)
@@ -520,8 +520,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Role:      usermodel.RoleDefault,
 			Username:  "byusernameuser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, u)
@@ -544,8 +544,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Role:      usermodel.RoleAdmin,
 			Username:  "roledeleteuser1",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		u2 := usermodel.User{
 			ID:        uuid.New().String(),
@@ -553,8 +553,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Role:      usermodel.RoleDefault,
 			Username:  "roledeleteuser2",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, u1)
@@ -594,8 +594,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Role:      usermodel.RoleDefault,
 			Username:  "nofilteruser",
 			Password:  "password123",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 		err := repository.Create(ctx, u)
 		require.NoError(s.T(), err)

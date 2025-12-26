@@ -1,8 +1,7 @@
 package serializer
 
 import (
-	"time"
-
+	"github.com/dromara/carbon/v2"
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -19,7 +18,7 @@ func PbUserToEntity(pbUser *pb.User) *userentity.User {
 		Mobile:    pbUser.Mobile,
 		FirstName: pbUser.FirstName,
 		LastName:  pbUser.LastName,
-		BirthDate: pbUser.BirthDate.AsTime().In(time.UTC),
+		BirthDate: carbon.CreateFromStdTime(pbUser.BirthDate.AsTime()).SetTimezone(carbon.UTC).StdTime(),
 	}
 }
 

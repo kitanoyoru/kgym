@@ -5,6 +5,7 @@ go 1.25
 require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/caarlos0/env/v11 v11.3.1
+	github.com/dromara/carbon/v2 v2.6.15
 	github.com/go-playground/validator/v10 v10.30.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.6

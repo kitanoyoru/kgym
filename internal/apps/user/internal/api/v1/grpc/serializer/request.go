@@ -1,8 +1,7 @@
 package serializer
 
 import (
-	"time"
-
+	"github.com/dromara/carbon/v2"
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
@@ -18,7 +17,7 @@ func PbCreateRequestToServiceRequest(pbCreateRequest *pb.CreateUser_Request) ser
 		Mobile:    pbCreateRequest.Mobile,
 		FirstName: pbCreateRequest.FirstName,
 		LastName:  pbCreateRequest.LastName,
-		BirthDate: pbCreateRequest.BirthDate.AsTime().In(time.UTC),
+		BirthDate: carbon.CreateFromStdTime(pbCreateRequest.BirthDate.AsTime()).SetTimezone(carbon.UTC).StdTime(),
 	}
 }
 

@@ -2,15 +2,13 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"path/filepath"
-	"time"
 
+	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/minio"
 	filemodel "github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/models/file"
 	"github.com/kitanoyoru/kgym/internal/apps/file/internal/repository/postgres"
-	pkgValidator "github.com/kitanoyoru/kgym/internal/apps/file/pkg/validator"
 	"go.uber.org/multierr"
 )
 
@@ -30,10 +28,6 @@ func New(cfg Config, minioRepository minio.IRepository, postgresRepository postg
 }
 
 func (s *Service) Upload(ctx context.Context, req UploadRequest) (UploadResponse, error) {
-	if err := pkgValidator.Validate.StructCtx(ctx, req); err != nil {
-		return UploadResponse{}, err
-	}
-
 	bucket, ok := s.cfg.Buckets[req.Target]
 	if !ok || bucket == "" {
 		return UploadResponse{}, ErrBucketNotFound
@@ -41,10 +35,10 @@ func (s *Service) Upload(ctx context.Context, req UploadRequest) (UploadResponse
 
 	extension, err := filemodel.ExtensionFromFileName(req.Name)
 	if err != nil {
-		return UploadResponse{}, fmt.Errorf("invalid file extension: %w", err)
+		return UploadResponse{}, err
 	}
 
-	now := time.Now()
+	now := carbon.Now().StdTime()
 	fileID := uuid.New().String()
 	path := filepath.Join(bucket, req.Name)
 
@@ -52,7 +46,7 @@ func (s *Service) Upload(ctx context.Context, req UploadRequest) (UploadResponse
 		ID:        fileID,
 		UserID:    req.UserID,
 		Path:      path,
-		Size:      0, // TODO: get size from reader
+		Size:      0,
 		Extension: extension,
 		State:     filemodel.StatePending,
 		CreatedAt: now,

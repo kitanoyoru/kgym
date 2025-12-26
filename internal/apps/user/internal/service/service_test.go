@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
+	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
@@ -39,7 +39,7 @@ func (s *ServiceTestSuite) TearDownTest() {
 
 func (s *ServiceTestSuite) TestCreate() {
 	s.Run("should create a user successfully", func() {
-		birthDate := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
+		birthDate := carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()
 		req := CreateUserRequest{
 			Email:     "test@example.com",
 			Role:      "default",
@@ -96,7 +96,7 @@ func (s *ServiceTestSuite) TestCreate() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -114,7 +114,7 @@ func (s *ServiceTestSuite) TestCreate() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -132,7 +132,7 @@ func (s *ServiceTestSuite) TestCreate() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -150,7 +150,7 @@ func (s *ServiceTestSuite) TestCreate() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -168,7 +168,7 @@ func (s *ServiceTestSuite) TestCreate() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -186,7 +186,7 @@ func (s *ServiceTestSuite) TestCreate() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		userID, err := s.service.Create(s.ctx, req)
@@ -204,7 +204,7 @@ func (s *ServiceTestSuite) TestCreate() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		expectedError := errors.New("repository error")
@@ -232,9 +232,9 @@ func (s *ServiceTestSuite) TestList() {
 				Mobile:    "+1234567890",
 				FirstName: "John",
 				LastName:  "Doe",
-				BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
+				CreatedAt: carbon.Now().StdTime(),
+				UpdatedAt: carbon.Now().StdTime(),
 			},
 			{
 				ID:        uuid.New().String(),
@@ -246,9 +246,9 @@ func (s *ServiceTestSuite) TestList() {
 				Mobile:    "+1234567891",
 				FirstName: "Jane",
 				LastName:  "Smith",
-				BirthDate: time.Date(1991, 2, 2, 0, 0, 0, 0, time.UTC),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				BirthDate: carbon.CreateFromDateTime(1991, 2, 2, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
+				CreatedAt: carbon.Now().StdTime(),
+				UpdatedAt: carbon.Now().StdTime(),
 			},
 		}
 
@@ -281,9 +281,9 @@ func (s *ServiceTestSuite) TestList() {
 				Mobile:    "+1234567890",
 				FirstName: "John",
 				LastName:  "Doe",
-				BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
+				CreatedAt: carbon.Now().StdTime(),
+				UpdatedAt: carbon.Now().StdTime(),
 			},
 		}
 
@@ -318,9 +318,9 @@ func (s *ServiceTestSuite) TestList() {
 				Mobile:    "+1234567890",
 				FirstName: "John",
 				LastName:  "Doe",
-				BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
+				CreatedAt: carbon.Now().StdTime(),
+				UpdatedAt: carbon.Now().StdTime(),
 			},
 		}
 
@@ -355,9 +355,9 @@ func (s *ServiceTestSuite) TestList() {
 				Mobile:    "+1234567890",
 				FirstName: "Admin",
 				LastName:  "One",
-				BirthDate: time.Date(1985, 1, 1, 0, 0, 0, 0, time.UTC),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				BirthDate: carbon.CreateFromDateTime(1985, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
+				CreatedAt: carbon.Now().StdTime(),
+				UpdatedAt: carbon.Now().StdTime(),
 			},
 			{
 				ID:        uuid.New().String(),
@@ -369,9 +369,9 @@ func (s *ServiceTestSuite) TestList() {
 				Mobile:    "+1234567891",
 				FirstName: "Admin",
 				LastName:  "Two",
-				BirthDate: time.Date(1986, 2, 2, 0, 0, 0, 0, time.UTC),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				BirthDate: carbon.CreateFromDateTime(1986, 2, 2, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
+				CreatedAt: carbon.Now().StdTime(),
+				UpdatedAt: carbon.Now().StdTime(),
 			},
 		}
 
@@ -410,9 +410,9 @@ func (s *ServiceTestSuite) TestList() {
 				Mobile:    "+1234567890",
 				FirstName: "John",
 				LastName:  "Doe",
-				BirthDate: time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
+				BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
+				CreatedAt: carbon.Now().StdTime(),
+				UpdatedAt: carbon.Now().StdTime(),
 			},
 		}
 

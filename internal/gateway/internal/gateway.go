@@ -6,16 +6,15 @@ import (
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	pbFile "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
+	pbUser "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
+	"github.com/kitanoyoru/kgym/internal/gateway/internal/handlers/file"
+	"github.com/kitanoyoru/kgym/internal/gateway/internal/middlewares"
 	"github.com/rs/cors"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
-
-	pbFile "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
-	pbUser "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
-	"github.com/kitanoyoru/kgym/internal/gateway/internal/handlers/file"
-	"github.com/kitanoyoru/kgym/internal/gateway/internal/middlewares"
 )
 
 func New(ctx context.Context, cfg Config) (*Gateway, error) {

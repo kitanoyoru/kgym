@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dromara/carbon/v2"
 	pkgLogger "github.com/kitanoyoru/kgym/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -16,7 +17,7 @@ func Logging(next http.Handler) http.Handler {
 			return
 		}
 
-		startTime := time.Now()
+		startTime := carbon.Now()
 
 		logger.Info("request received",
 			zap.String("method", r.Method),
@@ -32,7 +33,7 @@ func Logging(next http.Handler) http.Handler {
 			zap.String("method", r.Method),
 			zap.String("path", r.URL.Path),
 			zap.Int("status", http.StatusOK),
-			zap.Duration("latency", time.Since(startTime)),
+			zap.Duration("latency", time.Since(startTime.StdTime())),
 		)
 	})
 }

@@ -3,8 +3,8 @@ package postgres
 import (
 	"context"
 	"testing"
-	"time"
 
+	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -75,8 +75,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -101,8 +101,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file1)
@@ -115,8 +115,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      2048,
 			Extension: filemodel.ExtensionJPEG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err = repository.Create(ctx, file2)
@@ -131,8 +131,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -147,8 +147,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      0,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -163,8 +163,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      1024,
 			Extension: "",
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -179,8 +179,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      1024,
 			Extension: filemodel.Extension("xyz"),
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -195,8 +195,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      -1,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -211,8 +211,8 @@ func (s *RepositoryTestSuite) TestCreate() {
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -233,8 +233,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		file2 := filemodel.File{
@@ -244,8 +244,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Size:      2048,
 			Extension: filemodel.ExtensionJPEG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file1)
@@ -280,8 +280,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -307,8 +307,8 @@ func (s *RepositoryTestSuite) TestList() {
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)
@@ -335,8 +335,8 @@ func (s *RepositoryTestSuite) TestDelete() {
 			Size:      1024,
 			Extension: filemodel.ExtensionPNG,
 			State:     filemodel.StatePending,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: carbon.Now().StdTime(),
+			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, file)

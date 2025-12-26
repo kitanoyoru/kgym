@@ -171,7 +171,7 @@ func (s *ServiceTestSuite) TestUpload() {
 
 		resp, err := service.Upload(s.ctx, req)
 		assert.Error(s.T(), err)
-		assert.True(s.T(), strings.Contains(err.Error(), "invalid file extension"))
+		assert.True(s.T(), strings.Contains(err.Error(), "invalid extension"))
 		assert.Empty(s.T(), resp.ID)
 	})
 }

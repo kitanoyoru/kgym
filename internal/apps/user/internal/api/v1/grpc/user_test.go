@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -109,7 +110,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		birthDate := time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)
+		birthDate := carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()
 		req := &pb.CreateUser_Request{
 			Email:     "test@example.com",
 			Role:      pb.Role_USER,
@@ -155,7 +156,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -176,7 +177,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -197,7 +198,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -218,7 +219,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -239,7 +240,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -260,7 +261,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -281,7 +282,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "123",
 			FirstName: "John",
 			LastName:  "Doe",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -302,7 +303,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "+1234567890",
 			FirstName: "",
 			LastName:  "Doe",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -323,7 +324,7 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 			Mobile:    "+1234567890",
 			FirstName: "John",
 			LastName:  "",
-			BirthDate: timestamppb.New(time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC)),
+			BirthDate: timestamppb.New(carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime()),
 		}
 
 		resp, err := s.client.CreateUser(ctx, req)
@@ -506,7 +507,7 @@ func (s *UserServiceTestSuite) TestDeleteUser() {
 }
 
 func (s *UserServiceTestSuite) createTestUser(ctx context.Context, email string, role pb.Role, username, password string) string {
-	return s.createTestUserWithFields(ctx, email, role, username, password, "https://example.com/avatar.jpg", "+1234567890", "John", "Doe", time.Date(1990, 1, 1, 0, 0, 0, 0, time.UTC))
+	return s.createTestUserWithFields(ctx, email, role, username, password, "https://example.com/avatar.jpg", "+1234567890", "John", "Doe", carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime())
 }
 
 func (s *UserServiceTestSuite) createTestUserWithFields(ctx context.Context, email string, role pb.Role, username, password, avatarURL, mobile, firstName, lastName string, birthDate time.Time) string {

@@ -135,6 +135,204 @@ var _ interface {
 	ErrorName() string
 } = UploadUserAvatarValidationError{}
 
+// Validate checks the field values on GetFileURL with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *GetFileURL) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetFileURL with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in GetFileURLMultiError, or
+// nil if none found.
+func (m *GetFileURL) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetFileURL) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetFileURLMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetFileURLMultiError is an error wrapping multiple validation errors
+// returned by GetFileURL.ValidateAll() if the designated constraints aren't met.
+type GetFileURLMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetFileURLMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetFileURLMultiError) AllErrors() []error { return m }
+
+// GetFileURLValidationError is the validation error returned by
+// GetFileURL.Validate if the designated constraints aren't met.
+type GetFileURLValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetFileURLValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetFileURLValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetFileURLValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetFileURLValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetFileURLValidationError) ErrorName() string { return "GetFileURLValidationError" }
+
+// Error satisfies the builtin error interface
+func (e GetFileURLValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetFileURL.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetFileURLValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetFileURLValidationError{}
+
+// Validate checks the field values on DeleteFile with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *DeleteFile) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteFile with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in DeleteFileMultiError, or
+// nil if none found.
+func (m *DeleteFile) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteFile) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return DeleteFileMultiError(errors)
+	}
+
+	return nil
+}
+
+// DeleteFileMultiError is an error wrapping multiple validation errors
+// returned by DeleteFile.ValidateAll() if the designated constraints aren't met.
+type DeleteFileMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteFileMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteFileMultiError) AllErrors() []error { return m }
+
+// DeleteFileValidationError is the validation error returned by
+// DeleteFile.Validate if the designated constraints aren't met.
+type DeleteFileValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteFileValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteFileValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteFileValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteFileValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteFileValidationError) ErrorName() string { return "DeleteFileValidationError" }
+
+// Error satisfies the builtin error interface
+func (e DeleteFileValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteFile.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteFileValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteFileValidationError{}
+
 // Validate checks the field values on UploadUserAvatar_Request with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -398,3 +596,417 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = UploadUserAvatar_ResponseValidationError{}
+
+// Validate checks the field values on GetFileURL_Request with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetFileURL_Request) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetFileURL_Request with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetFileURL_RequestMultiError, or nil if none found.
+func (m *GetFileURL_Request) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetFileURL_Request) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return GetFileURL_RequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetFileURL_RequestMultiError is an error wrapping multiple validation errors
+// returned by GetFileURL_Request.ValidateAll() if the designated constraints
+// aren't met.
+type GetFileURL_RequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetFileURL_RequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetFileURL_RequestMultiError) AllErrors() []error { return m }
+
+// GetFileURL_RequestValidationError is the validation error returned by
+// GetFileURL_Request.Validate if the designated constraints aren't met.
+type GetFileURL_RequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetFileURL_RequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetFileURL_RequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetFileURL_RequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetFileURL_RequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetFileURL_RequestValidationError) ErrorName() string {
+	return "GetFileURL_RequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetFileURL_RequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetFileURL_Request.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetFileURL_RequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetFileURL_RequestValidationError{}
+
+// Validate checks the field values on GetFileURL_Response with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *GetFileURL_Response) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetFileURL_Response with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetFileURL_ResponseMultiError, or nil if none found.
+func (m *GetFileURL_Response) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetFileURL_Response) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Url
+
+	if len(errors) > 0 {
+		return GetFileURL_ResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetFileURL_ResponseMultiError is an error wrapping multiple validation
+// errors returned by GetFileURL_Response.ValidateAll() if the designated
+// constraints aren't met.
+type GetFileURL_ResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetFileURL_ResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetFileURL_ResponseMultiError) AllErrors() []error { return m }
+
+// GetFileURL_ResponseValidationError is the validation error returned by
+// GetFileURL_Response.Validate if the designated constraints aren't met.
+type GetFileURL_ResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetFileURL_ResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetFileURL_ResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetFileURL_ResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetFileURL_ResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetFileURL_ResponseValidationError) ErrorName() string {
+	return "GetFileURL_ResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e GetFileURL_ResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetFileURL_Response.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetFileURL_ResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetFileURL_ResponseValidationError{}
+
+// Validate checks the field values on DeleteFile_Request with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DeleteFile_Request) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteFile_Request with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DeleteFile_RequestMultiError, or nil if none found.
+func (m *DeleteFile_Request) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteFile_Request) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	if len(errors) > 0 {
+		return DeleteFile_RequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// DeleteFile_RequestMultiError is an error wrapping multiple validation errors
+// returned by DeleteFile_Request.ValidateAll() if the designated constraints
+// aren't met.
+type DeleteFile_RequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteFile_RequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteFile_RequestMultiError) AllErrors() []error { return m }
+
+// DeleteFile_RequestValidationError is the validation error returned by
+// DeleteFile_Request.Validate if the designated constraints aren't met.
+type DeleteFile_RequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteFile_RequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteFile_RequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteFile_RequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteFile_RequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteFile_RequestValidationError) ErrorName() string {
+	return "DeleteFile_RequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteFile_RequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteFile_Request.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteFile_RequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteFile_RequestValidationError{}
+
+// Validate checks the field values on DeleteFile_Response with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DeleteFile_Response) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DeleteFile_Response with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DeleteFile_ResponseMultiError, or nil if none found.
+func (m *DeleteFile_Response) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DeleteFile_Response) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return DeleteFile_ResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// DeleteFile_ResponseMultiError is an error wrapping multiple validation
+// errors returned by DeleteFile_Response.ValidateAll() if the designated
+// constraints aren't met.
+type DeleteFile_ResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DeleteFile_ResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DeleteFile_ResponseMultiError) AllErrors() []error { return m }
+
+// DeleteFile_ResponseValidationError is the validation error returned by
+// DeleteFile_Response.Validate if the designated constraints aren't met.
+type DeleteFile_ResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DeleteFile_ResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DeleteFile_ResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DeleteFile_ResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DeleteFile_ResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DeleteFile_ResponseValidationError) ErrorName() string {
+	return "DeleteFile_ResponseValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DeleteFile_ResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDeleteFile_Response.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DeleteFile_ResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DeleteFile_ResponseValidationError{}
