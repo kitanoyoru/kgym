@@ -1,9 +1,11 @@
 package token
 
 import (
+	"context"
+
 	"github.com/pkg/errors"
 
-	tokenentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/token"
+	pkgValidator "github.com/kitanoyoru/kgym/internal/apps/sso/pkg/validator"
 )
 
 type TokenType string
@@ -21,13 +23,8 @@ func TokenTypeFromString(s string) (TokenType, error) {
 	}
 }
 
-func TokenTypeFromEntity(entity tokenentity.TokenType) (TokenType, error) {
-	switch entity {
-	case tokenentity.TokenTypeRefresh:
-		return TokenTypeRefresh, nil
-	default:
-		return "", errors.New("invalid token type")
-	}
+func (t TokenType) Validate(ctx context.Context) error {
+	return pkgValidator.Validate.VarCtx(ctx, t, "oneof=refresh")
 }
 
 func (t TokenType) String() string {

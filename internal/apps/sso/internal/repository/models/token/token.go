@@ -1,6 +1,11 @@
 package token
 
-import "time"
+import (
+	"time"
+
+	"github.com/dromara/carbon/v2"
+	tokenentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/token"
+)
 
 const (
 	Table = "tokens"
@@ -14,6 +19,24 @@ var Columns = []string{
 	"created_at",
 	"updated_at",
 	"deleted_at",
+}
+
+func TokenFromEntity(entity tokenentity.Token) Token {
+	tokenType, err := TokenTypeFromEntity(entity.TokenType)
+	if err != nil {
+		return Token{}
+	}
+
+	now := carbon.Now().StdTime()
+
+	return Token{
+		ID:        entity.ID,
+		UserID:    entity.UserID,
+		TokenType: tokenType,
+		Token:     entity.Token,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
 }
 
 type Token struct {

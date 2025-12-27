@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	tokenentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/token"
 	tokenmodel "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/models/token"
 )
 
@@ -22,11 +23,13 @@ func New(db *pgxpool.Pool) *Repository {
 	}
 }
 
-func (r *Repository) Create(ctx context.Context, token tokenmodel.Token) error {
+func (r *Repository) Create(ctx context.Context, token tokenentity.Token) error {
+	model := tokenmodel.TokenFromEntity(token)
+
 	query := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
 		Insert(tokenmodel.Table).
 		Columns(tokenmodel.Columns...).
-		Values(token.Values()...)
+		Values(model.Values()...)
 
 	sql, args, err := query.ToSql()
 	if err != nil {

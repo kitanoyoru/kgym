@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	tokenentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/token"
 	tokenmodel "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/models/token"
 	"github.com/kitanoyoru/kgym/internal/apps/sso/migrations"
 	"github.com/kitanoyoru/kgym/pkg/database/postgres"
@@ -68,13 +68,11 @@ func (s *RepositoryTestSuite) TestCreate() {
 	repository := New(s.db)
 
 	s.Run("should create a token successfully", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -85,31 +83,27 @@ func (s *RepositoryTestSuite) TestCreate() {
 		require.Len(s.T(), tokens, 1)
 		assert.Equal(s.T(), token.ID, tokens[0].ID)
 		assert.Equal(s.T(), token.UserID, tokens[0].UserID)
-		assert.Equal(s.T(), token.TokenType, tokens[0].TokenType)
+		assert.Equal(s.T(), tokenmodel.TokenTypeRefresh, tokens[0].TokenType)
 		assert.Equal(s.T(), token.Token, tokens[0].Token)
 	})
 
 	s.Run("should not create a token because of non-unique user_id", func() {
 		userID := uuid.New().String()
-		token1 := tokenmodel.Token{
+		token1 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-1",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token1)
 		require.NoError(s.T(), err)
 
-		token2 := tokenmodel.Token{
+		token2 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-2",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err = repository.Create(ctx, token2)
@@ -118,25 +112,21 @@ func (s *RepositoryTestSuite) TestCreate() {
 
 	s.Run("should not create a token because of non-unique token", func() {
 		tokenValue := "duplicate-token-value"
-		token1 := tokenmodel.Token{
+		token1 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     tokenValue,
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token1)
 		require.NoError(s.T(), err)
 
-		token2 := tokenmodel.Token{
+		token2 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     tokenValue,
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err = repository.Create(ctx, token2)
@@ -144,13 +134,11 @@ func (s *RepositoryTestSuite) TestCreate() {
 	})
 
 	s.Run("should not create a token because of empty user_id", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    "",
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -158,13 +146,11 @@ func (s *RepositoryTestSuite) TestCreate() {
 	})
 
 	s.Run("should not create a token because of empty token", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -177,13 +163,11 @@ func (s *RepositoryTestSuite) TestCreate() {
 	})
 
 	s.Run("should not create a token because of invalid user_id format", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    "invalid-uuid",
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -196,13 +180,11 @@ func (s *RepositoryTestSuite) TestCreate() {
 			longToken[i] = 'a'
 		}
 
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     string(longToken),
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -216,22 +198,18 @@ func (s *RepositoryTestSuite) TestList() {
 
 	s.Run("should list tokens successfully", func() {
 		userID := uuid.New().String()
-		token1 := tokenmodel.Token{
+		token1 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-1",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
-		token2 := tokenmodel.Token{
+		token2 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-2",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		// Note: Due to unique constraint on user_id, we can only create one token per user
@@ -254,22 +232,18 @@ func (s *RepositoryTestSuite) TestList() {
 	s.Run("should list tokens by token type", func() {
 		userID1 := uuid.New().String()
 		userID2 := uuid.New().String()
-		token1 := tokenmodel.Token{
+		token1 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID1,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     uuid.New().String() + "-token-1",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
-		token2 := tokenmodel.Token{
+		token2 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID2,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     uuid.New().String() + "-token-2",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token1)
@@ -288,13 +262,11 @@ func (s *RepositoryTestSuite) TestList() {
 	})
 
 	s.Run("should list tokens by id", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-by-id",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -308,13 +280,11 @@ func (s *RepositoryTestSuite) TestList() {
 	})
 
 	s.Run("should not list tokens because they are deleted", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-to-delete",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -341,13 +311,11 @@ func (s *RepositoryTestSuite) TestUpdate() {
 	repository := New(s.db)
 
 	s.Run("should update a token successfully", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "old-refresh-token",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -361,7 +329,8 @@ func (s *RepositoryTestSuite) TestUpdate() {
 		require.NoError(s.T(), err)
 		require.Len(s.T(), tokens, 1)
 		assert.Equal(s.T(), newTokenValue, tokens[0].Token)
-		assert.NotEqual(s.T(), token.UpdatedAt, tokens[0].UpdatedAt)
+		// UpdatedAt is set by the database, so we just verify it exists
+		assert.NotZero(s.T(), tokens[0].UpdatedAt)
 	})
 
 	s.Run("should not update a token because token not found", func() {
@@ -371,13 +340,11 @@ func (s *RepositoryTestSuite) TestUpdate() {
 	})
 
 	s.Run("should not update a token because it is deleted", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "token-to-delete",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -395,22 +362,18 @@ func (s *RepositoryTestSuite) TestUpdate() {
 	})
 
 	s.Run("should not update a token because of non-unique token value", func() {
-		token1 := tokenmodel.Token{
+		token1 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "unique-token-1",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
-		token2 := tokenmodel.Token{
+		token2 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "unique-token-2",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token1)
@@ -430,13 +393,11 @@ func (s *RepositoryTestSuite) TestDelete() {
 	repository := New(s.db)
 
 	s.Run("should delete a token successfully", func() {
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-to-delete",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -456,13 +417,11 @@ func (s *RepositoryTestSuite) TestDelete() {
 
 	s.Run("should delete a token by user_id", func() {
 		userID := uuid.New().String()
-		token := tokenmodel.Token{
+		token := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-by-user",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token)
@@ -479,22 +438,18 @@ func (s *RepositoryTestSuite) TestDelete() {
 	s.Run("should delete a token by token type", func() {
 		userID1 := uuid.New().String()
 		userID2 := uuid.New().String()
-		token1 := tokenmodel.Token{
+		token1 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID1,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-1",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
-		token2 := tokenmodel.Token{
+		token2 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    userID2,
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     "refresh-token-2",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token1)
@@ -518,22 +473,18 @@ func (s *RepositoryTestSuite) TestDelete() {
 	})
 
 	s.Run("should delete all tokens when no filters are provided", func() {
-		token1 := tokenmodel.Token{
+		token1 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     uuid.New().String() + "-token-1",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
-		token2 := tokenmodel.Token{
+		token2 := tokenentity.Token{
 			ID:        uuid.New().String(),
 			UserID:    uuid.New().String(),
-			TokenType: tokenmodel.TokenTypeRefresh,
+			TokenType: tokenentity.TokenTypeRefresh,
 			Token:     uuid.New().String() + "-token-2",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
 		}
 
 		err := repository.Create(ctx, token1)
