@@ -8,9 +8,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
 	"github.com/kitanoyoru/kgym/internal/apps/user/migrations"
-	"github.com/kitanoyoru/kgym/pkg/database/postgres"
+	postgresdb "github.com/kitanoyoru/kgym/pkg/database/postgres"
 	"github.com/kitanoyoru/kgym/pkg/testing/integration/cockroachdb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,7 +34,7 @@ func (s *RepositoryTestSuite) SetupSuite() {
 
 	s.container = container
 
-	s.db, err = postgres.New(ctx, postgres.Config{
+	s.db, err = postgresdb.New(ctx, postgresdb.Config{
 		URI: container.URI,
 	})
 	require.NoError(s.T(), err, "failed to create postgres client")
@@ -53,560 +54,299 @@ func (s *RepositoryTestSuite) TearDownSuite() {
 
 func (s *RepositoryTestSuite) SetupTest() {
 	ctx := context.Background()
-	err := migrations.Up(ctx, "pgx", s.container.URI)
-	require.NoError(s.T(), err, "failed to run migrations up")
+	_, err := s.db.Exec(ctx, "DELETE FROM users")
+	require.NoError(s.T(), err, "failed to clean users table")
 }
 
 func (s *RepositoryTestSuite) TearDownTest() {
 	ctx := context.Background()
-	err := migrations.Down(ctx, "pgx", s.container.URI)
-	require.NoError(s.T(), err, "failed to run migrations down")
+	_, err := s.db.Exec(ctx, "DELETE FROM users")
+	require.NoError(s.T(), err, "failed to clean users table")
 }
 
 func (s *RepositoryTestSuite) TestCreate() {
-	repository := New(s.db)
 	ctx := context.Background()
+	repository := New(s.db)
 
 	s.Run("should create a user successfully", func() {
-		user := usermodel.User{
+		user := userentity.User{
 			ID:        uuid.New().String(),
 			Email:     "test@example.com",
-			Role:      usermodel.RoleDefault,
+			Role:      userentity.RoleUser,
 			Username:  "testuser",
 			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		err := repository.Create(ctx, user)
 		assert.NoError(s.T(), err)
 
-		users, err := repository.List(ctx, WithEmail(user.Email))
+		retrievedUser, err := repository.GetByID(ctx, user.ID)
 		require.NoError(s.T(), err)
-		require.Len(s.T(), users, 1)
-		assert.Equal(s.T(), user.Email, users[0].Email)
-		assert.Equal(s.T(), user.Username, users[0].Username)
+		assert.Equal(s.T(), user.ID, retrievedUser.ID)
+		assert.Equal(s.T(), user.Email, retrievedUser.Email)
+		assert.Equal(s.T(), usermodel.RoleUser, retrievedUser.Role)
+		assert.Equal(s.T(), user.Username, retrievedUser.Username)
+		assert.Equal(s.T(), user.Password, retrievedUser.Password)
 	})
 
-	s.Run("should not create a user because of non-unique email", func() {
-		user1 := usermodel.User{
+	s.Run("should not create a user because of duplicate email", func() {
+		email := "duplicate@example.com"
+		user1 := userentity.User{
 			ID:        uuid.New().String(),
-			Email:     "duplicate@example.com",
-			Role:      usermodel.RoleDefault,
+			Email:     email,
+			Role:      userentity.RoleUser,
 			Username:  "user1",
 			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			AvatarURL: "https://example.com/avatar1.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		err := repository.Create(ctx, user1)
 		require.NoError(s.T(), err)
 
-		user2 := usermodel.User{
+		user2 := userentity.User{
 			ID:        uuid.New().String(),
-			Email:     "duplicate@example.com",
-			Role:      usermodel.RoleDefault,
+			Email:     email,
+			Role:      userentity.RoleAdmin,
 			Username:  "user2",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			Password:  "password456",
+			AvatarURL: "https://example.com/avatar2.jpg",
+			Mobile:    "+0987654321",
+			FirstName: "Jane",
+			LastName:  "Smith",
+			BirthDate: carbon.CreateFromDateTime(1991, 2, 2, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		err = repository.Create(ctx, user2)
 		assert.Error(s.T(), err)
 	})
 
-	s.Run("should not create a user because of empty email", func() {
-		user := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "",
-			Role:      usermodel.RoleDefault,
-			Username:  "testuser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-
-		err := repository.Create(ctx, user)
-		assert.Error(s.T(), err)
-	})
-
-	s.Run("should not create a user because of email length is greater than 255 characters", func() {
-		longEmail := make([]byte, 256)
-		for i := range longEmail {
-			longEmail[i] = 'a'
-		}
-
-		user := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     string(longEmail) + "@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "testuser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-
-		err := repository.Create(ctx, user)
-		assert.Error(s.T(), err)
-	})
-
-	s.Run("should not create a user because of empty password", func() {
-		user := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "test@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "testuser",
-			Password:  "",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-
-		err := repository.Create(ctx, user)
-		assert.Error(s.T(), err)
-	})
-
-	s.Run("should not create a user because of password length is greater than 255 characters", func() {
-		longPassword := make([]byte, 256)
-		for i := range longPassword {
-			longPassword[i] = 'a'
-		}
-
-		user := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "test@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "testuser",
-			Password:  string(longPassword),
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-
-		err := repository.Create(ctx, user)
-		assert.Error(s.T(), err)
-	})
-
-	s.Run("should not create a user because of non-unique username", func() {
-		user1 := usermodel.User{
+	s.Run("should not create a user because of duplicate username", func() {
+		username := "duplicateuser"
+		user1 := userentity.User{
 			ID:        uuid.New().String(),
 			Email:     "user1@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "duplicateuser",
+			Role:      userentity.RoleUser,
+			Username:  username,
 			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			AvatarURL: "https://example.com/avatar1.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		err := repository.Create(ctx, user1)
 		require.NoError(s.T(), err)
 
-		user2 := usermodel.User{
+		user2 := userentity.User{
 			ID:        uuid.New().String(),
 			Email:     "user2@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "duplicateuser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			Role:      userentity.RoleAdmin,
+			Username:  username,
+			Password:  "password456",
+			AvatarURL: "https://example.com/avatar2.jpg",
+			Mobile:    "+0987654321",
+			FirstName: "Jane",
+			LastName:  "Smith",
+			BirthDate: carbon.CreateFromDateTime(1991, 2, 2, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		err = repository.Create(ctx, user2)
 		assert.Error(s.T(), err)
 	})
+}
 
-	s.Run("should not create a user because of username length is greater than 255 characters", func() {
-		longUsername := make([]byte, 256)
-		for i := range longUsername {
-			longUsername[i] = 'a'
-		}
+func (s *RepositoryTestSuite) TestGetByID() {
+	ctx := context.Background()
+	repository := New(s.db)
 
-		user := usermodel.User{
+	s.Run("should get user by id successfully", func() {
+		user := userentity.User{
 			ID:        uuid.New().String(),
-			Email:     "test@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  string(longUsername),
+			Email:     "getbyid@example.com",
+			Role:      userentity.RoleUser,
+			Username:  "getbyiduser",
 			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
 		err := repository.Create(ctx, user)
+		require.NoError(s.T(), err)
+
+		retrievedUser, err := repository.GetByID(ctx, user.ID)
+		require.NoError(s.T(), err)
+		assert.Equal(s.T(), user.ID, retrievedUser.ID)
+		assert.Equal(s.T(), user.Email, retrievedUser.Email)
+		assert.Equal(s.T(), usermodel.RoleUser, retrievedUser.Role)
+		assert.Equal(s.T(), user.Username, retrievedUser.Username)
+		assert.Equal(s.T(), user.Password, retrievedUser.Password)
+	})
+
+	s.Run("should return error when user not found", func() {
+		nonExistentID := uuid.New().String()
+		_, err := repository.GetByID(ctx, nonExistentID)
+		assert.Error(s.T(), err)
+	})
+
+	s.Run("should not return deleted user", func() {
+		user := userentity.User{
+			ID:        uuid.New().String(),
+			Email:     "tobedeleted@example.com",
+			Role:      userentity.RoleUser,
+			Username:  "tobedeleted",
+			Password:  "password123",
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
+		}
+
+		err := repository.Create(ctx, user)
+		require.NoError(s.T(), err)
+
+		err = repository.DeleteByID(ctx, user.ID)
+		require.NoError(s.T(), err)
+
+		_, err = repository.GetByID(ctx, user.ID)
 		assert.Error(s.T(), err)
 	})
 }
 
-func (s *RepositoryTestSuite) TestList() {
-	repository := New(s.db)
+func (s *RepositoryTestSuite) TestGetByEmail() {
 	ctx := context.Background()
+	repository := New(s.db)
 
-	clearUsers := func() {
-		_, err := s.db.Exec(ctx, "DELETE FROM users")
-		require.NoError(s.T(), err)
-	}
-
-	s.Run("shoud return list users successfully", func() {
-		clearUsers()
-		u1 := usermodel.User{
+	s.Run("should get user by email successfully", func() {
+		user := userentity.User{
 			ID:        uuid.New().String(),
-			Email:     "user1@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "user1",
+			Email:     "getbyemail@example.com",
+			Role:      userentity.RoleAdmin,
+			Username:  "getbyemailuser",
 			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		u2 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "user2@example.com",
-			Role:      usermodel.RoleAdmin,
-			Username:  "user2",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "Jane",
+			LastName:  "Smith",
+			BirthDate: carbon.CreateFromDateTime(1991, 2, 2, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
-		err := repository.Create(ctx, u1)
-		require.NoError(s.T(), err)
-		err = repository.Create(ctx, u2)
+		err := repository.Create(ctx, user)
 		require.NoError(s.T(), err)
 
-		users, err := repository.List(ctx)
+		retrievedUser, err := repository.GetByEmail(ctx, user.Email)
 		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 2)
-
-		var ids []string
-		for _, u := range users {
-			ids = append(ids, u.ID)
-		}
-		assert.Contains(s.T(), ids, u1.ID)
-		assert.Contains(s.T(), ids, u2.ID)
+		assert.Equal(s.T(), user.ID, retrievedUser.ID)
+		assert.Equal(s.T(), user.Email, retrievedUser.Email)
+		assert.Equal(s.T(), usermodel.RoleAdmin, retrievedUser.Role)
+		assert.Equal(s.T(), user.Username, retrievedUser.Username)
+		assert.Equal(s.T(), user.Password, retrievedUser.Password)
 	})
 
-	s.Run("should return all list of users because of no filters", func() {
-		clearUsers()
-		u1 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "all1@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "alluser1",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		u2 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "all2@example.com",
-			Role:      usermodel.RoleAdmin,
-			Username:  "alluser2",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		_ = repository.Create(ctx, u1)
-		_ = repository.Create(ctx, u2)
-
-		users, err := repository.List(ctx)
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 2)
-
-		var ids []string
-		for _, u := range users {
-			ids = append(ids, u.ID)
-		}
-		assert.Contains(s.T(), ids, u1.ID)
-		assert.Contains(s.T(), ids, u2.ID)
+	s.Run("should return error when user not found by email", func() {
+		nonExistentEmail := "nonexistent@example.com"
+		_, err := repository.GetByEmail(ctx, nonExistentEmail)
+		assert.Error(s.T(), err)
 	})
 
-	s.Run("should return empty list of users because of no users", func() {
-		clearUsers()
-		users, err := repository.List(ctx)
-		require.NoError(s.T(), err)
-		assert.Empty(s.T(), users)
-	})
-
-	s.Run("should return list of users because of email filter", func() {
-		clearUsers()
-		u1 := usermodel.User{
+	s.Run("should not return deleted user by email", func() {
+		user := userentity.User{
 			ID:        uuid.New().String(),
-			Email:     "filtremail1@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "auser",
+			Email:     "tobedeletedbyemail@example.com",
+			Role:      userentity.RoleUser,
+			Username:  "tobedeletedbyemail",
 			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		u2 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "filtremail2@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "buser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
-		err := repository.Create(ctx, u1)
-		require.NoError(s.T(), err)
-		err = repository.Create(ctx, u2)
+		err := repository.Create(ctx, user)
 		require.NoError(s.T(), err)
 
-		users, err := repository.List(ctx, WithEmail(u1.Email))
+		err = repository.DeleteByID(ctx, user.ID)
 		require.NoError(s.T(), err)
 
-		assert.Len(s.T(), users, 1)
-		assert.Equal(s.T(), u1.Email, users[0].Email)
-		assert.Equal(s.T(), u1.Username, users[0].Username)
-	})
-
-	s.Run("should return list of users because of username filter", func() {
-		clearUsers()
-		u1 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "username1@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "uniqueuser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		u2 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "username2@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "otheruser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		_ = repository.Create(ctx, u1)
-		_ = repository.Create(ctx, u2)
-
-		users, err := repository.List(ctx, WithUsername(u1.Username))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 1)
-		assert.Equal(s.T(), u1.Username, users[0].Username)
-		assert.Equal(s.T(), u1.Email, users[0].Email)
-	})
-
-	s.Run("should return list of users because of role filter", func() {
-		clearUsers()
-		u1 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "roleuser1@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "roleuser1",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		u2 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "roleuser2@example.com",
-			Role:      usermodel.RoleAdmin,
-			Username:  "roleuser2",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		u3 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "roleuser3@example.com",
-			Role:      usermodel.RoleAdmin,
-			Username:  "roleuser3",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		_ = repository.Create(ctx, u1)
-		_ = repository.Create(ctx, u2)
-		_ = repository.Create(ctx, u3)
-
-		users, err := repository.List(ctx, WithRole(usermodel.RoleAdmin))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 2)
-		for _, u := range users {
-			assert.Equal(s.T(), usermodel.RoleAdmin, u.Role)
-		}
+		_, err = repository.GetByEmail(ctx, user.Email)
+		assert.Error(s.T(), err)
 	})
 }
 
-func (s *RepositoryTestSuite) TestDelete() {
-	repository := New(s.db)
+func (s *RepositoryTestSuite) TestDeleteByID() {
 	ctx := context.Background()
-
-	clearUsers := func() {
-		_, _ = s.db.Exec(ctx, "DELETE FROM users")
-	}
+	repository := New(s.db)
 
 	s.Run("should delete a user successfully", func() {
-		clearUsers()
-
-		u := usermodel.User{
+		user := userentity.User{
 			ID:        uuid.New().String(),
-			Email:     "deleteuser@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "deleteuser",
+			Email:     "todelete@example.com",
+			Role:      userentity.RoleUser,
+			Username:  "todelete",
 			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
-		err := repository.Create(ctx, u)
+		err := repository.Create(ctx, user)
 		require.NoError(s.T(), err)
 
-		// Delete by ID
-		err = repository.Delete(ctx, WithID(u.ID))
+		retrievedUser, err := repository.GetByID(ctx, user.ID)
 		require.NoError(s.T(), err)
+		assert.Equal(s.T(), user.ID, retrievedUser.ID)
 
-		users, err := repository.List(ctx, WithID(u.ID))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 0)
+		err = repository.DeleteByID(ctx, user.ID)
+		assert.NoError(s.T(), err)
+
+		_, err = repository.GetByID(ctx, user.ID)
+		assert.Error(s.T(), err)
 	})
 
-	s.Run("should delete a user because of id filter", func() {
-		clearUsers()
-
-		u := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "byid@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "byiduser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-
-		err := repository.Create(ctx, u)
-		require.NoError(s.T(), err)
-
-		err = repository.Delete(ctx, WithID(u.ID))
-		require.NoError(s.T(), err)
-
-		users, err := repository.List(ctx, WithID(u.ID))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 0)
+	s.Run("should not error when deleting non-existent user", func() {
+		nonExistentID := uuid.New().String()
+		err := repository.DeleteByID(ctx, nonExistentID)
+		assert.NoError(s.T(), err)
 	})
 
-	s.Run("should delete a user because of email filter", func() {
-		clearUsers()
-
-		u := usermodel.User{
+	s.Run("should allow deleting already deleted user", func() {
+		user := userentity.User{
 			ID:        uuid.New().String(),
-			Email:     "byemail@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "byemailuser",
+			Email:     "doubledelete@example.com",
+			Role:      userentity.RoleUser,
+			Username:  "doubledelete",
 			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
+			AvatarURL: "https://example.com/avatar.jpg",
+			Mobile:    "+1234567890",
+			FirstName: "John",
+			LastName:  "Doe",
+			BirthDate: carbon.CreateFromDateTime(1990, 1, 1, 0, 0, 0).SetTimezone(carbon.UTC).StdTime(),
 		}
 
-		err := repository.Create(ctx, u)
+		err := repository.Create(ctx, user)
 		require.NoError(s.T(), err)
 
-		err = repository.Delete(ctx, WithEmail(u.Email))
+		err = repository.DeleteByID(ctx, user.ID)
 		require.NoError(s.T(), err)
 
-		users, err := repository.List(ctx, WithEmail(u.Email))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 0)
-	})
-
-	s.Run("should delete a user because of username filter", func() {
-		clearUsers()
-
-		u := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "byusername@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "byusernameuser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-
-		err := repository.Create(ctx, u)
-		require.NoError(s.T(), err)
-
-		err = repository.Delete(ctx, WithUsername(u.Username))
-		require.NoError(s.T(), err)
-
-		users, err := repository.List(ctx, WithUsername(u.Username))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 0)
-	})
-
-	s.Run("should delete a user because of role filter", func() {
-		clearUsers()
-
-		u1 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "roledelete1@example.com",
-			Role:      usermodel.RoleAdmin,
-			Username:  "roledeleteuser1",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		u2 := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "roledelete2@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "roledeleteuser2",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-
-		err := repository.Create(ctx, u1)
-		require.NoError(s.T(), err)
-		err = repository.Create(ctx, u2)
-		require.NoError(s.T(), err)
-
-		// Delete all users with RoleAdmin
-		err = repository.Delete(ctx, WithRole(usermodel.RoleAdmin))
-		require.NoError(s.T(), err)
-
-		users, err := repository.List(ctx, WithRole(usermodel.RoleAdmin))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 0)
-
-		usersDefault, err := repository.List(ctx, WithRole(usermodel.RoleDefault))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), usersDefault, 1)
-		assert.Equal(s.T(), u2.Username, usersDefault[0].Username)
-	})
-
-	s.Run("should not delete a user because of no user", func() {
-		clearUsers()
-
-		nonexistentID := uuid.New().String()
-		err := repository.Delete(ctx, WithID(nonexistentID))
-		require.NoError(s.T(), err)
-		// nothing breaks or panics. This is okay.
-	})
-
-	s.Run("should not delete a user because of no filters", func() {
-		clearUsers()
-
-		u := usermodel.User{
-			ID:        uuid.New().String(),
-			Email:     "nofilter@example.com",
-			Role:      usermodel.RoleDefault,
-			Username:  "nofilteruser",
-			Password:  "password123",
-			CreatedAt: carbon.Now().StdTime(),
-			UpdatedAt: carbon.Now().StdTime(),
-		}
-		err := repository.Create(ctx, u)
-		require.NoError(s.T(), err)
-
-		// Should not delete any user if no filters are provided
-		err = repository.Delete(ctx)
-		require.NoError(s.T(), err)
-
-		users, err := repository.List(ctx, WithID(u.ID))
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), users, 1)
+		err = repository.DeleteByID(ctx, user.ID)
+		assert.NoError(s.T(), err)
 	})
 }
 

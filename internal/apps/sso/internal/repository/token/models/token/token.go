@@ -13,9 +13,12 @@ const (
 
 var Columns = []string{
 	"id",
-	"user_id",
+	"subject",
+	"client_id",
 	"token_type",
-	"token",
+	"token_hash",
+	"expires_at",
+	"revoked",
 	"created_at",
 	"updated_at",
 	"deleted_at",
@@ -31,9 +34,12 @@ func TokenFromEntity(entity tokenentity.Token) Token {
 
 	return Token{
 		ID:        entity.ID,
-		UserID:    entity.UserID,
+		Subject:   entity.Subject,
+		ClientID:  entity.ClientID,
 		TokenType: tokenType,
-		Token:     entity.Token,
+		TokenHash: entity.TokenHash,
+		ExpiresAt: entity.ExpiresAt,
+		Revoked:   entity.Revoked,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -41,9 +47,12 @@ func TokenFromEntity(entity tokenentity.Token) Token {
 
 type Token struct {
 	ID        string     `db:"id"`
-	UserID    string     `db:"user_id"`
+	Subject   string     `db:"subject"`
+	ClientID  string     `db:"client_id"`
 	TokenType TokenType  `db:"token_type"`
-	Token     string     `db:"token"`
+	TokenHash string     `db:"token_hash"`
+	ExpiresAt time.Time  `db:"expires_at"`
+	Revoked   bool       `db:"revoked"`
 	CreatedAt time.Time  `db:"created_at"`
 	UpdatedAt time.Time  `db:"updated_at"`
 	DeletedAt *time.Time `db:"deleted_at"`
@@ -52,9 +61,12 @@ type Token struct {
 func (t Token) Values() []any {
 	return []any{
 		t.ID,
-		t.UserID,
+		t.Subject,
+		t.ClientID,
 		t.TokenType,
-		t.Token,
+		t.TokenHash,
+		t.ExpiresAt,
+		t.Revoked,
 		t.CreatedAt,
 		t.UpdatedAt,
 		t.DeletedAt,

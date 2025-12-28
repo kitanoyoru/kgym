@@ -1,7 +1,10 @@
-package models
+package user
 
 import (
 	"time"
+
+	"github.com/dromara/carbon/v2"
+	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 )
 
 const (
@@ -24,12 +27,24 @@ var Columns = []string{
 	"deleted_at",
 }
 
-type Role string
+func UserFromEntity(entity userentity.User) (User, error) {
+	role, err := RoleFromEntity(entity.Role)
+	if err != nil {
+		return User{}, err
+	}
 
-const (
-	RoleAdmin   Role = "admin"
-	RoleDefault Role = "default"
-)
+	now := carbon.Now().StdTime()
+
+	return User{
+		ID:        entity.ID,
+		Email:     entity.Email,
+		Role:      role,
+		Username:  entity.Username,
+		Password:  entity.Password,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}, nil
+}
 
 type User struct {
 	ID        string     `db:"id"`

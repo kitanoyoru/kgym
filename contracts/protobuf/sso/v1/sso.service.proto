@@ -2,39 +2,33 @@ syntax = "proto3";
 
 package sso.v1;
 
+import "sso/v1/sso.proto";
+
+import "google/api/annotations.proto";
+
 option go_package = "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/sso/v1;sso";
 
 service SSOService {
-    rpc Token(Token.Request) returns (Token.Response) {
+    rpc GetToken(GetToken.Request) returns (GetToken.Response) {
         option (google.api.http) = {
             post: "/api/v1/oauth/token"
             body: "*"
         };
     }
-
-    rpc Introspect(Introspect.Request) returns (Introspect.Response) {
-        option (google.api.http) = {
-            post: "/api/v1/oauth/introspect"
-            body: "*"
-        };
-    }
 }
 
-message Token {
+message GetToken {
     message Request {
-        oneof grant_type {
+        oneof grant {
             PasswordGrant password_grant = 1;
             RefreshTokenGrant refresh_token_grant = 2;
         }
 
-        string client_id = 4;
+        string client_id = 3;
     }
 
     message Response {
-        string access_token = 1;
-        string refresh_token = 2;
-        string token_type = 3;
-        int64 expires_in = 4;
+        Token token = 1;
     }
 }
 

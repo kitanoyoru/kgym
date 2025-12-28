@@ -12,7 +12,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/postgres"
-	"github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
+	userservice "github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
 	"github.com/kitanoyoru/kgym/internal/apps/user/migrations"
 	postgresdb "github.com/kitanoyoru/kgym/pkg/database/postgres"
 	"github.com/kitanoyoru/kgym/pkg/testing/integration/cockroachdb"
@@ -52,7 +52,7 @@ func (s *UserServiceTestSuite) SetupSuite() {
 	require.NoError(s.T(), err, "failed to run migrations")
 
 	repository := postgres.New(s.db)
-	userService := service.New(repository)
+	userService := userservice.New(repository)
 	grpcServer, err := NewUserService(userService)
 	require.NoError(s.T(), err, "failed to create gRPC server")
 
@@ -127,20 +127,6 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 		require.NoError(s.T(), err)
 		assert.NotEmpty(s.T(), resp.Id)
 		assert.Regexp(s.T(), `^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$`, resp.Id)
-
-		listReq := &pb.ListUsers_Request{}
-		listResp, err := s.client.ListUsers(ctx, listReq)
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), listResp.Users, 1)
-		user := listResp.Users[0]
-		assert.Equal(s.T(), "test@example.com", user.Email)
-		assert.Equal(s.T(), "testuser", user.Username)
-		assert.Equal(s.T(), "https://example.com/avatar.jpg", user.AvatarUrl)
-		assert.Equal(s.T(), "+1234567890", user.Mobile)
-		assert.Equal(s.T(), "John", user.FirstName)
-		assert.Equal(s.T(), "Doe", user.LastName)
-		assert.NotNil(s.T(), user.BirthDate)
-		assert.Equal(s.T(), birthDate.Unix(), user.BirthDate.AsTime().Unix())
 	})
 
 	s.Run("should not create a user because of invalid email", func() {
@@ -333,129 +319,87 @@ func (s *UserServiceTestSuite) TestCreateUser() {
 	})
 }
 
-func (s *UserServiceTestSuite) TestListUsers() {
+func (s *UserServiceTestSuite) TestGetUser() {
 	ctx := context.Background()
 	_, _ = s.db.Exec(ctx, "DELETE FROM users")
 
-	s.Run("should return list of users successfully with no filters", func() {
+	s.Run("should get user by id successfully", func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		_, _ = s.db.Exec(ctx, "DELETE FROM users")
 
-		user1ID := s.createTestUser(ctx, "user1@example.com", pb.Role_USER, "user1", "password123")
-		user2ID := s.createTestUser(ctx, "user2@example.com", pb.Role_ADMIN, "user2", "password123")
+		email := "getbyid@example.com"
+		userID := s.createTestUser(ctx, email, pb.Role_USER, "getbyiduser", "password123")
 
-		req := &pb.ListUsers_Request{}
-
-		resp, err := s.client.ListUsers(ctx, req)
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), resp.Users, 2)
-
-		var ids []string
-		for _, u := range resp.Users {
-			ids = append(ids, u.Id)
+		req := &pb.GetUser_Request{
+			Id: &userID,
 		}
-		assert.Contains(s.T(), ids, user1ID)
-		assert.Contains(s.T(), ids, user2ID)
+
+		resp, err := s.client.GetUser(ctx, req)
+		require.NoError(s.T(), err)
+		assert.NotNil(s.T(), resp.User)
+		assert.Equal(s.T(), userID, resp.User.Id)
+		assert.Equal(s.T(), email, resp.User.Email)
 	})
 
-	s.Run("should return list of users successfully with email filter", func() {
+	s.Run("should get user by email successfully", func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
 		_, _ = s.db.Exec(ctx, "DELETE FROM users")
 
-		email := "filter@example.com"
-		userID := s.createTestUser(ctx, email, pb.Role_USER, "emailfilteruser", "password123")
-		s.createTestUser(ctx, "other@example.com", pb.Role_USER, "otheruser", "password123")
+		email := "getbyemail@example.com"
+		userID := s.createTestUser(ctx, email, pb.Role_USER, "getbyemailuser", "password123")
 
-		req := &pb.ListUsers_Request{
+		req := &pb.GetUser_Request{
 			Email: &email,
 		}
 
-		resp, err := s.client.ListUsers(ctx, req)
+		resp, err := s.client.GetUser(ctx, req)
 		require.NoError(s.T(), err)
-		assert.Len(s.T(), resp.Users, 1)
-		assert.Equal(s.T(), userID, resp.Users[0].Id)
-		assert.Equal(s.T(), email, resp.Users[0].Email)
-		assert.NotEmpty(s.T(), resp.Users[0].AvatarUrl)
-		assert.NotEmpty(s.T(), resp.Users[0].Mobile)
-		assert.NotEmpty(s.T(), resp.Users[0].FirstName)
-		assert.NotEmpty(s.T(), resp.Users[0].LastName)
-		assert.NotNil(s.T(), resp.Users[0].BirthDate)
+		assert.NotNil(s.T(), resp.User)
+		assert.Equal(s.T(), userID, resp.User.Id)
+		assert.Equal(s.T(), email, resp.User.Email)
 	})
 
-	s.Run("should return list of users successfully with username filter", func() {
+	s.Run("should return error when neither id nor email provided", func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		_, _ = s.db.Exec(ctx, "DELETE FROM users")
+		req := &pb.GetUser_Request{}
 
-		username := "usernamefilteruser"
-		userID := s.createTestUser(ctx, "usernamefilter@example.com", pb.Role_USER, username, "password123")
-		s.createTestUser(ctx, "otheruser@example.com", pb.Role_USER, "otheruser2", "password123")
-
-		req := &pb.ListUsers_Request{
-			Username: &username,
-		}
-
-		resp, err := s.client.ListUsers(ctx, req)
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), resp.Users, 1)
-		assert.Equal(s.T(), userID, resp.Users[0].Id)
-		assert.Equal(s.T(), username, resp.Users[0].Username)
-		assert.NotEmpty(s.T(), resp.Users[0].AvatarUrl)
-		assert.NotEmpty(s.T(), resp.Users[0].Mobile)
-		assert.NotEmpty(s.T(), resp.Users[0].FirstName)
-		assert.NotEmpty(s.T(), resp.Users[0].LastName)
-		assert.NotNil(s.T(), resp.Users[0].BirthDate)
+		resp, err := s.client.GetUser(ctx, req)
+		assert.Error(s.T(), err)
+		assert.Nil(s.T(), resp)
 	})
 
-	s.Run("should return list of users successfully with role filter", func() {
+	s.Run("should return error when user not found by id", func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		_, _ = s.db.Exec(ctx, "DELETE FROM users")
-
-		role := pb.Role_ADMIN
-		user1ID := s.createTestUser(ctx, "admin1@example.com", role, "admin1", "password123")
-		user2ID := s.createTestUser(ctx, "admin2@example.com", role, "admin2", "password123")
-		s.createTestUser(ctx, "user@example.com", pb.Role_USER, "user", "password123")
-
-		req := &pb.ListUsers_Request{
-			Role: &role,
+		nonExistentID := uuid.New().String()
+		req := &pb.GetUser_Request{
+			Id: &nonExistentID,
 		}
 
-		resp, err := s.client.ListUsers(ctx, req)
-		require.NoError(s.T(), err)
-		assert.Len(s.T(), resp.Users, 2)
-
-		var ids []string
-		for _, u := range resp.Users {
-			ids = append(ids, u.Id)
-			assert.Equal(s.T(), role, u.Role)
-			assert.NotEmpty(s.T(), u.AvatarUrl)
-			assert.NotEmpty(s.T(), u.Mobile)
-			assert.NotEmpty(s.T(), u.FirstName)
-			assert.NotEmpty(s.T(), u.LastName)
-			assert.NotNil(s.T(), u.BirthDate)
-		}
-		assert.Contains(s.T(), ids, user1ID)
-		assert.Contains(s.T(), ids, user2ID)
+		resp, err := s.client.GetUser(ctx, req)
+		assert.Error(s.T(), err)
+		assert.Nil(s.T(), resp)
 	})
 
-	s.Run("should return empty list when no users found", func() {
+	s.Run("should return error when user not found by email", func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
 
-		_, _ = s.db.Exec(ctx, "DELETE FROM users")
+		nonExistentEmail := "nonexistent@example.com"
+		req := &pb.GetUser_Request{
+			Email: &nonExistentEmail,
+		}
 
-		req := &pb.ListUsers_Request{}
-
-		resp, err := s.client.ListUsers(ctx, req)
-		require.NoError(s.T(), err)
-		assert.Empty(s.T(), resp.Users)
+		resp, err := s.client.GetUser(ctx, req)
+		assert.Error(s.T(), err)
+		assert.Nil(s.T(), resp)
 	})
 }
 
@@ -479,15 +423,11 @@ func (s *UserServiceTestSuite) TestDeleteUser() {
 		require.NoError(s.T(), err)
 		assert.NotNil(s.T(), resp)
 
-		listReq := &pb.ListUsers_Request{}
-		listResp, err := s.client.ListUsers(ctx, listReq)
-		require.NoError(s.T(), err)
-
-		var ids []string
-		for _, u := range listResp.Users {
-			ids = append(ids, u.Id)
+		getReq := &pb.GetUser_Request{
+			Id: &userID,
 		}
-		assert.NotContains(s.T(), ids, userID)
+		_, err = s.client.GetUser(ctx, getReq)
+		assert.Error(s.T(), err)
 	})
 
 	s.Run("should return error when user not found", func() {

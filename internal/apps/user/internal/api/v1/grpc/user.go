@@ -6,7 +6,8 @@ import (
 
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/api/v1/grpc/serializer"
-	"github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
+	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
+	user "github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
 	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 	"google.golang.org/grpc/codes"
@@ -20,13 +21,13 @@ const (
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
 
-	service *service.Service
+	svc user.IService
 }
 
-func NewUserService(service *service.Service) (*UserServiceServer, error) {
+func NewUserService(svc user.IService) (*UserServiceServer, error) {
 	methods := []string{
 		"CreateUser",
-		"ListUsers",
+		"GetUser",
 		"DeleteUser",
 	}
 
@@ -40,42 +41,57 @@ func NewUserService(service *service.Service) (*UserServiceServer, error) {
 	}
 
 	return &UserServiceServer{
-		service: service,
+		svc: svc,
 	}, nil
 }
 
 func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUser_Request) (*pb.CreateUser_Response, error) {
-	id, err := s.service.Create(ctx, serializer.PbCreateRequestToServiceRequest(req))
+	svcReq, err := serializer.PbCreateRequestToServiceRequest(req)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid request: %v", err)
+	}
+
+	svcResp, err := s.svc.Create(ctx, svcReq)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create user: %v", err)
 	}
 
 	return &pb.CreateUser_Response{
-		Id: id,
+		Id: svcResp.ID,
 	}, nil
 }
 
-func (s *UserServiceServer) ListUsers(ctx context.Context, req *pb.ListUsers_Request) (*pb.ListUsers_Response, error) {
-	options := serializer.PbListRequestToServiceOptions(req)
+func (s *UserServiceServer) GetUser(ctx context.Context, req *pb.GetUser_Request) (*pb.GetUser_Response, error) {
+	var userEntity userentity.User
+	var err error
 
-	users, err := s.service.List(ctx, options...)
+	id := req.GetId()
+	email := req.GetEmail()
+
+	if id != "" {
+		userEntity, err = s.svc.GetByID(ctx, id)
+	} else if email != "" {
+		userEntity, err = s.svc.GetByEmail(ctx, email)
+	} else {
+		return nil, status.Errorf(codes.InvalidArgument, "either id or email must be provided")
+	}
+
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to list users: %v", err)
+		return nil, status.Errorf(codes.Internal, "failed to get user: %v", err)
 	}
 
-	pbUsers := make([]*pb.User, len(users))
-	for i, user := range users {
-		pbUsers[i] = serializer.EntityToPbUser(&user)
+	pbUser, err := serializer.EntityToPbUser(userEntity)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to convert entity to protobuf: %v", err)
 	}
 
-	return &pb.ListUsers_Response{
-		Users: pbUsers,
+	return &pb.GetUser_Response{
+		User: &pbUser,
 	}, nil
 }
 
 func (s *UserServiceServer) DeleteUser(ctx context.Context, req *pb.DeleteUser_Request) (*pb.DeleteUser_Response, error) {
-	err := s.service.Delete(ctx, req.Id)
-	if err != nil {
+	if err := s.svc.DeleteByID(ctx, req.Id); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to delete user: %v", err)
 	}
 

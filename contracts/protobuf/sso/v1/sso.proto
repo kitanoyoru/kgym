@@ -4,11 +4,14 @@ package sso.v1;
 
 option go_package = "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/sso/v1;sso";
 
-service SSOService {
-  rpc CreateToken(CreateToken.Request) returns (CreateToken.Response) {
-    option (google.api.http) = {
-      post: "/api/v1/tokens"
-      body: "*"
-    };
-  }
+message Token {
+    string access_token = 1;
+    string refresh_token = 2;
+    int64 expires_in = 3;
+    TokenType token_type = 4;
+}
+
+enum TokenType {
+    TOKEN_TYPE_UNSPECIFIED = 0;
+    TOKEN_TYPE_BEARER = 1;
 }

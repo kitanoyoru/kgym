@@ -21,4 +21,4 @@ docker-build:
 
 .PHONY: generate-mocks
 generate-mocks:
-	mockgen -source=internal/repository/postgres/repository.go -destination=internal/repository/postgres/mocks/repository_mock.go -package=mocks
+	mockgen -source=internal/repository/repository.go -destination=internal/repository/mocks/repository_mock.go -package=mocks

@@ -18,7 +18,7 @@ service UserService {
     };
   }
 
-  rpc ListUsers(ListUsers.Request) returns (ListUsers.Response) {
+  rpc GetUser(GetUser.Request) returns (GetUser.Response) {
     option (google.api.http) = {
       get: "/api/v1/users"
     };
@@ -49,15 +49,14 @@ message CreateUser {
   }
 }
 
-message ListUsers {
+message GetUser {
   message Request {
-    optional string email = 1 [(validate.rules).string.email = true];
-    optional user.v1.Role role = 2;
-    optional string username = 3 [(validate.rules).string = {min_len: 3, max_len: 32}];
+    optional string id = 1 [(validate.rules).string.uuid = true];
+    optional string email = 2 [(validate.rules).string.email = true];
   }
 
   message Response {
-    repeated user.v1.User users = 1;
+    user.v1.User user = 1;
   }
 }
 
