@@ -37,12 +37,12 @@ func (r *Repository) GetCurrentSigningKey(ctx context.Context) (keyentity.Key, e
 		return keyentity.Key{}, err
 	}
 
-	var storage keymodel.Key
-	if err := json.Unmarshal(data, &storage); err != nil {
+	var model keymodel.Key
+	if err := json.Unmarshal(data, &model); err != nil {
 		return keyentity.Key{}, err
 	}
 
-	return storage.ToEntity()
+	return model.ToEntity()
 }
 
 func (r *Repository) GetPublicKeys(ctx context.Context) ([]keyentity.Key, error) {
@@ -59,16 +59,16 @@ func (r *Repository) GetPublicKeys(ctx context.Context) ([]keyentity.Key, error)
 			continue
 		}
 
-		var storage keymodel.Key
-		if err := json.Unmarshal(data, &storage); err != nil {
+		var model keymodel.Key
+		if err := json.Unmarshal(data, &model); err != nil {
 			continue
 		}
 
-		if !storage.Active {
+		if !model.Active {
 			continue
 		}
 
-		key, err := storage.ToEntity()
+		key, err := model.ToEntity()
 		if err != nil {
 			continue
 		}
@@ -96,12 +96,12 @@ func (r *Repository) Rotate(ctx context.Context) (keyentity.Key, error) {
 		Active:    true,
 	}
 
-	storage, err := keymodel.FromEntity(key)
+	model, err := keymodel.FromEntity(key)
 	if err != nil {
 		return keyentity.Key{}, err
 	}
 
-	data, err := json.Marshal(storage)
+	data, err := json.Marshal(model)
 	if err != nil {
 		return keyentity.Key{}, err
 	}
