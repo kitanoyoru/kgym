@@ -9,6 +9,7 @@ import (
 
 	keyentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/key"
 	keyrepo "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/key"
+	keymodel "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/key/models/key"
 	redis "github.com/redis/go-redis/v9"
 	"go.uber.org/multierr"
 )
@@ -16,10 +17,10 @@ import (
 var _ keyrepo.IRepository = (*Repository)(nil)
 
 type Repository struct {
-	rdb *redis.ClusterClient
+	rdb redis.Cmdable
 }
 
-func New(ctx context.Context, rdb *redis.ClusterClient) (*Repository, error) {
+func New(ctx context.Context, rdb redis.Cmdable) (*Repository, error) {
 	return &Repository{
 		rdb: rdb,
 	}, nil
@@ -36,12 +37,12 @@ func (r *Repository) GetCurrentSigningKey(ctx context.Context) (keyentity.Key, e
 		return keyentity.Key{}, err
 	}
 
-	var key keyentity.Key
-	if err := json.Unmarshal(data, &key); err != nil {
+	var storage keymodel.Key
+	if err := json.Unmarshal(data, &storage); err != nil {
 		return keyentity.Key{}, err
 	}
 
-	return key, nil
+	return storage.ToEntity()
 }
 
 func (r *Repository) GetPublicKeys(ctx context.Context) ([]keyentity.Key, error) {
@@ -55,15 +56,20 @@ func (r *Repository) GetPublicKeys(ctx context.Context) ([]keyentity.Key, error)
 	for _, kid := range kids {
 		data, err := r.rdb.Get(ctx, "jwks:key:"+kid).Bytes()
 		if err != nil {
-			return nil, err
-		}
-
-		var key keyentity.Key
-		if err := json.Unmarshal(data, &key); err != nil {
 			continue
 		}
 
-		if !key.Active {
+		var storage keymodel.Key
+		if err := json.Unmarshal(data, &storage); err != nil {
+			continue
+		}
+
+		if !storage.Active {
+			continue
+		}
+
+		key, err := storage.ToEntity()
+		if err != nil {
 			continue
 		}
 
@@ -90,7 +96,12 @@ func (r *Repository) Rotate(ctx context.Context) (keyentity.Key, error) {
 		Active:    true,
 	}
 
-	data, err := json.Marshal(key)
+	storage, err := keymodel.FromEntity(key)
+	if err != nil {
+		return keyentity.Key{}, err
+	}
+
+	data, err := json.Marshal(storage)
 	if err != nil {
 		return keyentity.Key{}, err
 	}

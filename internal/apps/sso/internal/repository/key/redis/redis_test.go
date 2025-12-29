@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
@@ -20,7 +21,7 @@ import (
 type RepositoryTestSuite struct {
 	suite.Suite
 
-	rdb        *redis.ClusterClient
+	rdb        *redis.Client
 	container  *rediscontainer.RedisContainer
 	repository *Repository
 	ctx        context.Context
@@ -44,8 +45,8 @@ func (s *RepositoryTestSuite) SetupSuite() {
 		address = parsedURI.Host
 	}
 
-	s.rdb = redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs: []string{address},
+	s.rdb = redis.NewClient(&redis.Options{
+		Addr: address,
 	})
 
 	repository, err := New(ctx, s.rdb)
@@ -65,23 +66,28 @@ func (s *RepositoryTestSuite) TearDownSuite() {
 
 func (s *RepositoryTestSuite) SetupTest() {
 	ctx := context.Background()
-	// Clean up Redis keys used by the repository
-	keys, err := s.rdb.Keys(ctx, "jwks:*").Result()
-	if err == nil {
-		if len(keys) > 0 {
-			_ = s.rdb.Del(ctx, keys...).Err()
-		}
-	}
+	s.cleanupKeys(ctx)
 }
 
 func (s *RepositoryTestSuite) TearDownTest() {
 	ctx := context.Background()
-	// Clean up Redis keys used by the repository
-	keys, err := s.rdb.Keys(ctx, "jwks:*").Result()
-	if err == nil {
-		if len(keys) > 0 {
-			_ = s.rdb.Del(ctx, keys...).Err()
+	s.cleanupKeys(ctx)
+}
+
+func (s *RepositoryTestSuite) cleanupKeys(ctx context.Context) {
+	_ = s.rdb.Del(ctx, "jwks:active").Err()
+
+	kids, err := s.rdb.SMembers(ctx, "jwks:public").Result()
+	if err == nil && len(kids) > 0 {
+		for _, kid := range kids {
+			_ = s.rdb.Del(ctx, "jwks:key:"+kid).Err()
 		}
+		_ = s.rdb.Del(ctx, "jwks:public").Err()
+	}
+
+	keys, err := s.rdb.Keys(ctx, "jwks:*").Result()
+	if err == nil && len(keys) > 0 {
+		_ = s.rdb.Del(ctx, keys...).Err()
 	}
 }
 
@@ -112,9 +118,11 @@ func (s *RepositoryTestSuite) TestRotate() {
 	})
 
 	s.Run("should rotate key multiple times", func() {
+		s.cleanupKeys(s.ctx)
 		key1, err := s.repository.Rotate(s.ctx)
 		require.NoError(s.T(), err)
 
+		time.Sleep(time.Second)
 		key2, err := s.repository.Rotate(s.ctx)
 		require.NoError(s.T(), err)
 
@@ -153,6 +161,7 @@ func (s *RepositoryTestSuite) TestGetCurrentSigningKey() {
 	})
 
 	s.Run("should return error when no active key exists", func() {
+		s.cleanupKeys(s.ctx)
 		_, err := s.repository.GetCurrentSigningKey(s.ctx)
 		assert.Error(s.T(), err)
 	})
@@ -169,10 +178,12 @@ func (s *RepositoryTestSuite) TestGetCurrentSigningKey() {
 
 func (s *RepositoryTestSuite) TestGetPublicKeys() {
 	s.Run("should get public keys successfully", func() {
+		s.cleanupKeys(s.ctx)
 		// Rotate multiple keys
 		key1, err := s.repository.Rotate(s.ctx)
 		require.NoError(s.T(), err)
 
+		time.Sleep(time.Second)
 		key2, err := s.repository.Rotate(s.ctx)
 		require.NoError(s.T(), err)
 
@@ -194,12 +205,14 @@ func (s *RepositoryTestSuite) TestGetPublicKeys() {
 	})
 
 	s.Run("should return empty list when no public keys exist", func() {
+		s.cleanupKeys(s.ctx)
 		keys, err := s.repository.GetPublicKeys(s.ctx)
 		require.NoError(s.T(), err)
 		assert.Empty(s.T(), keys)
 	})
 
 	s.Run("should only return active keys", func() {
+		s.cleanupKeys(s.ctx)
 		// Rotate a key
 		key, err := s.repository.Rotate(s.ctx)
 		require.NoError(s.T(), err)
@@ -228,6 +241,7 @@ func (s *RepositoryTestSuite) TestGetPublicKeys() {
 	})
 
 	s.Run("should skip keys with invalid JSON", func() {
+		s.cleanupKeys(s.ctx)
 		// Add invalid JSON to a key
 		_ = s.rdb.Set(s.ctx, "jwks:key:invalid-json", "invalid json data", 0).Err()
 		_ = s.rdb.SAdd(s.ctx, "jwks:public", "invalid-json").Err()

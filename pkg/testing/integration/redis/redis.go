@@ -16,7 +16,7 @@ type RedisContainer struct {
 
 func SetupTestContainer(ctx context.Context) (*RedisContainer, error) {
 	req := testcontainers.ContainerRequest{
-		Image:        "redis:latest",
+		Image:        "redis:8.4.0-alpine",
 		ExposedPorts: []string{"6379/tcp"},
 		WaitingFor:   wait.ForLog("Ready to accept connections"),
 	}
