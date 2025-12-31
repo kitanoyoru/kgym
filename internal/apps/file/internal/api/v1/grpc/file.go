@@ -8,7 +8,6 @@ import (
 
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
 	"github.com/kitanoyoru/kgym/internal/apps/file/internal/service"
-	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 	"go.uber.org/multierr"
 )
@@ -31,7 +30,7 @@ func NewFileService(service service.IService) (*FileServiceServer, error) {
 	}
 
 	for _, method := range methods {
-		if err := metrics.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
+		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
 			Name: fmt.Sprintf("%s.%s", GRPCServiceMetricsPrefix, method),
 			Type: prometheus.Counter,
 		}); err != nil {

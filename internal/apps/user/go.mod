@@ -11,7 +11,6 @@ require (
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251224100050-18a6beb5f3f6
 	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20251224100050-18a6beb5f3f6
-	github.com/kitanoyoru/kgym/pkg/logger v0.0.0-20251224135906-736e0909d07d
 	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20251224100050-18a6beb5f3f6
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224100050-18a6beb5f3f6
 	github.com/pkg/errors v0.9.1
@@ -20,7 +19,6 @@ require (
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/goleak v1.3.0
 	go.uber.org/mock v0.6.0
-	golang.org/x/sync v0.19.0
 	google.golang.org/grpc v1.78.0
 	google.golang.org/protobuf v1.36.11
 )
@@ -94,10 +92,10 @@ require (
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/trace v1.39.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.1 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/crypto v0.46.0 // indirect
 	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/sync v0.19.0 // indirect
 	golang.org/x/sys v0.39.0 // indirect
 	golang.org/x/text v0.32.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20251222181119-0a764e51fe1b // indirect

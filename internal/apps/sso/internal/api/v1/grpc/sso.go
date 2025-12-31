@@ -8,7 +8,6 @@ import (
 	keyserializer "github.com/kitanoyoru/kgym/internal/apps/sso/internal/api/v1/grpc/serializer/key"
 	authservice "github.com/kitanoyoru/kgym/internal/apps/sso/internal/service/auth"
 	keyservice "github.com/kitanoyoru/kgym/internal/apps/sso/internal/service/key"
-	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,7 +31,7 @@ func NewSSOServer(authService authservice.IService, keyService keyservice.IServi
 	}
 
 	for _, method := range methods {
-		if err := metrics.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
+		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
 			Name: fmt.Sprintf("%s.%s", GRPCServiceMetricsPrefix, method),
 			Type: prometheus.Counter,
 		}); err != nil {

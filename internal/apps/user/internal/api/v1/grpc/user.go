@@ -8,7 +8,6 @@ import (
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/api/v1/grpc/serializer"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 	user "github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
-	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -32,7 +31,7 @@ func NewUserService(svc user.IService) (*UserServiceServer, error) {
 	}
 
 	for _, method := range methods {
-		if err := metrics.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
+		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
 			Name: fmt.Sprintf("%s.%s", GRPCServiceMetricsPrefix, method),
 			Type: prometheus.Counter,
 		}); err != nil {

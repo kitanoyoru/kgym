@@ -2,10 +2,9 @@ package decorators
 
 import (
 	"context"
+	"log"
 
 	"github.com/kitanoyoru/kgym/internal/apps/file/internal/service"
-	pkgLogger "github.com/kitanoyoru/kgym/pkg/logger"
-	"go.uber.org/zap"
 )
 
 type loggingDecorator struct {
@@ -17,45 +16,24 @@ func Logging(svc service.IService) service.IService {
 }
 
 func (ld *loggingDecorator) Upload(ctx context.Context, req service.UploadRequest) (service.UploadResponse, error) {
-	logger, err := pkgLogger.FromContext(ctx)
-	if err != nil {
-		return service.UploadResponse{}, err
-	}
-
-	logger.With(zap.String("service", "file")).Info("uploading file",
-		zap.String("user_id", req.UserID),
-		zap.String("target", req.Target),
-		zap.String("name", req.Name),
-		zap.String("content_type", req.ContentType),
+	log.Printf("uploading file: user_id=%s target=%s name=%s content_type=%s",
+		req.UserID,
+		req.Target,
+		req.Name,
+		req.ContentType,
 	)
 
 	return ld.svc.Upload(ctx, req)
 }
 
 func (ld *loggingDecorator) GetURL(ctx context.Context, id string) (string, error) {
-	logger, err := pkgLogger.FromContext(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	logger.With(zap.String("service", "file")).Info("getting file URL",
-		zap.String("file_id", id),
-	)
+	log.Printf("getting file URL: file_id=%s", id)
 
 	return ld.svc.GetURL(ctx, id)
-
 }
 
 func (ld *loggingDecorator) Delete(ctx context.Context, id string) error {
-	logger, err := pkgLogger.FromContext(ctx)
-	if err != nil {
-		return err
-	}
-
-	logger.With(zap.String("service", "file")).Info("deleting file",
-		zap.String("file_id", id),
-	)
+	log.Printf("deleting file: file_id=%s", id)
 
 	return ld.svc.Delete(ctx, id)
-
 }

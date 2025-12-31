@@ -1,6 +1,6 @@
 .PHONY: help user-% gateway-% file-% sso-% tools tools-install tools-update ci-test test-all
 
-SERVICES := user gateway file sso
+SERVICES := gateway sso
 
 TOOLS_DIR := $(CURDIR)/tools
 BIN_DIR := $(CURDIR)/bin
@@ -57,6 +57,26 @@ ci-test:
 	@echo "Testing CI pipeline with act..."
 	@act push
 
+lint-all:
+	@echo "Running all linters..."
+	@for service in $(SERVICES); do \
+		echo ""; \
+		echo "=== Linting $$service service ==="; \
+		$(MAKE) $$service-lint || exit 1; \
+	done
+	@echo ""
+	@echo "All linters completed successfully!"
+
+build-all:
+	@echo "Building all services..."
+	@for service in $(SERVICES); do \
+		echo ""; \
+		echo "=== Building $$service service ==="; \
+		$(MAKE) $$service-build || exit 1; \
+	done
+	@echo ""
+	@echo "All services built successfully!"
+
 test-all:
 	@echo "Running all tests..."
 	@for service in $(SERVICES); do \
@@ -67,15 +87,6 @@ test-all:
 	@echo ""
 	@echo "All tests completed successfully!"
 
-lint-all:
-	@echo "Running all linters..."
-	@for service in $(SERVICES); do \
-		echo ""; \
-		echo "=== Linting $$service service ==="; \
-		$(MAKE) $$service-lint || exit 1; \
-	done
-	@echo ""
-	@echo "All linters completed successfully!"
 
 define SERVICE_TARGET
 $(1)-%:

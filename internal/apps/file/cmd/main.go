@@ -7,29 +7,10 @@ import (
 
 	"github.com/kitanoyoru/kgym/internal/apps/file/cmd/run"
 	"github.com/kitanoyoru/kgym/internal/apps/file/cmd/shutdown"
-	pkgLogger "github.com/kitanoyoru/kgym/pkg/logger"
 )
 
 var rootCmd = &cobra.Command{
 	Use: "kgym-file-service",
-	PreRun: func(cmd *cobra.Command, args []string) {
-		logger, err := pkgLogger.New(pkgLogger.WithDev())
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		cmd.SetContext(pkgLogger.Inject(cmd.Context(), logger))
-	},
-	PostRun: func(cmd *cobra.Command, args []string) {
-		logger, err := pkgLogger.FromContext(cmd.Context())
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err := logger.Sync(); err != nil {
-			log.Fatal(err)
-		}
-	},
 }
 
 func main() {

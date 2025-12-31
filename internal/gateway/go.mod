@@ -8,22 +8,22 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251224130539-0821f3d3e6a0
-	github.com/kitanoyoru/kgym/pkg/logger v0.0.0-20251224130539-0821f3d3e6a0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.11.1
 	github.com/spf13/cobra v1.10.2
 	go.uber.org/multierr v1.11.0
-	go.uber.org/zap v1.27.1
 	google.golang.org/grpc v1.78.0
 )
 
 require (
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.39.0 // indirect

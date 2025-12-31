@@ -73,24 +73,28 @@ jobs:
         run: make contracts-deps
 
       - name: Generate contracts
-        run: make contracts-generate
+        run: make contracts-protobuf-gen-go
 
       - name: Build tools
         run: make tools-install
 
-      - name: Build user service
+      - name: Build all services
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
           CGO_ENABLED: 0
-        run: make user-build
+        run: make build-all
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
-          name: kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}
-          path: internal/apps/user/kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+          name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
+          path: |
+            internal/apps/user/kgym-user-service-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+            internal/apps/file/kgym-file-service-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+            internal/apps/sso/kgym-sso-service-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
+            internal/gateway/kgym-gateway-${{ matrix.os }}-${{ matrix.arch }}${{ matrix.os == 'windows' && '.exe' || '' }}
           retention-days: 7
         if: always()
 
@@ -126,15 +130,15 @@ jobs:
         run: make contracts-deps
 
       - name: Generate contracts
-        run: make contracts-generate
+        run: make contracts-protobuf-gen-go
 
       - name: Build tools
         run: make tools-install
 
-      - name: Run golangci-lint on user service
+      - name: Run golangci-lint on all services
         run: |
           export PATH="$PWD/bin:$PATH"
-          make user-lint
+          make lint-all 
 
   test:
     name: Test
@@ -168,12 +172,12 @@ jobs:
         run: make contracts-deps
 
       - name: Generate contracts
-        run: make contracts-generate
+        run: make contracts-protobuf-gen-go
 
       - name: Build tools
         run: make tools-install
 
-      - name: Run tests for user service
+      - name: Run tests for all services
         run: |
           export PATH="$PWD/bin:$PATH"
           make test-all
