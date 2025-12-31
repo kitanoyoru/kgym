@@ -53,9 +53,16 @@ $(BIN_DIR)/golangci-lint: $(BIN_DIR) $(TOOLS_DIR)/golangci-lint | tools-update
 	@echo "Building golangci-lint..."
 	@cd $(TOOLS_DIR)/golangci-lint && GOWORK=off go build -o $(BIN_DIR)/golangci-lint ./cmd/golangci-lint
 
-ci-test:
-	@echo "Testing CI pipeline with act..."
-	@act push
+gomod-all:
+	@echo "Running gomod tidy on all services..."
+	@for service in $(SERVICES); do \
+		echo ""; \
+		echo "=== Running gomod on $$service service ==="; \
+		$(MAKE) $$service-gomod || exit 1; \
+	done
+	@echo ""
+	@echo "All services gomod completed successfully!"
+
 
 lint-all:
 	@echo "Running all linters..."
@@ -87,6 +94,9 @@ test-all:
 	@echo ""
 	@echo "All tests completed successfully!"
 
+ci-test:
+	@echo "Testing CI pipeline with act..."
+	@act push
 
 define SERVICE_TARGET
 $(1)-%:
