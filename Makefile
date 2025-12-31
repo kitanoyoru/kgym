@@ -21,7 +21,7 @@ help:
 	@echo ""
 	@echo "Available services: $(SERVICES)"
 
-contracts-generate:
+contracts-protobuf-gen-go:
 	@$(MAKE) -C contracts/protobuf generate
 
 contracts-deps:
