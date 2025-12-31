@@ -7,6 +7,7 @@ import (
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	pbFile "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
+	pbSSO "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/sso/v1"
 	pbUser "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	"github.com/kitanoyoru/kgym/internal/gateway/internal/handlers/file"
 	"github.com/kitanoyoru/kgym/internal/gateway/internal/middlewares"
@@ -49,6 +50,7 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 	err := multierr.Combine(
 		pbUser.RegisterUserServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
 		pbFile.RegisterFileServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
+		pbSSO.RegisterSSOServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
 	)
 	if err != nil {
 		return nil, err

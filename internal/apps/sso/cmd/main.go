@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/kitanoyoru/kgym/internal/apps/sso/cmd/run"
-	"github.com/kitanoyoru/kgym/internal/apps/sso/cmd/shutdown"
 	pkgLogger "github.com/kitanoyoru/kgym/pkg/logger"
 )
 
@@ -34,7 +33,6 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	rootCmd.AddCommand(run.Command())
-	rootCmd.AddCommand(shutdown.Command())
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err)
