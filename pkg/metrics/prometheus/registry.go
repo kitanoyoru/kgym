@@ -1,3 +1,7 @@
 package prometheus
 
-var GlobalRegistry = NewRegistry()
+var GlobalRegistry *Registry
+
+func init() {
+	GlobalRegistry = NewRegistry()
+}
