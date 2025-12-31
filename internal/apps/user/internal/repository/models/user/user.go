@@ -27,7 +27,7 @@ var Columns = []string{
 	"deleted_at",
 }
 
-func UserFromEntity(entity userentity.User) (User, error) {
+func FromEntity(entity userentity.User) (User, error) {
 	role, err := RoleFromEntity(entity.Role)
 	if err != nil {
 		return User{}, err

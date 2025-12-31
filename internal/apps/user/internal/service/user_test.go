@@ -7,15 +7,14 @@ import (
 
 	"github.com/dromara/carbon/v2"
 	"github.com/google/uuid"
+	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
+	"github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/mocks"
+	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
 	"go.uber.org/mock/gomock"
-
-	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
-	"github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/mocks"
-	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
 )
 
 type ServiceTestSuite struct {

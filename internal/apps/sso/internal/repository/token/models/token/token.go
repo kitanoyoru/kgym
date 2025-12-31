@@ -24,8 +24,8 @@ var Columns = []string{
 	"deleted_at",
 }
 
-func TokenFromEntity(entity tokenentity.Token) Token {
-	tokenType, err := TokenTypeFromEntity(entity.TokenType)
+func FromEntity(entity tokenentity.Token) Token {
+	tokenType, err := TypeFromEntity(entity.TokenType)
 	if err != nil {
 		return Token{}
 	}
@@ -49,7 +49,7 @@ type Token struct {
 	ID        string     `db:"id"`
 	Subject   string     `db:"subject"`
 	ClientID  string     `db:"client_id"`
-	TokenType TokenType  `db:"token_type"`
+	TokenType Type       `db:"token_type"`
 	TokenHash string     `db:"token_hash"`
 	ExpiresAt time.Time  `db:"expires_at"`
 	Revoked   bool       `db:"revoked"`

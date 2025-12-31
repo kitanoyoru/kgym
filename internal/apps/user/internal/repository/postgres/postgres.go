@@ -76,7 +76,7 @@ func (r *Repository) GetByEmail(ctx context.Context, email string) (usermodel.Us
 }
 
 func (r *Repository) Create(ctx context.Context, user userentity.User) error {
-	model, err := usermodel.UserFromEntity(user)
+	model, err := usermodel.FromEntity(user)
 	if err != nil {
 		return err
 	}

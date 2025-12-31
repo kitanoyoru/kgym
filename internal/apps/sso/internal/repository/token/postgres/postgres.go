@@ -6,7 +6,6 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-
 	tokenentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/token"
 	tokenrepo "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/token"
 	tokenmodel "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/token/models/token"
@@ -25,7 +24,7 @@ func New(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) Create(ctx context.Context, token tokenentity.Token) error {
-	model := tokenmodel.TokenFromEntity(token)
+	model := tokenmodel.FromEntity(token)
 
 	query := sq.StatementBuilder.PlaceholderFormat(sq.Dollar).
 		Insert(tokenmodel.Table).

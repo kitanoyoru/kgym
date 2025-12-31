@@ -10,7 +10,6 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-
 	tokenentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/token"
 	keyrepo "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/key"
 	tokenrepo "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/token"
@@ -125,7 +124,7 @@ func (s *Service) issueRefreshToken(ctx context.Context, subject, clientID strin
 		ID:        uuid.New().String(),
 		Subject:   subject,
 		ClientID:  clientID,
-		TokenType: tokenentity.TokenTypeRefresh,
+		TokenType: tokenentity.TypeRefresh,
 		TokenHash: tokenHash,
 		ExpiresAt: time.Now().Add(RefreshTokenTTL),
 		Revoked:   false,

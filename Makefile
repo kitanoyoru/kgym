@@ -67,6 +67,16 @@ test-all:
 	@echo ""
 	@echo "All tests completed successfully!"
 
+lint-all:
+	@echo "Running all linters..."
+	@for service in $(SERVICES); do \
+		echo ""; \
+		echo "=== Linting $$service service ==="; \
+		$(MAKE) $$service-lint || exit 1; \
+	done
+	@echo ""
+	@echo "All linters completed successfully!"
+
 define SERVICE_TARGET
 $(1)-%:
 	@if [ "$(1)" = "gateway" ]; then \

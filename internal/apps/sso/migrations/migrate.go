@@ -20,7 +20,7 @@ func Up(ctx context.Context, driver, uri string) error {
 	if err != nil {
 		return err
 	}
-	defer sql.Close()
+	defer func() { _ = sql.Close() }()
 
 	err = goose.Up(sql, migrationsDir)
 	if err != nil {
@@ -37,7 +37,7 @@ func Down(ctx context.Context, driver, uri string) error {
 	if err != nil {
 		return err
 	}
-	defer sql.Close()
+	defer func() { _ = sql.Close() }()
 
 	err = goose.Down(sql, migrationsDir)
 	if err != nil {

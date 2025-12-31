@@ -3,30 +3,29 @@ package token
 import (
 	"context"
 
-	"github.com/pkg/errors"
-
 	pkgValidator "github.com/kitanoyoru/kgym/internal/apps/sso/pkg/validator"
+	"github.com/pkg/errors"
 )
 
-type TokenType string
+type Type string
 
 const (
-	TokenTypeRefresh TokenType = "refresh"
+	TypeRefresh Type = "refresh"
 )
 
-func TokenTypeFromString(s string) (TokenType, error) {
+func TypeFromString(s string) (Type, error) {
 	switch s {
 	case "refresh":
-		return TokenTypeRefresh, nil
+		return TypeRefresh, nil
 	default:
 		return "", errors.New("invalid token type")
 	}
 }
 
-func (t TokenType) Validate(ctx context.Context) error {
+func (t Type) Validate(ctx context.Context) error {
 	return pkgValidator.Validate.VarCtx(ctx, t, "oneof=refresh")
 }
 
-func (t TokenType) String() string {
+func (t Type) String() string {
 	return string(t)
 }

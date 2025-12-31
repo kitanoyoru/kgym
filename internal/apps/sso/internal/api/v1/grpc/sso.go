@@ -5,14 +5,13 @@ import (
 	"fmt"
 
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/sso/v1"
-	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
 	keyserializer "github.com/kitanoyoru/kgym/internal/apps/sso/internal/api/v1/grpc/serializer/key"
 	authservice "github.com/kitanoyoru/kgym/internal/apps/sso/internal/service/auth"
 	keyservice "github.com/kitanoyoru/kgym/internal/apps/sso/internal/service/key"
 	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/metrics"
+	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 const (

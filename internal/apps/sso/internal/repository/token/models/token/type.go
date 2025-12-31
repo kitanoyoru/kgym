@@ -1,35 +1,34 @@
 package token
 
 import (
-	"github.com/pkg/errors"
-
 	tokenentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/token"
+	"github.com/pkg/errors"
 )
 
-type TokenType string
+type Type string
 
 const (
-	TokenTypeRefresh TokenType = "refresh"
+	TypeRefresh Type = "refresh"
 )
 
-func TokenTypeFromString(s string) (TokenType, error) {
+func TypeFromString(s string) (Type, error) {
 	switch s {
 	case "refresh":
-		return TokenTypeRefresh, nil
+		return TypeRefresh, nil
 	default:
 		return "", errors.New("invalid token type")
 	}
 }
 
-func TokenTypeFromEntity(entity tokenentity.TokenType) (TokenType, error) {
+func TypeFromEntity(entity tokenentity.Type) (Type, error) {
 	switch entity {
-	case tokenentity.TokenTypeRefresh:
-		return TokenTypeRefresh, nil
+	case tokenentity.TypeRefresh:
+		return TypeRefresh, nil
 	default:
 		return "", errors.New("invalid token type")
 	}
 }
 
-func (t TokenType) String() string {
+func (t Type) String() string {
 	return string(t)
 }

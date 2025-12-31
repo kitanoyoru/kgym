@@ -4,9 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/pkg/errors"
-
 	pkgValidator "github.com/kitanoyoru/kgym/internal/apps/user/pkg/validator"
+	"github.com/pkg/errors"
 )
 
 type Role string

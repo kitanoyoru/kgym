@@ -8,14 +8,13 @@ import (
 	"testing"
 	"time"
 
+	keyentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/key"
+	rediscontainer "github.com/kitanoyoru/kgym/pkg/testing/integration/redis"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/goleak"
-
-	keyentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/key"
-	rediscontainer "github.com/kitanoyoru/kgym/pkg/testing/integration/redis"
 )
 
 type RepositoryTestSuite struct {

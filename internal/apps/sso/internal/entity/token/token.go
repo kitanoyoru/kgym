@@ -11,7 +11,7 @@ type Token struct {
 	ID        string
 	Subject   string
 	ClientID  string
-	TokenType TokenType
+	TokenType Type
 	TokenHash string
 	ExpiresAt time.Time
 	Revoked   bool

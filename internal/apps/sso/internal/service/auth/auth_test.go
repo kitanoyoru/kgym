@@ -9,10 +9,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"go.uber.org/mock/gomock"
-
 	keyentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/key"
 	tokenentity "github.com/kitanoyoru/kgym/internal/apps/sso/internal/entity/token"
 	keymocks "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/key/mocks"
@@ -20,6 +16,9 @@ import (
 	tokenmodel "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/token/models/token"
 	usermocks "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/user/mocks"
 	usermodel "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/user/models"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestService_PasswordGrant(t *testing.T) {
@@ -73,7 +72,7 @@ func TestService_PasswordGrant(t *testing.T) {
 			DoAndReturn(func(ctx context.Context, token tokenentity.Token) error {
 				assert.Equal(t, userID, token.Subject)
 				assert.Equal(t, clientID, token.ClientID)
-				assert.Equal(t, tokenentity.TokenTypeRefresh, token.TokenType)
+				assert.Equal(t, tokenentity.TypeRefresh, token.TokenType)
 				assert.False(t, token.Revoked)
 				assert.NotEmpty(t, token.TokenHash)
 				return nil
@@ -337,7 +336,7 @@ func TestService_RefreshTokenGrant(t *testing.T) {
 			DoAndReturn(func(ctx context.Context, newToken tokenentity.Token) error {
 				assert.Equal(t, subject, newToken.Subject)
 				assert.Equal(t, clientID, newToken.ClientID)
-				assert.Equal(t, tokenentity.TokenTypeRefresh, newToken.TokenType)
+				assert.Equal(t, tokenentity.TypeRefresh, newToken.TokenType)
 				assert.False(t, newToken.Revoked)
 				return nil
 			})
