@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/dromara/carbon/v2 v2.6.15
-	github.com/go-playground/validator/v10 v10.30.0
+	github.com/go-playground/validator/v10 v10.30.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251224100050-18a6beb5f3f6
@@ -14,6 +14,7 @@ require (
 	github.com/kitanoyoru/kgym/pkg/logger v0.0.0-20251224135906-736e0909d07d
 	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20251224100050-18a6beb5f3f6
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224100050-18a6beb5f3f6
+	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.26.0
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.11.1
@@ -73,7 +74,6 @@ require (
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect

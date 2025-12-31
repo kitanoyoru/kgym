@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	SSOService_GetToken_FullMethodName = "/sso.v1.SSOService/GetToken"
+	SSOService_GetJWKS_FullMethodName  = "/sso.v1.SSOService/GetJWKS"
 )
 
 // SSOServiceClient is the client API for SSOService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SSOServiceClient interface {
 	GetToken(ctx context.Context, in *GetToken_Request, opts ...grpc.CallOption) (*GetToken_Response, error)
+	GetJWKS(ctx context.Context, in *GetJWKS_Request, opts ...grpc.CallOption) (*GetJWKS_Response, error)
 }
 
 type sSOServiceClient struct {
@@ -47,11 +49,22 @@ func (c *sSOServiceClient) GetToken(ctx context.Context, in *GetToken_Request, o
 	return out, nil
 }
 
+func (c *sSOServiceClient) GetJWKS(ctx context.Context, in *GetJWKS_Request, opts ...grpc.CallOption) (*GetJWKS_Response, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetJWKS_Response)
+	err := c.cc.Invoke(ctx, SSOService_GetJWKS_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SSOServiceServer is the server API for SSOService service.
 // All implementations must embed UnimplementedSSOServiceServer
 // for forward compatibility.
 type SSOServiceServer interface {
 	GetToken(context.Context, *GetToken_Request) (*GetToken_Response, error)
+	GetJWKS(context.Context, *GetJWKS_Request) (*GetJWKS_Response, error)
 	mustEmbedUnimplementedSSOServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedSSOServiceServer struct{}
 
 func (UnimplementedSSOServiceServer) GetToken(context.Context, *GetToken_Request) (*GetToken_Response, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetToken not implemented")
+}
+func (UnimplementedSSOServiceServer) GetJWKS(context.Context, *GetJWKS_Request) (*GetJWKS_Response, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetJWKS not implemented")
 }
 func (UnimplementedSSOServiceServer) mustEmbedUnimplementedSSOServiceServer() {}
 func (UnimplementedSSOServiceServer) testEmbeddedByValue()                    {}
@@ -104,6 +120,24 @@ func _SSOService_GetToken_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SSOService_GetJWKS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetJWKS_Request)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SSOServiceServer).GetJWKS(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SSOService_GetJWKS_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SSOServiceServer).GetJWKS(ctx, req.(*GetJWKS_Request))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SSOService_ServiceDesc is the grpc.ServiceDesc for SSOService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var SSOService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetToken",
 			Handler:    _SSOService_GetToken_Handler,
+		},
+		{
+			MethodName: "GetJWKS",
+			Handler:    _SSOService_GetJWKS_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

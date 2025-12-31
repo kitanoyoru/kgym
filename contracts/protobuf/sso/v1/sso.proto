@@ -7,11 +7,18 @@ option go_package = "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/sso/v1
 message Token {
     string access_token = 1;
     string refresh_token = 2;
-    int64 expires_in = 3;
-    TokenType token_type = 4;
+    TokenType token_type = 3;
 }
 
 enum TokenType {
     TOKEN_TYPE_UNSPECIFIED = 0;
     TOKEN_TYPE_BEARER = 1;
+}
+
+message Key {
+    string kid = 1;
+    string private = 2;
+    string public = 3;
+    string algorithm = 4;
+    bool active = 5;
 }

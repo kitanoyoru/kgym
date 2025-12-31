@@ -60,8 +60,6 @@ func (m *Token) validate(all bool) error {
 
 	// no validation rules for RefreshToken
 
-	// no validation rules for ExpiresIn
-
 	// no validation rules for TokenType
 
 	if len(errors) > 0 {
@@ -140,3 +138,111 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = TokenValidationError{}
+
+// Validate checks the field values on Key with the rules defined in the proto
+// definition for this message. If any rules are violated, the first error
+// encountered is returned, or nil if there are no violations.
+func (m *Key) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Key with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in KeyMultiError, or nil if none found.
+func (m *Key) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Key) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Kid
+
+	// no validation rules for Private
+
+	// no validation rules for Public
+
+	// no validation rules for Algorithm
+
+	// no validation rules for Active
+
+	if len(errors) > 0 {
+		return KeyMultiError(errors)
+	}
+
+	return nil
+}
+
+// KeyMultiError is an error wrapping multiple validation errors returned by
+// Key.ValidateAll() if the designated constraints aren't met.
+type KeyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m KeyMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m KeyMultiError) AllErrors() []error { return m }
+
+// KeyValidationError is the validation error returned by Key.Validate if the
+// designated constraints aren't met.
+type KeyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e KeyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e KeyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e KeyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e KeyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e KeyValidationError) ErrorName() string { return "KeyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e KeyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sKey.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = KeyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = KeyValidationError{}

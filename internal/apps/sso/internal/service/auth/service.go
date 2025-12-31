@@ -20,8 +20,8 @@ const (
 )
 
 type IService interface {
-	PasswordGrant(ctx context.Context, req PasswordGrantRequest) (string, error)
-	RefreshTokenGrant(ctx context.Context, req RefreshTokenGrantRequest) (string, error)
+	PasswordGrant(ctx context.Context, req PasswordGrantRequest) (PasswordGrantResponse, error)
+	RefreshTokenGrant(ctx context.Context, req RefreshTokenGrantRequest) (RefreshTokenGrantResponse, error)
 }
 
 type (

@@ -15,6 +15,12 @@ service SSOService {
             body: "*"
         };
     }
+
+    rpc GetJWKS(GetJWKS.Request) returns (GetJWKS.Response) {
+        option (google.api.http) = {
+            get: "/.well-known/jwks.json"
+        };
+    }
 }
 
 message GetToken {
@@ -41,3 +47,11 @@ message RefreshTokenGrant {
     string refresh_token = 1;
 }
 
+message GetJWKS {
+    message Request {
+    }
+
+    message Response {
+        repeated Key keys = 1;
+    }
+}

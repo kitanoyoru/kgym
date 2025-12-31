@@ -5,7 +5,7 @@ go 1.25
 require (
 	github.com/caarlos0/env/v11 v11.3.1
 	github.com/dromara/carbon/v2 v2.6.15
-	github.com/go-playground/validator/v10 v10.30.0
+	github.com/go-playground/validator/v10 v10.30.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.3
 	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251224130539-0821f3d3e6a0
 	github.com/kitanoyoru/kgym/pkg/logger v0.0.0-20251224130539-0821f3d3e6a0

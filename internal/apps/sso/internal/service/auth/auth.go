@@ -17,10 +17,20 @@ import (
 	userrepo "github.com/kitanoyoru/kgym/internal/apps/sso/internal/repository/user"
 )
 
+var _ IService = (*Service)(nil)
+
 type Service struct {
 	userRepository  userrepo.IRepository
 	tokenRepository tokenrepo.IRepository
 	keyRepository   keyrepo.IRepository
+}
+
+func NewService(userRepository userrepo.IRepository, tokenRepository tokenrepo.IRepository, keyRepository keyrepo.IRepository) *Service {
+	return &Service{
+		userRepository:  userRepository,
+		tokenRepository: tokenRepository,
+		keyRepository:   keyRepository,
+	}
 }
 
 func (s *Service) PasswordGrant(ctx context.Context, req PasswordGrantRequest) (PasswordGrantResponse, error) {
@@ -69,14 +79,14 @@ func (s *Service) RefreshTokenGrant(ctx context.Context, req RefreshTokenGrantRe
 		return RefreshTokenGrantResponse{}, err
 	}
 
-	newRefresh, err := s.issueRefreshToken(ctx, token.Subject, token.ClientID)
+	refresh, err := s.issueRefreshToken(ctx, token.Subject, token.ClientID)
 	if err != nil {
 		return RefreshTokenGrantResponse{}, err
 	}
 
 	return RefreshTokenGrantResponse{
 		AccessToken:  access,
-		RefreshToken: newRefresh,
+		RefreshToken: refresh,
 	}, nil
 }
 
@@ -97,7 +107,7 @@ func (s *Service) issueAccessToken(ctx context.Context, subject, clientID string
 		ExpiresAt: jwt.NewNumericDate(now.Add(AccessTokenTTL)),
 	})
 
-	return token.SignedString(key)
+	return token.SignedString(key.Private)
 }
 
 func (s *Service) issueRefreshToken(ctx context.Context, subject, clientID string) (string, error) {

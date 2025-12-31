@@ -342,6 +342,104 @@ var _ interface {
 	ErrorName() string
 } = RefreshTokenGrantValidationError{}
 
+// Validate checks the field values on GetJWKS with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *GetJWKS) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetJWKS with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in GetJWKSMultiError, or nil if none found.
+func (m *GetJWKS) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetJWKS) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetJWKSMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetJWKSMultiError is an error wrapping multiple validation errors returned
+// by GetJWKS.ValidateAll() if the designated constraints aren't met.
+type GetJWKSMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetJWKSMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetJWKSMultiError) AllErrors() []error { return m }
+
+// GetJWKSValidationError is the validation error returned by GetJWKS.Validate
+// if the designated constraints aren't met.
+type GetJWKSValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetJWKSValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetJWKSValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetJWKSValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetJWKSValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetJWKSValidationError) ErrorName() string { return "GetJWKSValidationError" }
+
+// Error satisfies the builtin error interface
+func (e GetJWKSValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetJWKS.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetJWKSValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetJWKSValidationError{}
+
 // Validate checks the field values on GetToken_Request with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.
@@ -661,3 +759,237 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = GetToken_ResponseValidationError{}
+
+// Validate checks the field values on GetJWKS_Request with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *GetJWKS_Request) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetJWKS_Request with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetJWKS_RequestMultiError, or nil if none found.
+func (m *GetJWKS_Request) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetJWKS_Request) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return GetJWKS_RequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetJWKS_RequestMultiError is an error wrapping multiple validation errors
+// returned by GetJWKS_Request.ValidateAll() if the designated constraints
+// aren't met.
+type GetJWKS_RequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetJWKS_RequestMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetJWKS_RequestMultiError) AllErrors() []error { return m }
+
+// GetJWKS_RequestValidationError is the validation error returned by
+// GetJWKS_Request.Validate if the designated constraints aren't met.
+type GetJWKS_RequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetJWKS_RequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetJWKS_RequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetJWKS_RequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetJWKS_RequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetJWKS_RequestValidationError) ErrorName() string { return "GetJWKS_RequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e GetJWKS_RequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetJWKS_Request.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetJWKS_RequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetJWKS_RequestValidationError{}
+
+// Validate checks the field values on GetJWKS_Response with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *GetJWKS_Response) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on GetJWKS_Response with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// GetJWKS_ResponseMultiError, or nil if none found.
+func (m *GetJWKS_Response) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *GetJWKS_Response) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetKeys() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, GetJWKS_ResponseValidationError{
+						field:  fmt.Sprintf("Keys[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, GetJWKS_ResponseValidationError{
+						field:  fmt.Sprintf("Keys[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return GetJWKS_ResponseValidationError{
+					field:  fmt.Sprintf("Keys[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return GetJWKS_ResponseMultiError(errors)
+	}
+
+	return nil
+}
+
+// GetJWKS_ResponseMultiError is an error wrapping multiple validation errors
+// returned by GetJWKS_Response.ValidateAll() if the designated constraints
+// aren't met.
+type GetJWKS_ResponseMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m GetJWKS_ResponseMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m GetJWKS_ResponseMultiError) AllErrors() []error { return m }
+
+// GetJWKS_ResponseValidationError is the validation error returned by
+// GetJWKS_Response.Validate if the designated constraints aren't met.
+type GetJWKS_ResponseValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e GetJWKS_ResponseValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e GetJWKS_ResponseValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e GetJWKS_ResponseValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e GetJWKS_ResponseValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e GetJWKS_ResponseValidationError) ErrorName() string { return "GetJWKS_ResponseValidationError" }
+
+// Error satisfies the builtin error interface
+func (e GetJWKS_ResponseValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sGetJWKS_Response.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = GetJWKS_ResponseValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = GetJWKS_ResponseValidationError{}
