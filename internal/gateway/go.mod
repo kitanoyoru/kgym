@@ -7,7 +7,7 @@ require (
 	github.com/dromara/carbon/v2 v2.6.15
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4
-	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231141926-0ecf5abf157f
+	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260101185215-bc756a0f7c9a
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.11.1
 	github.com/spf13/cobra v1.10.2

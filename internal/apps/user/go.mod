@@ -9,9 +9,9 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231141926-0ecf5abf157f
-	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20251231141926-0ecf5abf157f
-	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20251231141926-0ecf5abf157f
+	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260101185215-bc756a0f7c9a
+	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260101185215-bc756a0f7c9a
+	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260101185215-bc756a0f7c9a
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224100050-18a6beb5f3f6
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.26.0

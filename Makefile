@@ -1,6 +1,6 @@
 .PHONY: help user-% gateway-% file-% sso-% tools tools-install tools-update ci-test test-all
 
-SERVICES := gateway sso user
+SERVICES := gateway sso user file
 
 TOOLS_DIR := $(CURDIR)/tools
 BIN_DIR := $(CURDIR)/bin

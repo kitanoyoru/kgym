@@ -10,9 +10,9 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231141926-0ecf5abf157f
-	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20251231141926-0ecf5abf157f
-	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20251231141926-0ecf5abf157f
+	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260101185215-bc756a0f7c9a
+	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260101185215-bc756a0f7c9a
+	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260101185215-bc756a0f7c9a
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251231132045-c6a785bb3bc2
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.26.0
