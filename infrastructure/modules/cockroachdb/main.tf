@@ -48,8 +48,37 @@ resource "kubernetes_namespace" "cockroachdb" {
   }
 }
 
-resource "kubernetes_manifest" "cockroachdb_cluster" {
-  manifest = {
+resource "null_resource" "wait_for_webhook" {
+  depends_on = [kubectl_manifest.operator]
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      timeout=300
+      elapsed=0
+      interval=5
+      while [ $elapsed -lt $timeout ]; do
+        if kubectl get svc cockroach-operator-webhook-service -n ${var.operator_namespace} >/dev/null 2>&1; then
+          if kubectl get endpoints cockroach-operator-webhook-service -n ${var.operator_namespace} -o jsonpath='{.subsets[*].addresses[*].ip}' | grep -q .; then
+            echo "Webhook service is ready"
+            exit 0
+          fi
+        fi
+        echo "Waiting for webhook service to be ready... ($elapsed/$timeout seconds)"
+        sleep $interval
+        elapsed=$((elapsed + interval))
+      done
+      echo "Timeout waiting for webhook service"
+      exit 1
+    EOT
+  }
+
+  triggers = {
+    operator_manifest = join(",", [for k, v in kubectl_manifest.operator : "${k}=${v.id}"])
+  }
+}
+
+resource "kubectl_manifest" "cockroachdb_cluster" {
+  yaml_body = yamlencode({
     apiVersion = "crdb.cockroachlabs.com/v1alpha1"
     kind       = "CrdbCluster"
     metadata = {
@@ -62,6 +91,7 @@ resource "kubernetes_manifest" "cockroachdb_cluster" {
         pvc = {
           spec = {
             accessModes = ["ReadWriteOnce"]
+            volumeMode  = "Filesystem"
             resources = {
               requests = {
                 storage = var.storage_size
@@ -72,7 +102,9 @@ resource "kubernetes_manifest" "cockroachdb_cluster" {
         }
       }
       nodes = var.node_count
-      image = var.image
+      image = {
+        name = var.image
+      }
       resources = {
         requests = {
           cpu    = var.resources.requests.cpu
@@ -85,8 +117,9 @@ resource "kubernetes_manifest" "cockroachdb_cluster" {
       }
       tlsEnabled = var.tls_enabled
     }
-  }
+  })
   depends_on = [
-    kubectl_manifest.operator
+    kubectl_manifest.operator,
+    null_resource.wait_for_webhook
   ]
 }

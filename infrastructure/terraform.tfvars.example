@@ -1,0 +1,42 @@
+kubeconfig_path    = null
+kubeconfig_context = null
+
+cockroachdb_enabled      = true
+cockroachdb_cluster_name = "cockroachdb"
+cockroachdb_namespace    = "cockroachdb"
+cockroachdb_node_count   = 3
+cockroachdb_storage_size = "10Gi"
+cockroachdb_storage_class = ""
+
+redis_enabled      = true
+redis_cluster_name = "redis"
+redis_namespace    = "redis"
+redis_replicas     = 3
+redis_storage_size = "1Gi"
+redis_storage_class = ""
+redis_password     = null
+
+prometheus_enabled      = true
+prometheus_namespace    = "monitoring"
+prometheus_storage_size = "5Gi"
+prometheus_storage_class = ""
+
+loki_enabled      = true
+loki_namespace    = "monitoring"
+loki_storage_size = "1Gi"
+loki_storage_class = ""
+
+grafana_enabled         = true
+grafana_namespace       = "monitoring"
+grafana_admin_password  = null
+grafana_storage_size    = "1Gi"
+grafana_storage_class   = ""
+
+minio_enabled      = true
+minio_cluster_name = "minio"
+minio_namespace    = "minio"
+minio_replicas     = 1
+minio_storage_size  = "1Gi"
+minio_storage_class = ""
+minio_access_key   = "minioadmin"
+minio_secret_key   = "minioadmin"
