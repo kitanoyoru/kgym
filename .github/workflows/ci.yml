@@ -208,6 +208,8 @@ jobs:
     name: Test
     needs: [build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -292,12 +294,44 @@ jobs:
             fi
           done
 
-      - name: Generate combined coverage report
+      - name: Generate coverage reports and badges
         run: |
-          echo "mode: atomic" > coverage/combined.out
-          tail -n +2 coverage/*.out >> coverage/combined.out 2>/dev/null || true
-          go tool cover -html=coverage/combined.out -o coverage/coverage.html
-          go tool cover -func=coverage/combined.out -o coverage/coverage.txt
+          ROOT_DIR="$PWD"
+          mkdir -p coverage/badges
+          for service in gateway sso user file; do
+            if [ -f "coverage/${service}.out" ]; then
+              if [ "$service" = "gateway" ] && [ -f internal/gateway/Makefile ]; then
+                cd internal/gateway
+                go tool cover -func="$ROOT_DIR/coverage/${service}.out" > "$ROOT_DIR/coverage/${service}.txt" 2>/dev/null || true
+                go tool cover -html="$ROOT_DIR/coverage/${service}.out" -o "$ROOT_DIR/coverage/${service}.html" 2>/dev/null || true
+                COVERAGE_OUTPUT=$(go tool cover -func="$ROOT_DIR/coverage/${service}.out" 2>/dev/null | grep total || echo "")
+                cd "$ROOT_DIR"
+              elif [ -f "internal/apps/${service}/Makefile" ]; then
+                cd "internal/apps/${service}"
+                go tool cover -func="$ROOT_DIR/coverage/${service}.out" > "$ROOT_DIR/coverage/${service}.txt" 2>/dev/null || true
+                go tool cover -html="$ROOT_DIR/coverage/${service}.out" -o "$ROOT_DIR/coverage/${service}.html" 2>/dev/null || true
+                COVERAGE_OUTPUT=$(go tool cover -func="$ROOT_DIR/coverage/${service}.out" 2>/dev/null | grep total || echo "")
+                cd "$ROOT_DIR"
+              else
+                COVERAGE_OUTPUT=""
+              fi
+              if [ -n "$COVERAGE_OUTPUT" ]; then
+                COVERAGE=$(echo "$COVERAGE_OUTPUT" | awk '{print $3}' | sed 's/%//')
+                COVERAGE_INT=$(echo "$COVERAGE" | cut -d. -f1)
+                if [ -z "$COVERAGE_INT" ]; then
+                  COVERAGE_INT=0
+                fi
+                if [ "$COVERAGE_INT" -ge 80 ]; then
+                  COLOR="green"
+                elif [ "$COVERAGE_INT" -ge 60 ]; then
+                  COLOR="yellow"
+                else
+                  COLOR="red"
+                fi
+                echo "{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"${COVERAGE}%\", \"color\": \"${COLOR}\"}" > "coverage/badges/${service}.json"
+              fi
+            fi
+          done
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v6
@@ -305,6 +339,35 @@ jobs:
           name: coverage-reports
           path: |
             coverage/*.out
-            coverage/coverage.html
-            coverage/coverage.txt
+            coverage/*.html
+            coverage/*.txt
+            coverage/badges/*.json
           retention-days: 30
+
+      - name: Update README with coverage badges
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+        run: |
+          REPO="${{ github.repository }}"
+          BRANCH="${GITHUB_REF#refs/heads/}"
+          if [ -d "coverage/badges" ] && [ -n "$(ls -A coverage/badges/*.json 2>/dev/null)" ]; then
+            mkdir -p .github/badges
+            cp coverage/badges/*.json .github/badges/ 2>/dev/null || true
+
+            if [ -f README.md ]; then
+              sed -i "s|REPO_PLACEHOLDER|${REPO}|g" README.md
+              sed -i "s|BRANCH_PLACEHOLDER|${BRANCH}|g" README.md
+            fi
+          fi
+
+      - name: Commit coverage badges and README
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop')
+        run: |
+          if [ -d ".github/badges" ] && [ -n "$(ls -A .github/badges/*.json 2>/dev/null)" ]; then
+            git config --local user.email "action@github.com"
+            git config --local user.name "GitHub Action"
+            git add .github/badges/*.json README.md
+            git diff --staged --quiet || git commit -m "Update coverage badges [skip ci]"
+            git push || echo "No changes to commit or push failed"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
