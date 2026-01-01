@@ -273,7 +273,37 @@ jobs:
           export PATH="$PWD/bin:$PATH"
           make contracts-protobuf-gen-go
 
-      - name: Run tests for all services
+      - name: Run tests with coverage for all services
         run: |
           export PATH="$PWD/bin:$PATH"
-          make test-all
+          mkdir -p coverage
+          for service in gateway sso user file; do
+            if [ "$service" = "gateway" ]; then
+              if [ -f internal/gateway/Makefile ]; then
+                cd internal/gateway
+                gotestsum --format short-verbose -- -coverprofile=../../coverage/${service}.out -covermode=atomic ./internal/...
+                cd ../..
+              fi
+            elif [ -f internal/apps/${service}/Makefile ]; then
+              cd internal/apps/${service}
+              gotestsum --format short-verbose -- -coverprofile=../../coverage/${service}.out -covermode=atomic ./internal/... ./migrations/...
+              cd ../..
+            fi
+          done
+
+      - name: Generate combined coverage report
+        run: |
+          echo "mode: atomic" > coverage/combined.out
+          tail -n +2 coverage/*.out >> coverage/combined.out 2>/dev/null || true
+          go tool cover -html=coverage/combined.out -o coverage/coverage.html
+          go tool cover -func=coverage/combined.out -o coverage/coverage.txt
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-reports
+          path: |
+            coverage/*.out
+            coverage/coverage.html
+            coverage/coverage.txt
+          retention-days: 30
