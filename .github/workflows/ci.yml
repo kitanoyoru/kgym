@@ -118,7 +118,7 @@ jobs:
         run: make build-all
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         continue-on-error: true
         with:
           name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
