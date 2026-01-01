@@ -95,14 +95,8 @@ github.com/jackc/puddle/v2 v2.2.2 h1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo
 github.com/jackc/puddle/v2 v2.2.2/go.mod h1:vriiEXHvEE654aYKXXjOvZM39qJ0q+azkZFrfEOc3H4=
 github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260101185215-bc756a0f7c9a h1:sUuHlKvjnd835ZnQ3OFqt96SrFTTG8a4H2Xbd6shK7o=
 github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260101185215-bc756a0f7c9a/go.mod h1:CqGc1bue0hXP3l5xG97VIIkNb+n5JYm4qcuK7caUzSg=
-github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260101185215-bc756a0f7c9a h1:LzIMfXyWn8vNS4wEkrCozARzNibKqYS6VTG/U0tOV+Q=
-github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260101185215-bc756a0f7c9a/go.mod h1:vLiD+O0X4EqZkIQ5/urrXRgGOOjglGXk89y3aQ4vmZ0=
-github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260101185215-bc756a0f7c9a h1:vi7O0VqXHNe0aj8u3LcGklGAebdq55Lpv1mrouf4K6M=
-github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260101185215-bc756a0f7c9a/go.mod h1:LYa+ySQ/1/cQJpAInZk3WawhCmWE5v6zrzLFgbaFaUs=
-github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224100050-18a6beb5f3f6 h1:Qg/QUJEV6eIFfEEMbxeKxcPat/YHHrcfBj5dZ/Fn3h0=
-github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224100050-18a6beb5f3f6/go.mod h1:YjRb02z0GRbnoYefRtvf4TSs6Oj223HJPbLesGoqqw4=
-github.com/klauspost/compress v1.18.0 h1:c/Cqfb0r+Yi+JtIEq73FWXVkRonBlf0CRNYc8Zttxdo=
-github.com/klauspost/compress v1.18.0/go.mod h1:2Pp+KzxcywXVXMr50+X0Q/Lsb43OQHYWRCY2AiWywWQ=
+github.com/klauspost/compress v1.18.2 h1:iiPHWW0YrcFgpBYhsA6D1+fqHssJscY/Tm/y2Uqnapk=
+github.com/klauspost/compress v1.18.2/go.mod h1:R0h/fSBs8DE4ENlcrlib3PsXS61voFxhIs2DeRhCvJ4=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
 github.com/kr/pretty v0.3.1/go.mod h1:hoEshYVHaxMs3cyo3Yncou5ZscifuDolrwPKZanG3xk=
 github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=

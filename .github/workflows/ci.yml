@@ -55,6 +55,28 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            **/go.mod
+            **/go.sum
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ env.GO_VERSION }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ env.GO_VERSION }}-
+
+      - name: Cache tools
+        uses: actions/cache@v4
+        id: cache-tools
+        with:
+          path: bin
+          key: ${{ runner.os }}-tools-${{ hashFiles('Makefile', 'tools/mockgen/**', 'tools/golangci-lint/**') }}
+          restore-keys: |
+            ${{ runner.os }}-tools-
 
       - name: Install protoc
         run: |
@@ -63,9 +85,24 @@ jobs:
           protoc --version
 
       - name: Build tools
+        if: steps.cache-tools.outputs.cache-hit != 'true'
         run: make tools-install
 
+      - name: Cache contracts dependencies
+        uses: actions/cache@v4
+        id: cache-contracts-deps
+        with:
+          path: |
+            contracts/protobuf/deps/googleapis
+            contracts/protobuf/deps/protobuf
+            contracts/protobuf/deps/protoc-gen-validate
+            contracts/protobuf/deps/grpc-gateway
+          key: ${{ runner.os }}-contracts-deps-${{ hashFiles('.gitmodules', 'contracts/protobuf/Makefile') }}
+          restore-keys: |
+            ${{ runner.os }}-contracts-deps-
+
       - name: Initialize contracts dependencies
+        if: steps.cache-contracts-deps.outputs.cache-hit != 'true'
         run: make contracts-deps
 
       - name: Generate contracts
@@ -107,6 +144,28 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            **/go.mod
+            **/go.sum
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ env.GO_VERSION }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ env.GO_VERSION }}-
+
+      - name: Cache tools
+        uses: actions/cache@v4
+        id: cache-tools
+        with:
+          path: bin
+          key: ${{ runner.os }}-tools-${{ hashFiles('Makefile', 'tools/mockgen/**', 'tools/golangci-lint/**') }}
+          restore-keys: |
+            ${{ runner.os }}-tools-
 
       - name: Install protoc
         run: |
@@ -115,9 +174,24 @@ jobs:
           protoc --version
 
       - name: Build tools
+        if: steps.cache-tools.outputs.cache-hit != 'true'
         run: make tools-install
 
+      - name: Cache contracts dependencies
+        uses: actions/cache@v4
+        id: cache-contracts-deps
+        with:
+          path: |
+            contracts/protobuf/deps/googleapis
+            contracts/protobuf/deps/protobuf
+            contracts/protobuf/deps/protoc-gen-validate
+            contracts/protobuf/deps/grpc-gateway
+          key: ${{ runner.os }}-contracts-deps-${{ hashFiles('.gitmodules', 'contracts/protobuf/Makefile') }}
+          restore-keys: |
+            ${{ runner.os }}-contracts-deps-
+
       - name: Initialize contracts dependencies
+        if: steps.cache-contracts-deps.outputs.cache-hit != 'true'
         run: make contracts-deps
 
       - name: Generate contracts
@@ -144,6 +218,28 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: |
+            **/go.mod
+            **/go.sum
+
+      - name: Cache Go modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ env.GO_VERSION }}-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-${{ env.GO_VERSION }}-
+
+      - name: Cache tools
+        uses: actions/cache@v4
+        id: cache-tools
+        with:
+          path: bin
+          key: ${{ runner.os }}-tools-${{ hashFiles('Makefile', 'tools/mockgen/**', 'tools/golangci-lint/**') }}
+          restore-keys: |
+            ${{ runner.os }}-tools-
 
       - name: Install protoc
         run: |
@@ -152,9 +248,24 @@ jobs:
           protoc --version
 
       - name: Build tools
+        if: steps.cache-tools.outputs.cache-hit != 'true'
         run: make tools-install
 
+      - name: Cache contracts dependencies
+        uses: actions/cache@v4
+        id: cache-contracts-deps
+        with:
+          path: |
+            contracts/protobuf/deps/googleapis
+            contracts/protobuf/deps/protobuf
+            contracts/protobuf/deps/protoc-gen-validate
+            contracts/protobuf/deps/grpc-gateway
+          key: ${{ runner.os }}-contracts-deps-${{ hashFiles('.gitmodules', 'contracts/protobuf/Makefile') }}
+          restore-keys: |
+            ${{ runner.os }}-contracts-deps-
+
       - name: Initialize contracts dependencies
+        if: steps.cache-contracts-deps.outputs.cache-hit != 'true'
         run: make contracts-deps
 
       - name: Generate contracts

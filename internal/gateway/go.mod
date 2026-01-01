@@ -36,3 +36,10 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
+
+replace (
+	github.com/kitanoyoru/kgym/pkg/database => ../../pkg/database
+	github.com/kitanoyoru/kgym/pkg/grpc => ../../pkg/grpc
+	github.com/kitanoyoru/kgym/pkg/metrics => ../../pkg/metrics
+	github.com/kitanoyoru/kgym/pkg/testing => ../../pkg/testing
+)
