@@ -33,8 +33,8 @@ github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4 h1:kEISI/Gx67NzH3nJxAmY/dGac80
 github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4/go.mod h1:6Nz966r3vQYCqIzWsuEl9d7cf7mRhtDmm++sOxlnfxI=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
-github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231135817-00d9ee84700e h1:CuNAVtZG12WJ22YSEubJbfEgDckQZE0S7+Yde9PUwZw=
-github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231135817-00d9ee84700e/go.mod h1:CqGc1bue0hXP3l5xG97VIIkNb+n5JYm4qcuK7caUzSg=
+github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231141926-0ecf5abf157f h1:IZzLp0nnB6tO2pDIn9ki9/M027AyVFlRPuc1BG3VD7U=
+github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231141926-0ecf5abf157f/go.mod h1:CqGc1bue0hXP3l5xG97VIIkNb+n5JYm4qcuK7caUzSg=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

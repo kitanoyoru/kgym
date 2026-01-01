@@ -15,8 +15,10 @@ var (
 const (
 	IssuerServiceName = "sso.kgym"
 
-	AccessTokenTTL  = 15 * time.Minute   // 15 minutes
-	RefreshTokenTTL = 7 * 24 * time.Hour // 7 days
+	AccessTokenTTL = 15 * time.Minute // 15 minutes
+
+	RefreshTokenTTL    = 7 * 24 * time.Hour // 7 days
+	RefreshTokenLength = 32
 )
 
 type IService interface {

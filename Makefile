@@ -1,25 +1,9 @@
 .PHONY: help user-% gateway-% file-% sso-% tools tools-install tools-update ci-test test-all
 
-SERVICES := gateway sso
+SERVICES := gateway sso user
 
 TOOLS_DIR := $(CURDIR)/tools
 BIN_DIR := $(CURDIR)/bin
-
-help:
-	@echo "Available commands:"
-	@echo "  make <service>-<target>  - Run target in specific service"
-	@echo "  make test-all            - Run all tests across all services"
-	@echo "  make contracts-generate  - Generate protobuf files"
-	@echo "  make contracts-deps      - Update contracts deps submodules"
-	@echo "  make tools-install       - Install tools from submodules"
-	@echo "  make ci-test             - Test CI pipeline locally with act"
-	@echo ""
-	@echo "Examples:"
-	@echo "  make user-test          - Run tests in user service"
-	@echo "  make file-build          - Build file service"
-	@echo "  make test-all          - Run all tests"
-	@echo ""
-	@echo "Available services: $(SERVICES)"
 
 contracts-protobuf-gen-go:
 	@$(MAKE) -C contracts/protobuf generate

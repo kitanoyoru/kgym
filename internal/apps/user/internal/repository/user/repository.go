@@ -4,7 +4,7 @@ import (
 	"context"
 
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
-	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
+	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/user/models/user"
 )
 
 type IRepository interface {

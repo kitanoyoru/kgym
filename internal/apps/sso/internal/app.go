@@ -72,6 +72,20 @@ func New(ctx context.Context, cfg Config) (*App, error) {
 	return app, nil
 }
 
+func (app *App) Run(ctx context.Context) error {
+	listener, err := net.Listen("tcp", app.cfg.Endpoint)
+	if err != nil {
+		return err
+	}
+
+	return app.grpcServer.Serve(listener)
+}
+
+func (app *App) Shutdown(ctx context.Context) error {
+	app.grpcServer.GracefulStop()
+	return nil
+}
+
 func (app *App) initRepositories(ctx context.Context) error {
 	keyRepository, err := keyredis.New(ctx, app.rdb)
 	if err != nil {
@@ -113,19 +127,5 @@ func (app *App) initGRPCServer(_ context.Context) error {
 
 	app.grpcServer = server
 
-	return nil
-}
-
-func (app *App) Run(ctx context.Context) error {
-	listener, err := net.Listen("tcp", app.cfg.Endpoint)
-	if err != nil {
-		return err
-	}
-
-	return app.grpcServer.Serve(listener)
-}
-
-func (app *App) Shutdown(ctx context.Context) error {
-	app.grpcServer.GracefulStop()
 	return nil
 }

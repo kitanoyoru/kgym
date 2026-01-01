@@ -1,4 +1,9 @@
-.PHONY: build
+.PHONY: build gomod test lint docker-build generate-mocks
+
+gomod:
+	go get -u ./...
+	go mod tidy
+
 build:
 	@if [ -z "$(GOOS)" ] || [ -z "$(GOARCH)" ]; then \
 		echo "Error: GOOS and GOARCH must be set"; \

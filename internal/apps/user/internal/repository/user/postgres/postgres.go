@@ -7,8 +7,8 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
-	userrepo "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository"
-	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
+	userrepo "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/user"
+	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/user/models/user"
 )
 
 type Repository struct {

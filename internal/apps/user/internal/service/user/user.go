@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
-	userrepo "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository"
+	userrepo "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/user"
 )
 
 type Service struct {

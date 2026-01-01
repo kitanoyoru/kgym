@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
-	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
+	usermodel "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/user/models/user"
 	"github.com/kitanoyoru/kgym/internal/apps/user/migrations"
 	postgresdb "github.com/kitanoyoru/kgym/pkg/database/postgres"
 	"github.com/kitanoyoru/kgym/pkg/testing/integration/cockroachdb"

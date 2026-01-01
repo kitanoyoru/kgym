@@ -7,7 +7,7 @@ import (
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/api/v1/grpc/serializer"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
-	user "github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
+	userservice "github.com/kitanoyoru/kgym/internal/apps/user/internal/service/user"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -20,10 +20,10 @@ const (
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
 
-	svc user.IService
+	svc userservice.IService
 }
 
-func NewUserService(svc user.IService) (*UserServiceServer, error) {
+func NewUserService(svc userservice.IService) (*UserServiceServer, error) {
 	methods := []string{
 		"CreateUser",
 		"GetUser",

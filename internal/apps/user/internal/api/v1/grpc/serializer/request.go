@@ -4,7 +4,7 @@ import (
 	"github.com/dromara/carbon/v2"
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
-	userservice "github.com/kitanoyoru/kgym/internal/apps/user/internal/service"
+	userservice "github.com/kitanoyoru/kgym/internal/apps/user/internal/service/user"
 )
 
 func PbCreateRequestToServiceRequest(pbCreateRequest *pb.CreateUser_Request) (userservice.CreateRequest, error) {

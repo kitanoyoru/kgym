@@ -1,9 +1,8 @@
 package user
 
 import (
-	"github.com/pkg/errors"
-
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
+	"github.com/pkg/errors"
 )
 
 type Role string

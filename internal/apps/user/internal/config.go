@@ -1,25 +1,28 @@
 package internal
 
 import (
-	"context"
-
-	pkgValidator "github.com/kitanoyoru/kgym/internal/apps/user/pkg/validator"
+	"time"
 )
 
 type Config struct {
-	Grpc
+	GRPC
 	Cache
 	Database
+
+	ShutdownTimeout time.Duration `env:"KGYM_USER_SHUTDOWN_TIMEOUT" envDefault:"10s"`
 }
 
-func (c Config) Validate(ctx context.Context) error {
-	return pkgValidator.Validate.StructCtx(ctx, c)
-}
+type GRPC struct {
+	Endpoint string `env:"KGYM_USER_GRPC_ENDPOINT" validate:"required"`
 
-type Grpc struct {
+	MaxSendMsgSize       int           `env:"KGYM_USER_GRPC_MAX_SEND_MSG_SIZE" envDefault:"1024"`
+	MaxRecvMsgSize       int           `env:"KGYM_USER_GRPC_MAX_RECV_MSG_SIZE" envDefault:"1024"`
+	ConnectionTimeout    time.Duration `env:"KGYM_USER_GRPC_CONNECTION_TIMEOUT" envDefault:"10s"`
+	MaxConcurrentStreams uint32        `env:"KGYM_USER_GRPC_MAX_CONCURRENT_STREAMS" envDefault:"1000"`
 }
 
 type Cache struct {
+	Address string `env:"KGYM_USER_CACHE_ADDRESS" validate:"required"`
 }
 
 type Database struct {

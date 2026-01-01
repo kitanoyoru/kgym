@@ -4,15 +4,15 @@ go 1.25
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/caarlos0/env/v10 v10.0.0
 	github.com/dromara/carbon/v2 v2.6.15
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231135817-00d9ee84700e
-	github.com/kitanoyoru/kgym/internal/apps/user v0.0.0-20251231135817-00d9ee84700e
-	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20251231141119-a5c6152fa676
-	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20251231135817-00d9ee84700e
+	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20251231141926-0ecf5abf157f
+	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20251231141926-0ecf5abf157f
+	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20251231141926-0ecf5abf157f
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251231132045-c6a785bb3bc2
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.26.0
@@ -30,7 +30,6 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/caarlos0/env/v11 v11.3.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect

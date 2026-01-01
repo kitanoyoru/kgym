@@ -110,7 +110,7 @@ func (s *Service) issueAccessToken(ctx context.Context, subject, clientID string
 }
 
 func (s *Service) issueRefreshToken(ctx context.Context, subject, clientID string) (string, error) {
-	b := make([]byte, 32)
+	b := make([]byte, RefreshTokenLength)
 	if _, err := rand.Read(b); err != nil {
 		return "", err
 	}
@@ -121,7 +121,7 @@ func (s *Service) issueRefreshToken(ctx context.Context, subject, clientID strin
 	tokenHash := hex.EncodeToString(sum[:])
 
 	err := s.tokenRepository.Create(ctx, tokenentity.Token{
-		ID:        uuid.New().String(),
+		ID:        uuid.NewString(),
 		Subject:   subject,
 		ClientID:  clientID,
 		TokenType: tokenentity.TypeRefresh,

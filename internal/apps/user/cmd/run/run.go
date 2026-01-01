@@ -5,16 +5,25 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal"
 	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/env"
 	"github.com/spf13/cobra"
 )
 
+const (
+	Version = "1.0.0"
+	Short   = "Run the SSO application"
+	Long    = "Run the SSO application"
+	Use     = "run"
+)
+
 func Command() *cobra.Command {
 	return &cobra.Command{
-		Use: "run",
+		Use:     Use,
+		Version: Version,
+		Short:   Short,
+		Long:    Long,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -26,16 +35,14 @@ func Command() *cobra.Command {
 			ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
 			defer cancel()
 
-			app, err := internal.New(cfg)
+			app, err := internal.New(ctx, cfg)
 			if err != nil {
 				return err
 			}
 
 			errChan := make(chan error, 1)
 			go func() {
-				if err := app.Run(ctx); err != nil {
-					errChan <- err
-				}
+				errChan <- app.Run(ctx)
 			}()
 
 			select {
@@ -46,13 +53,25 @@ func Command() *cobra.Command {
 				}
 			}
 
-			shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+			shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), cfg.ShutdownTimeout)
 			defer shutdownCancel()
-			if err := app.Shutdown(shutdownCtx); err != nil {
-				return err
+
+			errChan = make(chan error, 1)
+
+			go func() {
+				errChan <- app.Shutdown(shutdownCtx)
+			}()
+
+			select {
+			case <-shutdownCtx.Done():
+				return shutdownCtx.Err()
+			case err := <-errChan:
+				if err != nil {
+					return err
+				}
 			}
 
-			return ctx.Err()
+			return nil
 		},
 	}
 }

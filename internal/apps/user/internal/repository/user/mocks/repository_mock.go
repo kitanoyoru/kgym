@@ -14,7 +14,7 @@ import (
 	reflect "reflect"
 
 	user "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
-	user0 "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/models/user"
+	user0 "github.com/kitanoyoru/kgym/internal/apps/user/internal/repository/user/models/user"
 	gomock "go.uber.org/mock/gomock"
 )
 

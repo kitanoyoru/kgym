@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 	"github.com/kitanoyoru/kgym/internal/apps/sso/internal"
-	"github.com/kitanoyoru/kgym/internal/apps/user/pkg/env"
+	"github.com/kitanoyoru/kgym/internal/apps/sso/pkg/env"
 	"github.com/spf13/cobra"
 )
 
@@ -42,9 +42,7 @@ func Command() *cobra.Command {
 
 			errChan := make(chan error, 1)
 			go func() {
-				if err := app.Run(ctx); err != nil {
-					errChan <- err
-				}
+				errChan <- app.Run(ctx)
 			}()
 
 			select {
