@@ -1,0 +1,240 @@
+version: 2
+updates:
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/contracts/protobuf"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "contracts"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/internal/apps/file"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "file-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/internal/apps/sso"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "sso-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/internal/apps/user"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "user-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/internal/gateway"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "gateway"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/pkg/database"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "pkg-database"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/pkg/file"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "pkg-file"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/pkg/grpc"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "pkg-grpc"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/pkg/metrics"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "pkg-metrics"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "gomod"
+    directory: "/pkg/testing"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "go"
+      - "pkg-testing"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "docker"
+    directory: "/internal/apps/file"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "file-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "docker"
+    directory: "/internal/apps/sso"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "sso-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "docker"
+    directory: "/internal/apps/user"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "user-service"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "docker"
+    directory: "/internal/gateway"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 3
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "gateway"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
