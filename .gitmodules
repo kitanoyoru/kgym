@@ -12,6 +12,22 @@
 	path = tools/gotestsum
 	url = https://github.com/gotestyourself/gotestsum.git
 
+[submodule "tools/protobuf-go"]
+	path = tools/protobuf-go
+	url = https://github.com/protocolbuffers/protobuf-go.git
+
+[submodule "tools/grpc-go"]
+	path = tools/grpc-go
+	url = https://github.com/grpc/grpc-go.git
+
+[submodule "tools/grpc-gateway"]
+	path = tools/grpc-gateway
+	url = https://github.com/grpc-ecosystem/grpc-gateway.git
+
+[submodule "tools/protoc-gen-validate"]
+	path = tools/protoc-gen-validate
+	url = https://github.com/bufbuild/protoc-gen-validate.git
+
 # Contracts protobuf dependencies
 
 [submodule "contracts/protobuf/deps/googleapis"]

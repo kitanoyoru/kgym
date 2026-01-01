@@ -38,13 +38,13 @@ func SetupTestContainer(ctx context.Context) (*CockroachDBContainer, error) {
 
 	host, err := container.Host(ctx)
 	if err != nil {
-		container.Terminate(ctx)
+		_ = container.Terminate(ctx)
 		return nil, err
 	}
 
 	port, err := container.MappedPort(ctx, "26257")
 	if err != nil {
-		container.Terminate(ctx)
+		_ = container.Terminate(ctx)
 		return nil, err
 	}
 

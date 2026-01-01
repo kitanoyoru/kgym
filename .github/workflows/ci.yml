@@ -3,11 +3,11 @@ name: CI
 on:
   push:
     branches:
-      - master 
+      - master
       - develop
   pull_request:
     branches:
-      - master 
+      - master
       - develop
 
 env:
@@ -202,7 +202,7 @@ jobs:
       - name: Run golangci-lint on all services
         run: |
           export PATH="$PWD/bin:$PATH"
-          make lint-all 
+          make lint-all
 
   test:
     name: Test
@@ -277,4 +277,3 @@ jobs:
         run: |
           export PATH="$PWD/bin:$PATH"
           make test-all
-

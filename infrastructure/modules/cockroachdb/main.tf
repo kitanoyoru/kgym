@@ -90,4 +90,3 @@ resource "kubernetes_manifest" "cockroachdb_cluster" {
     kubectl_manifest.operator
   ]
 }
-

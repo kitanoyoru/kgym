@@ -73,13 +73,13 @@ func SetupTestContainer(ctx context.Context, options ...Option) (*MinioContainer
 
 	host, err := container.Host(ctx)
 	if err != nil {
-		container.Terminate(ctx)
+		_ = container.Terminate(ctx)
 		return nil, err
 	}
 
 	port, err := container.MappedPort(ctx, "9000")
 	if err != nil {
-		container.Terminate(ctx)
+		_ = container.Terminate(ctx)
 		return nil, err
 	}
 

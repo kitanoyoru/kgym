@@ -1,0 +1,104 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=512']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  - repo: https://github.com/dnephin/pre-commit-golang
+    rev: v0.5.1
+    hooks:
+      - id: go-fmt
+      - id: go-mod-tidy
+        args: ['-w']
+
+  - repo: local
+    hooks:
+      - id: golangci-lint
+        name: golangci-lint
+        entry: bash
+        language: system
+        types: [go]
+        args:
+          - -c
+          - |
+            ROOT_DIR="$(git rev-parse --show-toplevel)"
+            BIN_DIR="$ROOT_DIR/bin"
+
+            if [ ! -f "$BIN_DIR/golangci-lint" ]; then
+              echo "golangci-lint not found. Run 'make tools-install' first."
+              exit 1
+            fi
+
+            changed_dirs=$(for file in "$@"; do
+              dir=$(dirname "$file")
+              while [ "$dir" != "." ] && [ "$dir" != "/" ]; do
+                if [ -f "$ROOT_DIR/$dir/go.mod" ]; then
+                  echo "$dir"
+                  break
+                fi
+                dir=$(dirname "$dir")
+              done
+            done | sort -u)
+
+            for dir in $changed_dirs; do
+              abs_dir="$ROOT_DIR/$dir"
+              config_file=""
+
+              search_dir="$abs_dir"
+              while [ "$search_dir" != "$ROOT_DIR" ] && [ "$search_dir" != "/" ]; do
+                if [ -f "$search_dir/.golangci.yml" ]; then
+                  config_file="$search_dir/.golangci.yml"
+                  break
+                fi
+                search_dir=$(dirname "$search_dir")
+              done
+
+              if [ -n "$config_file" ]; then
+                cd "$abs_dir" && "$BIN_DIR/golangci-lint" run --config "$config_file" --fix ./...
+              else
+                cd "$abs_dir" && "$BIN_DIR/golangci-lint" run --fix ./...
+              fi
+            done
+        require_serial: true
+        pass_filenames: true
+
+      - id: protobuf-validate
+        name: protobuf validation
+        entry: bash
+        language: system
+        types: [proto]
+        args:
+          - -c
+          - |
+            if ! command -v protoc &> /dev/null; then
+              echo "Warning: protoc not found. Skipping protobuf validation."
+              exit 0
+            fi
+            ROOT_DIR="$(git rev-parse --show-toplevel)"
+            PROTOBUF_DIR="$ROOT_DIR/contracts/protobuf"
+
+            for file in "$@"; do
+              abs_file="$ROOT_DIR/$file"
+              protoc \
+                --proto_path="$PROTOBUF_DIR" \
+                --proto_path="$PROTOBUF_DIR/deps/googleapis" \
+                --proto_path="$PROTOBUF_DIR/deps/protobuf/src" \
+                --proto_path="$PROTOBUF_DIR/deps/protoc-gen-validate" \
+                --proto_path="$PROTOBUF_DIR/deps/grpc-gateway" \
+                --descriptor_set_out=/dev/null \
+                "$abs_file" 2>&1 || {
+                echo "Invalid protobuf file: $file"
+                exit 1
+              }
+            done
+        require_serial: false
+        pass_filenames: true

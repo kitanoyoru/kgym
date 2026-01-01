@@ -18,19 +18,28 @@ tools-install: | tools-update
 	@git submodule update --init --recursive tools/mockgen
 	@cd $(TOOLS_DIR)/mockgen && GOWORK=off go build -o $(BIN_DIR)/mockgen ./mockgen
 	@echo "Building gotestsum..."
-	@GOWORK=off GOBIN=$(BIN_DIR) go install -ldflags="-s -w" gotest.tools/gotestsum@v1.13.0
+	@git submodule update --init --recursive tools/gotestsum
+	@cd $(TOOLS_DIR)/gotestsum && GOWORK=off go build -o $(BIN_DIR)/gotestsum -ldflags="-s -w" .
 	@chmod +x $(BIN_DIR)/gotestsum 2>/dev/null || true
 	@echo "Building golangci-lint..."
 	@git submodule update --init --recursive tools/golangci-lint
 	@cd $(TOOLS_DIR)/golangci-lint && GOWORK=off go build -o $(BIN_DIR)/golangci-lint ./cmd/golangci-lint
-	@echo "Installing protoc-gen-go..."
-	@GOWORK=off GOBIN=$(BIN_DIR) go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-	@echo "Installing protoc-gen-go-grpc..."
-	@GOWORK=off GOBIN=$(BIN_DIR) go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-	@echo "Installing protoc-gen-grpc-gateway..."
-	@GOWORK=off GOBIN=$(BIN_DIR) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
-	@echo "Installing protoc-gen-validate..."
-	@GOWORK=off GOBIN=$(BIN_DIR) go install github.com/envoyproxy/protoc-gen-validate@latest
+	@echo "Building protoc-gen-go..."
+	@git submodule update --init --recursive tools/protobuf-go
+	@cd $(TOOLS_DIR)/protobuf-go/cmd/protoc-gen-go && GOWORK=off go build -o $(BIN_DIR)/protoc-gen-go .
+	@chmod +x $(BIN_DIR)/protoc-gen-go 2>/dev/null || true
+	@echo "Building protoc-gen-go-grpc..."
+	@git submodule update --init --recursive tools/grpc-go
+	@cd $(TOOLS_DIR)/grpc-go/cmd/protoc-gen-go-grpc && GOWORK=off go build -o $(BIN_DIR)/protoc-gen-go-grpc .
+	@chmod +x $(BIN_DIR)/protoc-gen-go-grpc 2>/dev/null || true
+	@echo "Building protoc-gen-grpc-gateway..."
+	@git submodule update --init --recursive tools/grpc-gateway
+	@cd $(TOOLS_DIR)/grpc-gateway/protoc-gen-grpc-gateway && GOWORK=off go build -o $(BIN_DIR)/protoc-gen-grpc-gateway .
+	@chmod +x $(BIN_DIR)/protoc-gen-grpc-gateway 2>/dev/null || true
+	@echo "Building protoc-gen-validate..."
+	@git submodule update --init --recursive tools/protoc-gen-validate
+	@cd $(TOOLS_DIR)/protoc-gen-validate && GOWORK=off go build -o $(BIN_DIR)/protoc-gen-validate .
+	@chmod +x $(BIN_DIR)/protoc-gen-validate 2>/dev/null || true
 	@echo "All tools installed successfully in $(BIN_DIR)"
 	@echo "Add $(BIN_DIR) to your PATH to use them"
 

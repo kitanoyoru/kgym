@@ -223,4 +223,3 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
-

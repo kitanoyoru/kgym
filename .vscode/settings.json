@@ -11,6 +11,5 @@
       "-I=${workspaceFolder}/contracts/protobuf/deps/protoc-gen-validate",
       "-I=${workspaceFolder}/contracts/protobuf/deps/grpc-gateway"
     ]
-  },
+  }
 }
-
