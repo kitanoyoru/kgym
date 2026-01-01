@@ -276,18 +276,19 @@ jobs:
       - name: Run tests with coverage for all services
         run: |
           export PATH="$PWD/bin:$PATH"
-          mkdir -p coverage
+          ROOT_DIR="$PWD"
+          mkdir -p "$ROOT_DIR/coverage"
           for service in gateway sso user file; do
             if [ "$service" = "gateway" ]; then
               if [ -f internal/gateway/Makefile ]; then
                 cd internal/gateway
-                gotestsum --format short-verbose -- -coverprofile=../../coverage/${service}.out -covermode=atomic ./internal/...
-                cd ../..
+                gotestsum --format short-verbose -- -coverprofile="$ROOT_DIR/coverage/${service}.out" -covermode=atomic ./internal/...
+                cd "$ROOT_DIR"
               fi
             elif [ -f internal/apps/${service}/Makefile ]; then
               cd internal/apps/${service}
-              gotestsum --format short-verbose -- -coverprofile=../../coverage/${service}.out -covermode=atomic ./internal/... ./migrations/...
-              cd ../..
+              gotestsum --format short-verbose -- -coverprofile="$ROOT_DIR/coverage/${service}.out" -covermode=atomic ./internal/... ./migrations/...
+              cd "$ROOT_DIR"
             fi
           done
 
