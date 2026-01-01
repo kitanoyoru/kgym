@@ -11,31 +11,28 @@ contracts-protobuf-gen-go:
 contracts-deps:
 	@$(MAKE) -C contracts/protobuf deps
 
-tools-install: $(BIN_DIR)/mockgen $(BIN_DIR)/gotestsum $(BIN_DIR)/golangci-lint
-	@echo "All tools installed successfully in $(BIN_DIR)"
-	@echo "Add $(BIN_DIR) to your PATH to use them"
-
-$(BIN_DIR):
+tools-install: | tools-update
 	@mkdir -p $(BIN_DIR)
-
-$(TOOLS_DIR)/mockgen:
-	@git submodule update --init --recursive tools/mockgen
-
-$(BIN_DIR)/mockgen: $(BIN_DIR) $(TOOLS_DIR)/mockgen | tools-update
+	@echo "Installing tools..."
 	@echo "Building mockgen..."
+	@git submodule update --init --recursive tools/mockgen
 	@cd $(TOOLS_DIR)/mockgen && GOWORK=off go build -o $(BIN_DIR)/mockgen ./mockgen
-
-$(BIN_DIR)/gotestsum: $(BIN_DIR) | tools-update
 	@echo "Building gotestsum..."
 	@GOWORK=off GOBIN=$(BIN_DIR) go install -ldflags="-s -w" gotest.tools/gotestsum@v1.13.0
 	@chmod +x $(BIN_DIR)/gotestsum 2>/dev/null || true
-
-$(TOOLS_DIR)/golangci-lint:
-	@git submodule update --init --recursive tools/golangci-lint
-
-$(BIN_DIR)/golangci-lint: $(BIN_DIR) $(TOOLS_DIR)/golangci-lint | tools-update
 	@echo "Building golangci-lint..."
+	@git submodule update --init --recursive tools/golangci-lint
 	@cd $(TOOLS_DIR)/golangci-lint && GOWORK=off go build -o $(BIN_DIR)/golangci-lint ./cmd/golangci-lint
+	@echo "Installing protoc-gen-go..."
+	@GOWORK=off GOBIN=$(BIN_DIR) go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	@echo "Installing protoc-gen-go-grpc..."
+	@GOWORK=off GOBIN=$(BIN_DIR) go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	@echo "Installing protoc-gen-grpc-gateway..."
+	@GOWORK=off GOBIN=$(BIN_DIR) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
+	@echo "Installing protoc-gen-validate..."
+	@GOWORK=off GOBIN=$(BIN_DIR) go install github.com/envoyproxy/protoc-gen-validate@latest
+	@echo "All tools installed successfully in $(BIN_DIR)"
+	@echo "Add $(BIN_DIR) to your PATH to use them"
 
 gomod-all:
 	@echo "Running gomod tidy on all services..."
