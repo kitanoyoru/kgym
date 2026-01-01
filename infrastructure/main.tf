@@ -1,0 +1,86 @@
+locals {
+  monitoring_namespace_shared = var.prometheus_namespace == "monitoring" && var.loki_namespace == "monitoring" && var.grafana_namespace == "monitoring"
+  monitoring_enabled = var.prometheus_enabled || var.loki_enabled || var.grafana_enabled
+}
+
+resource "kubernetes_namespace" "monitoring" {
+  count = local.monitoring_namespace_shared && local.monitoring_enabled ? 1 : 0
+  metadata {
+    name = "monitoring"
+  }
+}
+
+module "cockroachdb" {
+  count  = var.cockroachdb_enabled ? 1 : 0
+  source = "./modules/cockroachdb"
+
+  cluster_name  = var.cockroachdb_cluster_name
+  namespace     = var.cockroachdb_namespace
+  node_count    = var.cockroachdb_node_count
+  storage_size  = var.cockroachdb_storage_size
+  storage_class = var.cockroachdb_storage_class
+}
+
+module "redis" {
+  count  = var.redis_enabled ? 1 : 0
+  source = "./modules/redis"
+
+  cluster_name  = var.redis_cluster_name
+  namespace     = var.redis_namespace
+  replicas      = var.redis_replicas
+  storage_size  = var.redis_storage_size
+  storage_class = var.redis_storage_class
+  password      = var.redis_password
+}
+
+module "prometheus" {
+  count  = var.prometheus_enabled ? 1 : 0
+  source = "./modules/prometheus"
+
+  namespace       = var.prometheus_namespace
+  storage_size     = var.prometheus_storage_size
+  storage_class    = var.prometheus_storage_class
+  create_namespace = !local.monitoring_namespace_shared
+
+  depends_on = [kubernetes_namespace.monitoring]
+}
+
+module "loki" {
+  count  = var.loki_enabled ? 1 : 0
+  source = "./modules/loki"
+
+  namespace       = var.loki_namespace
+  storage_size     = var.loki_storage_size
+  storage_class    = var.loki_storage_class
+  create_namespace = !local.monitoring_namespace_shared
+
+  depends_on = [kubernetes_namespace.monitoring]
+}
+
+module "grafana" {
+  count  = var.grafana_enabled ? 1 : 0
+  source = "./modules/grafana"
+
+  namespace        = var.grafana_namespace
+  admin_password   = var.grafana_admin_password
+  storage_size     = var.grafana_storage_size
+  storage_class    = var.grafana_storage_class
+  prometheus_url   = var.prometheus_enabled ? "http://${module.prometheus[0].service_endpoint}" : null
+  loki_url         = var.loki_enabled ? "http://${module.loki[0].service_endpoint}" : null
+  create_namespace = !local.monitoring_namespace_shared
+
+  depends_on = [kubernetes_namespace.monitoring]
+}
+
+module "minio" {
+  count  = var.minio_enabled ? 1 : 0
+  source = "./modules/minio"
+
+  cluster_name  = var.minio_cluster_name
+  namespace     = var.minio_namespace
+  replicas      = var.minio_replicas
+  storage_size  = var.minio_storage_size
+  storage_class = var.minio_storage_class
+  access_key    = var.minio_access_key
+  secret_key    = var.minio_secret_key
+}
