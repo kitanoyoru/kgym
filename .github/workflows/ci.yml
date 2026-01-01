@@ -132,6 +132,8 @@ jobs:
 
   lint:
     name: Lint
+    permissions:
+      contents: read
     needs: [build]
     runs-on: ubuntu-latest
     steps:
