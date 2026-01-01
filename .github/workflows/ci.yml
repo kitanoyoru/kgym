@@ -60,7 +60,7 @@ jobs:
             **/go.sum
 
       - name: Cache Go modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/go-build
@@ -70,7 +70,7 @@ jobs:
             ${{ runner.os }}-go-${{ env.GO_VERSION }}-
 
       - name: Cache tools
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-tools
         with:
           path: bin
@@ -89,7 +89,7 @@ jobs:
         run: make tools-install
 
       - name: Cache contracts dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-contracts-deps
         with:
           path: |
@@ -149,7 +149,7 @@ jobs:
             **/go.sum
 
       - name: Cache Go modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/go-build
@@ -159,7 +159,7 @@ jobs:
             ${{ runner.os }}-go-${{ env.GO_VERSION }}-
 
       - name: Cache tools
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-tools
         with:
           path: bin
@@ -178,7 +178,7 @@ jobs:
         run: make tools-install
 
       - name: Cache contracts dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-contracts-deps
         with:
           path: |
@@ -223,7 +223,7 @@ jobs:
             **/go.sum
 
       - name: Cache Go modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cache/go-build
@@ -233,7 +233,7 @@ jobs:
             ${{ runner.os }}-go-${{ env.GO_VERSION }}-
 
       - name: Cache tools
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-tools
         with:
           path: bin
@@ -252,7 +252,7 @@ jobs:
         run: make tools-install
 
       - name: Cache contracts dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-contracts-deps
         with:
           path: |
