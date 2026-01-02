@@ -62,3 +62,24 @@ output "minio" {
     access_key_secret_name = module.minio[0].access_key_secret_name
   } : null
 }
+
+output "kafka" {
+  description = "Kafka cluster outputs"
+  value = var.kafka_enabled ? {
+    namespace        = module.kafka[0].namespace
+    service_name     = module.kafka[0].service_name
+    service_endpoint = module.kafka[0].service_endpoint
+    replicas         = module.kafka[0].replicas
+  } : null
+}
+
+output "sentry" {
+  description = "Sentry outputs"
+  value = var.sentry_enabled ? {
+    namespace      = module.sentry[0].namespace
+    service_name   = module.sentry[0].service_name
+    service_endpoint = module.sentry[0].service_endpoint
+    user_email     = module.sentry[0].user_email
+  } : null
+  sensitive = true
+}

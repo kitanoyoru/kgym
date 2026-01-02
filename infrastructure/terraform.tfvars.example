@@ -40,3 +40,36 @@ minio_storage_size  = "1Gi"
 minio_storage_class = ""
 minio_access_key   = "minioadmin"
 minio_secret_key   = "minioadmin"
+
+kafka_enabled       = false
+kafka_namespace     = "kafka"
+kafka_replicas      = 1
+kafka_storage_size  = "10Gi"
+kafka_storage_class = ""
+
+# Sentry Configuration
+# Note: If sentry_*_host variables are left empty (""), Sentry will automatically
+# connect to the corresponding service if it's enabled:
+# - sentry_postgresql_host = "" → uses CockroachDB if cockroachdb_enabled = true
+# - sentry_redis_host = "" → uses Redis if redis_enabled = true
+# - sentry_kafka_host = "" → uses Kafka if kafka_enabled = true
+# To use external services, set the host variables explicitly.
+sentry_enabled         = false
+sentry_namespace       = "sentry"
+sentry_user_email      = "admin@sentry.local"
+sentry_user_password   = "sentry"
+# Leave empty to auto-connect to CockroachDB, or set to external PostgreSQL host
+sentry_postgresql_host = ""
+sentry_postgresql_port = 26257
+sentry_postgresql_database = "sentry"
+sentry_postgresql_user = "root"
+sentry_postgresql_password = ""
+# Leave empty to auto-connect to Redis, or set to external Redis host
+sentry_redis_host      = ""
+sentry_redis_port      = 6379
+sentry_redis_password  = null
+# Leave empty to auto-connect to Kafka, or set to external Kafka host
+sentry_kafka_host      = ""
+sentry_kafka_port      = 9092
+sentry_storage_size     = "10Gi"
+sentry_storage_class    = ""

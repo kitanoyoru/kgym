@@ -45,12 +45,12 @@ variable "resources" {
   })
   default = {
     requests = {
-      cpu    = "2"
-      memory = "8Gi"
+      cpu    = "500m"
+      memory = "1Gi"
     }
     limits = {
       cpu    = "2"
-      memory = "8Gi"
+      memory = "2Gi"
     }
   }
 }
@@ -64,7 +64,7 @@ variable "image" {
 variable "tls_enabled" {
   description = "Enable TLS for CockroachDB"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "labels" {

@@ -48,6 +48,36 @@ variable "cockroachdb_storage_class" {
   default     = ""
 }
 
+variable "cockroachdb_tls_enabled" {
+  description = "Enable TLS for CockroachDB (disabled by default to allow passwordless connections)"
+  type        = bool
+  default     = false
+}
+
+variable "cockroachdb_resources" {
+  description = "Resource requests and limits for CockroachDB pods"
+  type = object({
+    requests = object({
+      cpu    = string
+      memory = string
+    })
+    limits = object({
+      cpu    = string
+      memory = string
+    })
+  })
+  default = {
+    requests = {
+      cpu    = "500m"
+      memory = "1Gi"
+    }
+    limits = {
+      cpu    = "2"
+      memory = "2Gi"
+    }
+  }
+}
+
 variable "redis_enabled" {
   description = "Enable Redis deployment"
   type        = bool
@@ -220,4 +250,164 @@ variable "minio_secret_key" {
   type        = string
   default     = "minioadmin"
   sensitive   = true
+}
+
+variable "sentry_enabled" {
+  description = "Enable Sentry deployment"
+  type        = bool
+  default     = false
+}
+
+variable "sentry_namespace" {
+  description = "Kubernetes namespace for Sentry"
+  type        = string
+  default     = "sentry"
+}
+
+variable "sentry_user_email" {
+  description = "Email for the initial Sentry superuser"
+  type        = string
+  default     = "admin@sentry.local"
+}
+
+variable "sentry_user_password" {
+  description = "Password for the initial Sentry superuser"
+  type        = string
+  default     = "sentry"
+  sensitive   = true
+}
+
+variable "sentry_postgresql_host" {
+  description = "PostgreSQL host (leave empty to use embedded PostgreSQL, or set to CockroachDB service endpoint)"
+  type        = string
+  default     = ""
+}
+
+variable "sentry_postgresql_port" {
+  description = "PostgreSQL port"
+  type        = number
+  default     = 26257
+}
+
+variable "sentry_postgresql_database" {
+  description = "PostgreSQL database name"
+  type        = string
+  default     = "sentry"
+}
+
+variable "sentry_postgresql_user" {
+  description = "PostgreSQL username"
+  type        = string
+  default     = "root"
+}
+
+variable "sentry_postgresql_password" {
+  description = "PostgreSQL password"
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "sentry_redis_host" {
+  description = "Redis host (leave empty to use embedded Redis, or set to Redis service endpoint)"
+  type        = string
+  default     = ""
+}
+
+variable "sentry_redis_port" {
+  description = "Redis port"
+  type        = number
+  default     = 6379
+}
+
+variable "sentry_redis_password" {
+  description = "Redis password (if Redis requires authentication)"
+  type        = string
+  default     = null
+  nullable    = true
+  sensitive   = true
+}
+
+variable "sentry_storage_size" {
+  description = "Storage size for Sentry data"
+  type        = string
+  default     = "10Gi"
+}
+
+variable "sentry_storage_class" {
+  description = "Storage class for Sentry persistent volumes"
+  type        = string
+  default     = ""
+}
+
+variable "kafka_enabled" {
+  description = "Enable Kafka deployment"
+  type        = bool
+  default     = false
+}
+
+variable "kafka_namespace" {
+  description = "Kubernetes namespace for Kafka"
+  type        = string
+  default     = "kafka"
+}
+
+variable "kafka_replicas" {
+  description = "Number of Kafka broker replicas"
+  type        = number
+  default     = 1
+}
+
+variable "kafka_storage_size" {
+  description = "Storage size for each Kafka broker"
+  type        = string
+  default     = "10Gi"
+}
+
+variable "kafka_storage_class" {
+  description = "Storage class for Kafka persistent volumes"
+  type        = string
+  default     = ""
+}
+
+variable "kafka_resources" {
+  description = "Resource requests and limits for Kafka brokers"
+  type = object({
+    requests = object({
+      cpu    = string
+      memory = string
+    })
+    limits = object({
+      cpu    = string
+      memory = string
+    })
+  })
+  default = {
+    requests = {
+      cpu    = "500m"
+      memory = "1Gi"
+    }
+    limits = {
+      cpu    = "2"
+      memory = "2Gi"
+    }
+  }
+}
+
+variable "kafka_image_repository" {
+  description = "Docker image repository for Kafka (use 'bitnamilegacy/kafka' for legacy images)"
+  type        = string
+  default     = "bitnamilegacy/kafka"
+}
+
+variable "sentry_kafka_host" {
+  description = "Kafka host for Sentry (leave empty to auto-use Kafka service if enabled)"
+  type        = string
+  default     = ""
+}
+
+variable "sentry_kafka_port" {
+  description = "Kafka port for Sentry"
+  type        = number
+  default     = 9092
 }

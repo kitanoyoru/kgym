@@ -1,25 +1,35 @@
 variable "namespace" {
-  description = "Kubernetes namespace for Loki"
+  description = "Kubernetes namespace for Kafka deployment"
   type        = string
-  default     = "monitoring"
+  default     = "kafka"
 }
 
 variable "release_name" {
-  description = "Helm release name for Loki"
+  description = "Helm release name for Kafka"
   type        = string
-  default     = "loki"
+  default     = "kafka"
 }
 
 variable "chart_version" {
-  description = "Version of the Loki Helm chart (leave empty for latest)"
+  description = "Version of the Kafka Helm chart (uses latest if empty)"
   type        = string
   default     = ""
 }
 
+variable "replicas" {
+  description = "Number of Kafka broker replicas"
+  type        = number
+  default     = 1
+  validation {
+    condition     = var.replicas >= 1
+    error_message = "Replicas must be at least 1"
+  }
+}
+
 variable "storage_size" {
-  description = "Storage size for Loki (e.g., 100Gi)"
+  description = "Storage size for each Kafka broker (e.g., 10Gi)"
   type        = string
-  default     = "100Gi"
+  default     = "10Gi"
 }
 
 variable "storage_class" {
@@ -28,14 +38,8 @@ variable "storage_class" {
   default     = ""
 }
 
-variable "replicas" {
-  description = "Number of Loki replicas"
-  type        = number
-  default     = 1
-}
-
 variable "resources" {
-  description = "Resource requests and limits for Loki"
+  description = "Resource requests and limits for Kafka brokers"
   type = object({
     requests = object({
       cpu    = string
@@ -52,11 +56,12 @@ variable "resources" {
       memory = "1Gi"
     }
     limits = {
-      cpu    = "1"
+      cpu    = "2"
       memory = "2Gi"
     }
   }
 }
+
 
 variable "labels" {
   description = "Labels to apply to resources"
@@ -76,16 +81,14 @@ variable "timeout" {
   default     = 600
 }
 
-variable "kubeconfig_path" {
-  description = "Path to kubeconfig file"
+variable "image_repository" {
+  description = "Docker image repository for Kafka (use 'bitnami/kafka' for secure images or 'bitnamilegacy/kafka' for legacy images)"
   type        = string
-  default     = null
-  nullable    = true
+  default     = "bitnamilegacy/kafka"
 }
 
-variable "kubeconfig_context" {
-  description = "Kubernetes context to use"
+variable "image_tag" {
+  description = "Docker image tag for Kafka (leave empty to use chart default)"
   type        = string
-  default     = null
-  nullable    = true
+  default     = ""
 }

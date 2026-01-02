@@ -17,6 +17,8 @@ resource "helm_release" "loki" {
   chart      = "loki"
   version    = var.chart_version != "" ? var.chart_version : null
   namespace  = var.namespace
+  timeout    = var.timeout
+  wait       = true
 
   values = [
     yamlencode({
@@ -61,6 +63,32 @@ resource "helm_release" "loki" {
       }
       backend = {
         replicas = 0
+      }
+      chunksCache = {
+        replicas = 1
+        resources = {
+          requests = {
+            cpu    = "100m"
+            memory = "128Mi"
+          }
+          limits = {
+            cpu    = "500m"
+            memory = "512Mi"
+          }
+        }
+      }
+      resultsCache = {
+        replicas = 1
+        resources = {
+          requests = {
+            cpu    = "100m"
+            memory = "128Mi"
+          }
+          limits = {
+            cpu    = "500m"
+            memory = "512Mi"
+          }
+        }
       }
     })
   ]
