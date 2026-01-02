@@ -23,6 +23,7 @@ import (
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	pbhealth "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -134,7 +135,9 @@ func (app *App) initGRPCServer(_ context.Context) error {
 	if err != nil {
 		return err
 	}
+
 	pbsso.RegisterSSOServiceServer(server, ssoServer)
+	pbhealth.RegisterHealthServer(server, apiv1grpc.NewHealthzService())
 
 	reflection.Register(server)
 

@@ -17,6 +17,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
+	pbhealth "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
 )
 
@@ -125,6 +126,7 @@ func (app *App) initGRPCServer(_ context.Context) error {
 		return err
 	}
 	pbFile.RegisterFileServiceServer(server, fileServer)
+	pbhealth.RegisterHealthServer(server, apiv1grpc.NewHealthzService())
 
 	reflection.Register(server)
 

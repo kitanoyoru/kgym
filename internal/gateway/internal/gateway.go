@@ -16,10 +16,28 @@ import (
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
 )
 
 func New(ctx context.Context, cfg Config) (*Gateway, error) {
+	opts := []grpc.DialOption{
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultCallOptions(
+			grpc.MaxCallRecvMsgSize(cfg.MaxGRPCMsgSize),
+			grpc.MaxCallSendMsgSize(cfg.MaxGRPCMsgSize),
+		),
+		grpc.WithStatsHandler(
+			otelgrpc.NewClientHandler(),
+		),
+	}
+
+	healthConn, err := grpc.NewClient(cfg.GRPCEndpoint, opts...)
+	if err != nil {
+		return nil, err
+	}
+	healthClient := grpc_health_v1.NewHealthClient(healthConn)
+
 	mux := runtime.NewServeMux(
 		runtime.WithMetadata(func(ctx context.Context, r *http.Request) metadata.MD {
 			md := map[string]string{
@@ -38,20 +56,10 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 
 			return metadata.New(md)
 		}),
+		runtime.WithHealthzEndpoint(healthClient),
 	)
 
-	opts := []grpc.DialOption{
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithDefaultCallOptions(
-			grpc.MaxCallRecvMsgSize(cfg.MaxGRPCMsgSize),
-			grpc.MaxCallSendMsgSize(cfg.MaxGRPCMsgSize),
-		),
-		grpc.WithStatsHandler(
-			otelgrpc.NewClientHandler(),
-		),
-	}
-
-	err := multierr.Combine(
+	err = multierr.Combine(
 		pbUser.RegisterUserServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
 		pbFile.RegisterFileServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
 		pbSSO.RegisterSSOServiceHandlerFromEndpoint(ctx, mux, cfg.GRPCEndpoint, opts),
