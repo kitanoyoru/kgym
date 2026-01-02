@@ -1,8 +1,11 @@
 package cmd
 
 import (
-	"log"
+	"os"
+	"time"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
 	"github.com/kitanoyoru/kgym/internal/apps/file/cmd/run"
@@ -14,6 +17,10 @@ var tracingFlushFunc tracing.FlushFunc
 var rootCmd = &cobra.Command{
 	Use: "kgym-file-service",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		zerolog.TimeFieldFormat = time.RFC3339
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		log.Logger = zerolog.New(os.Stderr).With().Timestamp().Logger()
+
 		ctx := cmd.Context()
 
 		cfg, err := tracing.ConfigFromEnv(ctx)
@@ -47,6 +54,6 @@ func main() {
 	rootCmd.AddCommand(run.Command())
 
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed to execute command")
 	}
 }

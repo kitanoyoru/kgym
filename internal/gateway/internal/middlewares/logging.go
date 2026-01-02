@@ -1,30 +1,45 @@
 package middlewares
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/dromara/carbon/v2"
+	"github.com/rs/zerolog/log"
 )
 
 func Logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		startTime := carbon.Now()
 
-		log.Printf("request received: method=%s path=%s request_id=%s",
-			r.Method,
-			r.URL.Path,
-			r.Header.Get("X-Request-ID"),
-		)
+		log.Info().
+			Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Str("request_id", r.Header.Get("X-Request-ID")).
+			Msg("request received")
 
-		next.ServeHTTP(w, r)
+		ww := &responseWriter{
+			ResponseWriter: w,
+			statusCode:     http.StatusOK,
+		}
 
-		log.Printf("request completed: method=%s path=%s status=%d latency=%v",
-			r.Method,
-			r.URL.Path,
-			http.StatusOK,
-			time.Since(startTime.StdTime()),
-		)
+		next.ServeHTTP(ww, r)
+
+		log.Info().
+			Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Int("status", ww.statusCode).
+			Dur("latency", time.Since(startTime.StdTime())).
+			Msg("request completed")
 	})
+}
+
+type responseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (rw *responseWriter) WriteHeader(code int) {
+	rw.statusCode = code
+	rw.ResponseWriter.WriteHeader(code)
 }
