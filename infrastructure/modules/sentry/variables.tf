@@ -90,6 +90,22 @@ variable "kafka_port" {
   default     = 9092
 }
 
+variable "kafka_sasl_username" {
+  description = "Kafka SASL username"
+  type        = string
+  default     = null
+  nullable    = true
+  sensitive   = true
+}
+
+variable "kafka_sasl_password" {
+  description = "Kafka SASL password"
+  type        = string
+  default     = null
+  nullable    = true
+  sensitive   = true
+}
+
 variable "storage_size" {
   description = "Storage size for Sentry data (e.g., 10Gi)"
   type        = string

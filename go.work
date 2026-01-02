@@ -12,6 +12,6 @@ use (
 	./pkg/database
 	./pkg/grpc
 	./pkg/metrics
-	./pkg/tracing
 	./pkg/testing
+	./pkg/tracing
 )

@@ -202,6 +202,39 @@ variable "grafana_storage_class" {
   default     = ""
 }
 
+variable "grafana_config_file_path" {
+  description = "Path to Grafana configuration file (optional, defaults to config/monitoring/grafana/grafana.ini)"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "loki_config_file_path" {
+  description = "Path to Loki configuration file (optional, defaults to config/monitoring/loki/loki.yaml)"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "promtail_enabled" {
+  description = "Enable Promtail deployment"
+  type        = bool
+  default     = true
+}
+
+variable "promtail_namespace" {
+  description = "Kubernetes namespace for Promtail"
+  type        = string
+  default     = "monitoring"
+}
+
+variable "promtail_config_file_path" {
+  description = "Path to Promtail configuration file (optional, defaults to config/monitoring/promtail/promtail.yaml)"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "minio_enabled" {
   description = "Enable MinIO deployment"
   type        = bool
@@ -410,4 +443,18 @@ variable "sentry_kafka_port" {
   description = "Kafka port for Sentry"
   type        = number
   default     = 9092
+}
+
+variable "kafka_sasl_user" {
+  description = "Kafka SASL username"
+  type        = string
+  default     = "admin"
+  sensitive   = true
+}
+
+variable "kafka_sasl_password" {
+  description = "Kafka SASL password"
+  type        = string
+  default     = "admin-secret"
+  sensitive   = true
 }

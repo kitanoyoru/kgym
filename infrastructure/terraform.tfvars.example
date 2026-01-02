@@ -21,16 +21,34 @@ prometheus_namespace    = "monitoring"
 prometheus_storage_size = "5Gi"
 prometheus_storage_class = ""
 
+# Loki Configuration
+# Loki receives logs from Promtail and stores them
+# Grafana queries logs from Loki via datasource configuration
 loki_enabled      = true
 loki_namespace    = "monitoring"
 loki_storage_size = "1Gi"
 loki_storage_class = ""
+# Optional: Custom config file path (defaults to config/monitoring/loki/loki.yaml)
+loki_config_file_path = null
 
+# Promtail Configuration
+# Promtail scrapes logs from pods with label app.kubernetes.io/part-of=kgym
+# and sends them to Loki at http://loki.monitoring.svc.cluster.local:3100
+promtail_enabled      = true
+promtail_namespace    = "monitoring"
+# Optional: Custom config file path (defaults to config/monitoring/promtail/promtail.yaml)
+promtail_config_file_path = null
+
+# Grafana Configuration
+# Grafana visualizes logs from Loki and metrics from Prometheus
+# Datasources are automatically configured via Terraform module
 grafana_enabled         = true
 grafana_namespace       = "monitoring"
 grafana_admin_password  = null
 grafana_storage_size    = "1Gi"
 grafana_storage_class   = ""
+# Optional: Custom config file path (defaults to config/monitoring/grafana/grafana.ini)
+grafana_config_file_path = null
 
 minio_enabled      = true
 minio_cluster_name = "minio"
@@ -46,6 +64,9 @@ kafka_namespace     = "kafka"
 kafka_replicas      = 1
 kafka_storage_size  = "10Gi"
 kafka_storage_class = ""
+# Kafka SASL authentication credentials
+kafka_sasl_user     = "admin"
+kafka_sasl_password = "admin-secret"
 
 # Sentry Configuration
 # Uses embedded PostgreSQL when sentry_postgresql_host is empty (managed by Sentry Helm chart)

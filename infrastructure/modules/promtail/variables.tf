@@ -1,41 +1,28 @@
 variable "namespace" {
-  description = "Kubernetes namespace for Loki"
+  description = "Kubernetes namespace for Promtail"
   type        = string
   default     = "monitoring"
 }
 
 variable "release_name" {
-  description = "Helm release name for Loki"
+  description = "Helm release name for Promtail"
   type        = string
-  default     = "loki"
+  default     = "promtail"
 }
 
 variable "chart_version" {
-  description = "Version of the Loki Helm chart (leave empty for latest)"
+  description = "Version of the Promtail Helm chart (leave empty for latest)"
   type        = string
   default     = ""
 }
 
-variable "storage_size" {
-  description = "Storage size for Loki (e.g., 100Gi)"
+variable "config_file_path" {
+  description = "Path to Promtail configuration YAML file"
   type        = string
-  default     = "100Gi"
-}
-
-variable "storage_class" {
-  description = "Storage class for persistent volumes"
-  type        = string
-  default     = ""
-}
-
-variable "replicas" {
-  description = "Number of Loki replicas"
-  type        = number
-  default     = 1
 }
 
 variable "resources" {
-  description = "Resource requests and limits for Loki"
+  description = "Resource requests and limits for Promtail"
   type = object({
     requests = object({
       cpu    = string
@@ -48,12 +35,12 @@ variable "resources" {
   })
   default = {
     requests = {
-      cpu    = "500m"
-      memory = "1Gi"
+      cpu    = "100m"
+      memory = "128Mi"
     }
     limits = {
-      cpu    = "1"
-      memory = "2Gi"
+      cpu    = "500m"
+      memory = "512Mi"
     }
   }
 }
@@ -76,11 +63,22 @@ variable "timeout" {
   default     = 600
 }
 
-variable "config_file_path" {
-  description = "Path to Loki configuration YAML file (optional, if not provided uses default Helm values)"
-  type        = string
-  default     = null
-  nullable    = true
+variable "tolerations" {
+  description = "Tolerations for Promtail pods"
+  type        = list(any)
+  default     = []
+}
+
+variable "node_selector" {
+  description = "Node selector for Promtail pods"
+  type        = map(string)
+  default     = {}
+}
+
+variable "affinity" {
+  description = "Affinity rules for Promtail pods"
+  type        = any
+  default     = {}
 }
 
 variable "kubeconfig_path" {

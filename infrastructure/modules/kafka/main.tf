@@ -33,6 +33,64 @@ resource "helm_release" "kafka" {
           enabled = true
         }
 
+        auth = {
+          enabled = true
+          clientProtocol = "sasl"
+          interBrokerProtocol = "sasl"
+          saslMechanisms = ["plain"]
+          plainUsers = var.sasl_users
+        }
+
+        extraEnvVars = [
+          {
+            name  = "KAFKA_CFG_PROCESS_ROLES"
+            value = "broker,controller"
+          },
+          {
+            name  = "KAFKA_CFG_LISTENERS"
+            value = "SASL_PLAINTEXT://:9092,CONTROLLER://:9093"
+          },
+          {
+            name  = "KAFKA_CFG_ADVERTISED_LISTENERS"
+            value = "SASL_PLAINTEXT://${var.release_name}.${var.namespace}.svc.cluster.local:9092"
+          },
+          {
+            name  = "KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP"
+            value = "CONTROLLER:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT"
+          },
+          {
+            name  = "KAFKA_CFG_CONTROLLER_LISTENER_NAMES"
+            value = "CONTROLLER"
+          },
+          {
+            name  = "KAFKA_CFG_CONTROLLER_QUORUM_VOTERS"
+            value = "0@${var.release_name}-0.${var.release_name}-headless.${var.namespace}.svc.cluster.local:9093"
+          },
+          {
+            name  = "KAFKA_CFG_INTER_BROKER_LISTENER_NAME"
+            value = "SASL_PLAINTEXT"
+          },
+          {
+            name  = "KAFKA_CFG_SASL_ENABLED_MECHANISMS"
+            value = "PLAIN"
+          },
+          {
+            name  = "KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL"
+            value = "PLAIN"
+          },
+          {
+            name  = "KAFKA_CFG_SECURITY_INTER_BROKER_PROTOCOL"
+            value = "SASL_PLAINTEXT"
+          }
+        ]
+
+        service = {
+          type = "ClusterIP"
+          ports = {
+            internal = 9092
+          }
+        }
+
         image = merge(
           {
             registry   = "docker.io"

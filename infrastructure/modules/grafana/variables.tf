@@ -105,6 +105,13 @@ variable "kubeconfig_path" {
   nullable    = true
 }
 
+variable "config_file_path" {
+  description = "Path to Grafana configuration INI file (optional, if not provided uses default Helm values)"
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "kubeconfig_context" {
   description = "Kubernetes context to use"
   type        = string

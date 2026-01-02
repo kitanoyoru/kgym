@@ -133,10 +133,18 @@ resource "helm_release" "sentry" {
       } : {
         enabled = true
       }
-      externalKafka = var.kafka_host != "" ? {
-        host = var.kafka_host
-        port = var.kafka_port
-      } : null
+      externalKafka = var.kafka_host != "" ? (var.kafka_sasl_username != null ? {
+        host            = var.kafka_host
+        port            = var.kafka_port
+        securityProtocol = "SASL_PLAINTEXT"
+        saslMechanism   = "PLAIN"
+        saslUsername    = var.kafka_sasl_username
+        saslPassword    = var.kafka_sasl_password != null ? var.kafka_sasl_password : ""
+      } : {
+        host            = var.kafka_host
+        port            = var.kafka_port
+        securityProtocol = "PLAINTEXT"
+      }) : null
       web = {
         replicas = 1
         resources = {

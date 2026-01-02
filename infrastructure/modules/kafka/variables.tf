@@ -92,3 +92,10 @@ variable "image_tag" {
   type        = string
   default     = ""
 }
+
+variable "sasl_users" {
+  description = "SASL users for Kafka authentication (format: username:password)"
+  type        = string
+  default     = "admin:admin-secret"
+  sensitive   = true
+}

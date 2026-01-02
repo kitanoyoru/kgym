@@ -25,6 +25,21 @@ resource "kubernetes_secret_v1" "grafana_admin" {
   depends_on = [kubernetes_namespace_v1.grafana]
 }
 
+resource "kubernetes_config_map_v1" "grafana_config" {
+  count = var.config_file_path != null ? 1 : 0
+  metadata {
+    name      = "${var.release_name}-config"
+    namespace = var.namespace
+    labels    = var.labels
+  }
+
+  data = {
+    "grafana.ini" = file(var.config_file_path)
+  }
+
+  depends_on = [kubernetes_namespace_v1.grafana]
+}
+
 locals {
   datasources_list = concat(
     var.prometheus_url != null ? [{
@@ -32,13 +47,14 @@ locals {
       type      = "prometheus"
       access    = "proxy"
       url       = var.prometheus_url
-      isDefault = true
+      isDefault = false
     }] : [],
     var.loki_url != null ? [{
-      name   = "Loki"
-      type   = "loki"
-      access = "proxy"
-      url    = var.loki_url
+      name      = "Loki"
+      type      = "loki"
+      access    = "proxy"
+      url       = var.loki_url
+      isDefault = true
     }] : []
   )
 }
@@ -69,6 +85,15 @@ resource "helm_release" "grafana" {
           memory = var.resources.limits.memory
         }
       }
+      extraConfigmapMounts = var.config_file_path != null ? [
+        {
+          name      = "grafana-config"
+          mountPath = "/etc/grafana/grafana.ini"
+          subPath   = "grafana.ini"
+          configMap = kubernetes_config_map_v1.grafana_config[0].metadata[0].name
+          readOnly  = true
+        }
+      ] : []
       datasources = length(local.datasources_list) > 0 ? {
         "datasources.yaml" = {
           apiVersion = 1
