@@ -11,7 +11,7 @@ resource "kubectl_manifest" "operator_crds" {
   yaml_body = each.value
 }
 
-resource "kubernetes_namespace" "operator" {
+resource "kubernetes_namespace_v1" "operator" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.operator_namespace
@@ -31,11 +31,11 @@ resource "kubectl_manifest" "operator" {
   yaml_body = each.value
   depends_on = [
     kubectl_manifest.operator_crds,
-    kubernetes_namespace.operator
+    kubernetes_namespace_v1.operator
   ]
 }
 
-resource "kubernetes_namespace" "cockroachdb" {
+resource "kubernetes_namespace_v1" "cockroachdb" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.namespace

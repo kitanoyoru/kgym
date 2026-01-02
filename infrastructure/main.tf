@@ -3,7 +3,7 @@ locals {
   monitoring_enabled = var.prometheus_enabled || var.loki_enabled || var.grafana_enabled
 }
 
-resource "kubernetes_namespace" "monitoring" {
+resource "kubernetes_namespace_v1" "monitoring" {
   count = local.monitoring_namespace_shared && local.monitoring_enabled ? 1 : 0
   metadata {
     name = "monitoring"
@@ -44,7 +44,7 @@ module "prometheus" {
   storage_class    = var.prometheus_storage_class
   create_namespace = !local.monitoring_namespace_shared
 
-  depends_on = [kubernetes_namespace.monitoring]
+  depends_on = [kubernetes_namespace_v1.monitoring]
 }
 
 module "loki" {
@@ -56,7 +56,7 @@ module "loki" {
   storage_class    = var.loki_storage_class
   create_namespace = !local.monitoring_namespace_shared
 
-  depends_on = [kubernetes_namespace.monitoring]
+  depends_on = [kubernetes_namespace_v1.monitoring]
 }
 
 module "grafana" {
@@ -71,7 +71,7 @@ module "grafana" {
   loki_url         = var.loki_enabled ? "http://${module.loki[0].service_endpoint}" : null
   create_namespace = !local.monitoring_namespace_shared
 
-  depends_on = [kubernetes_namespace.monitoring]
+  depends_on = [kubernetes_namespace_v1.monitoring]
 }
 
 module "minio" {
@@ -106,7 +106,7 @@ module "sentry" {
   namespace            = var.sentry_namespace
   user_email          = var.sentry_user_email
   user_password       = var.sentry_user_password
-  postgresql_host     = var.sentry_postgresql_host != "" ? var.sentry_postgresql_host : (var.cockroachdb_enabled ? "${var.cockroachdb_cluster_name}-public.${var.cockroachdb_namespace}.svc.cluster.local" : "")
+  postgresql_host     = var.sentry_postgresql_host
   postgresql_port     = var.sentry_postgresql_port
   postgresql_database = var.sentry_postgresql_database
   postgresql_user     = var.sentry_postgresql_user

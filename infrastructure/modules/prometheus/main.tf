@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "prometheus" {
+resource "kubernetes_namespace_v1" "prometheus" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.namespace
@@ -54,5 +54,5 @@ resource "helm_release" "prometheus" {
     })
   ]
 
-  depends_on = [kubernetes_namespace.prometheus]
+  depends_on = [kubernetes_namespace_v1.prometheus]
 }

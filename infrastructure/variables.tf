@@ -278,7 +278,7 @@ variable "sentry_user_password" {
 }
 
 variable "sentry_postgresql_host" {
-  description = "PostgreSQL host (leave empty to use embedded PostgreSQL, or set to CockroachDB service endpoint)"
+  description = "PostgreSQL host (leave empty to use embedded PostgreSQL from Sentry Helm chart, or set to external PostgreSQL host)"
   type        = string
   default     = ""
 }

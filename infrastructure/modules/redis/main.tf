@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "redis" {
+resource "kubernetes_namespace_v1" "redis" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.namespace
@@ -11,7 +11,7 @@ resource "kubernetes_namespace" "redis" {
   }
 }
 
-resource "kubernetes_secret" "redis_password" {
+resource "kubernetes_secret_v1" "redis_password" {
   count = var.password != null ? 1 : 0
   metadata {
     name      = "${var.cluster_name}-password"
@@ -21,10 +21,10 @@ resource "kubernetes_secret" "redis_password" {
   data = {
     password = base64encode(var.password)
   }
-  depends_on = [kubernetes_namespace.redis]
+  depends_on = [kubernetes_namespace_v1.redis]
 }
 
-resource "kubernetes_config_map" "redis_config" {
+resource "kubernetes_config_map_v1" "redis_config" {
   metadata {
     name      = "${var.cluster_name}-config"
     namespace = var.namespace
@@ -35,10 +35,10 @@ resource "kubernetes_config_map" "redis_config" {
   } : {
     "redis.conf" = "# Redis configuration\n"
   }
-  depends_on = [kubernetes_namespace.redis]
+  depends_on = [kubernetes_namespace_v1.redis]
 }
 
-resource "kubernetes_service" "redis" {
+resource "kubernetes_service_v1" "redis" {
   metadata {
     name      = var.cluster_name
     namespace = var.namespace
@@ -55,17 +55,17 @@ resource "kubernetes_service" "redis" {
       name       = "redis"
     }
   }
-  depends_on = [kubernetes_namespace.redis]
+  depends_on = [kubernetes_namespace_v1.redis]
 }
 
-resource "kubernetes_stateful_set" "redis" {
+resource "kubernetes_stateful_set_v1" "redis" {
   metadata {
     name      = var.cluster_name
     namespace = var.namespace
     labels    = merge(var.labels, { app = var.cluster_name })
   }
   spec {
-    service_name = kubernetes_service.redis.metadata[0].name
+    service_name = kubernetes_service_v1.redis.metadata[0].name
     replicas     = var.replicas
     selector {
       match_labels = {
@@ -110,7 +110,7 @@ resource "kubernetes_stateful_set" "redis" {
         volume {
           name = "config"
           config_map {
-            name = kubernetes_config_map.redis_config.metadata[0].name
+            name = kubernetes_config_map_v1.redis_config.metadata[0].name
           }
         }
       }
@@ -131,8 +131,8 @@ resource "kubernetes_stateful_set" "redis" {
     }
   }
   depends_on = [
-    kubernetes_namespace.redis,
-    kubernetes_service.redis,
-    kubernetes_config_map.redis_config
+    kubernetes_namespace_v1.redis,
+    kubernetes_service_v1.redis,
+    kubernetes_config_map_v1.redis_config
   ]
 }

@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "sentry" {
+resource "kubernetes_namespace_v1" "sentry" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.namespace
@@ -11,7 +11,7 @@ resource "kubernetes_namespace" "sentry" {
   }
 }
 
-resource "kubernetes_secret" "sentry_secret_key" {
+resource "kubernetes_secret_v1" "sentry_secret_key" {
   metadata {
     name      = "${var.release_name}-secret-key"
     namespace = var.namespace
@@ -20,7 +20,7 @@ resource "kubernetes_secret" "sentry_secret_key" {
   data = {
     secret-key = base64encode(random_password.sentry_secret_key.result)
   }
-  depends_on = [kubernetes_namespace.sentry]
+  depends_on = [kubernetes_namespace_v1.sentry]
 }
 
 resource "random_password" "sentry_secret_key" {
@@ -28,7 +28,7 @@ resource "random_password" "sentry_secret_key" {
   special = true
 }
 
-resource "kubernetes_secret" "sentry_postgresql" {
+resource "kubernetes_secret_v1" "sentry_postgresql" {
   count = var.postgresql_host != "" ? 1 : 0
   metadata {
     name      = "${var.release_name}-postgresql"
@@ -42,10 +42,10 @@ resource "kubernetes_secret" "sentry_postgresql" {
     username = base64encode(var.postgresql_user)
     password = base64encode(var.postgresql_password != "" ? var.postgresql_password : "")
   }
-  depends_on = [kubernetes_namespace.sentry]
+  depends_on = [kubernetes_namespace_v1.sentry]
 }
 
-resource "kubernetes_secret" "sentry_redis" {
+resource "kubernetes_secret_v1" "sentry_redis" {
   count = var.redis_host != "" ? 1 : 0
   metadata {
     name      = "${var.release_name}-redis"
@@ -60,7 +60,7 @@ resource "kubernetes_secret" "sentry_redis" {
     host = base64encode(var.redis_host)
     port = base64encode(tostring(var.redis_port))
   }
-  depends_on = [kubernetes_namespace.sentry]
+  depends_on = [kubernetes_namespace_v1.sentry]
 }
 
 resource "helm_release" "sentry" {
@@ -80,14 +80,22 @@ resource "helm_release" "sentry" {
       }
       postgresql = var.postgresql_host != "" ? {
         enabled = false
-        persistence = null
+        primary = null
+        auth    = null
       } : {
         enabled = true
-        persistence = {
-          enabled      = true
-          size         = var.storage_size
-          storageClass = var.storage_class != "" ? var.storage_class : null
+        primary = {
+          persistence = {
+            enabled      = true
+            size         = var.storage_size
+            storageClass = var.storage_class != "" ? var.storage_class : null
+          }
         }
+        auth = var.postgresql_password != "" || var.postgresql_user != "" || var.postgresql_database != "sentry" ? {
+          postgresPassword = var.postgresql_password != "" ? var.postgresql_password : ""
+          database         = var.postgresql_database
+          username         = var.postgresql_user != "" ? var.postgresql_user : "postgres"
+        } : null
       }
       externalPostgresql = var.postgresql_host != "" ? {
         host     = var.postgresql_host
@@ -95,7 +103,10 @@ resource "helm_release" "sentry" {
         database = var.postgresql_database
         username = var.postgresql_user
         password = var.postgresql_password != "" ? var.postgresql_password : ""
-      } : null
+        sslMode  = "disable"
+      } : {
+        sslMode = "disable"
+      }
       redis = var.redis_host != "" ? {
         enabled = false
         master = null
@@ -175,7 +186,7 @@ resource "helm_release" "sentry" {
   ]
 
   depends_on = [
-    kubernetes_namespace.sentry,
-    kubernetes_secret.sentry_secret_key
+    kubernetes_namespace_v1.sentry,
+    kubernetes_secret_v1.sentry_secret_key
   ]
 }

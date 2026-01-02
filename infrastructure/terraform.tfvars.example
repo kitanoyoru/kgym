@@ -48,21 +48,22 @@ kafka_storage_size  = "10Gi"
 kafka_storage_class = ""
 
 # Sentry Configuration
+# Uses embedded PostgreSQL when sentry_postgresql_host is empty (managed by Sentry Helm chart)
 # Note: If sentry_*_host variables are left empty (""), Sentry will automatically
 # connect to the corresponding service if it's enabled:
-# - sentry_postgresql_host = "" → uses CockroachDB if cockroachdb_enabled = true
+# - sentry_postgresql_host = "" → uses embedded PostgreSQL from Sentry Helm chart
 # - sentry_redis_host = "" → uses Redis if redis_enabled = true
 # - sentry_kafka_host = "" → uses Kafka if kafka_enabled = true
-# To use external services, set the host variables explicitly.
+# To use external services (e.g., CockroachDB), set the host variables explicitly.
 sentry_enabled         = false
 sentry_namespace       = "sentry"
 sentry_user_email      = "admin@sentry.local"
 sentry_user_password   = "sentry"
-# Leave empty to auto-connect to CockroachDB, or set to external PostgreSQL host
+# Leave empty to use embedded PostgreSQL from Sentry Helm chart, or set to external PostgreSQL/CockroachDB host
 sentry_postgresql_host = ""
-sentry_postgresql_port = 26257
+sentry_postgresql_port = 5432
 sentry_postgresql_database = "sentry"
-sentry_postgresql_user = "root"
+sentry_postgresql_user = "postgres"
 sentry_postgresql_password = ""
 # Leave empty to auto-connect to Redis, or set to external Redis host
 sentry_redis_host      = ""

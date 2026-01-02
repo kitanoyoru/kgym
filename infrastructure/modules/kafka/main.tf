@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "kafka" {
+resource "kubernetes_namespace_v1" "kafka" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.namespace
@@ -21,7 +21,7 @@ resource "helm_release" "kafka" {
   wait       = true
 
   depends_on = [
-    kubernetes_namespace.kafka
+    kubernetes_namespace_v1.kafka
   ]
 
   values = [

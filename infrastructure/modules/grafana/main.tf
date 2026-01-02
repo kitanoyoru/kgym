@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "grafana" {
+resource "kubernetes_namespace_v1" "grafana" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.namespace
@@ -11,7 +11,7 @@ resource "kubernetes_namespace" "grafana" {
   }
 }
 
-resource "kubernetes_secret" "grafana_admin" {
+resource "kubernetes_secret_v1" "grafana_admin" {
   count = var.admin_password != null ? 1 : 0
   metadata {
     name      = "${var.release_name}-admin"
@@ -22,7 +22,7 @@ resource "kubernetes_secret" "grafana_admin" {
     admin-user     = base64encode(var.admin_user)
     admin-password = base64encode(var.admin_password)
   }
-  depends_on = [kubernetes_namespace.grafana]
+  depends_on = [kubernetes_namespace_v1.grafana]
 }
 
 locals {
@@ -79,7 +79,7 @@ resource "helm_release" "grafana" {
   ]
 
   depends_on = [
-    kubernetes_namespace.grafana,
-    kubernetes_secret.grafana_admin
+    kubernetes_namespace_v1.grafana,
+    kubernetes_secret_v1.grafana_admin
   ]
 }

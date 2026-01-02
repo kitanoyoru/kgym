@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "minio" {
+resource "kubernetes_namespace_v1" "minio" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.namespace
@@ -11,7 +11,7 @@ resource "kubernetes_namespace" "minio" {
   }
 }
 
-resource "kubernetes_secret" "minio_credentials" {
+resource "kubernetes_secret_v1" "minio_credentials" {
   metadata {
     name      = "${var.cluster_name}-credentials"
     namespace = var.namespace
@@ -21,10 +21,10 @@ resource "kubernetes_secret" "minio_credentials" {
     MINIO_ROOT_USER     = base64encode(var.access_key)
     MINIO_ROOT_PASSWORD = base64encode(var.secret_key)
   }
-  depends_on = [kubernetes_namespace.minio]
+  depends_on = [kubernetes_namespace_v1.minio]
 }
 
-resource "kubernetes_service" "minio_api" {
+resource "kubernetes_service_v1" "minio_api" {
   metadata {
     name      = "${var.cluster_name}-api"
     namespace = var.namespace
@@ -41,10 +41,10 @@ resource "kubernetes_service" "minio_api" {
       name       = "api"
     }
   }
-  depends_on = [kubernetes_namespace.minio]
+  depends_on = [kubernetes_namespace_v1.minio]
 }
 
-resource "kubernetes_service" "minio_console" {
+resource "kubernetes_service_v1" "minio_console" {
   metadata {
     name      = "${var.cluster_name}-console"
     namespace = var.namespace
@@ -61,17 +61,17 @@ resource "kubernetes_service" "minio_console" {
       name       = "console"
     }
   }
-  depends_on = [kubernetes_namespace.minio]
+  depends_on = [kubernetes_namespace_v1.minio]
 }
 
-resource "kubernetes_stateful_set" "minio" {
+resource "kubernetes_stateful_set_v1" "minio" {
   metadata {
     name      = var.cluster_name
     namespace = var.namespace
     labels    = merge(var.labels, { app = var.cluster_name })
   }
   spec {
-    service_name = kubernetes_service.minio_api.metadata[0].name
+    service_name = kubernetes_service_v1.minio_api.metadata[0].name
     replicas     = var.replicas
     selector {
       match_labels = {
@@ -104,7 +104,7 @@ resource "kubernetes_stateful_set" "minio" {
             name = "MINIO_ROOT_USER"
             value_from {
               secret_key_ref {
-                name = kubernetes_secret.minio_credentials.metadata[0].name
+                name = kubernetes_secret_v1.minio_credentials.metadata[0].name
                 key  = "MINIO_ROOT_USER"
               }
             }
@@ -113,7 +113,7 @@ resource "kubernetes_stateful_set" "minio" {
             name = "MINIO_ROOT_PASSWORD"
             value_from {
               secret_key_ref {
-                name = kubernetes_secret.minio_credentials.metadata[0].name
+                name = kubernetes_secret_v1.minio_credentials.metadata[0].name
                 key  = "MINIO_ROOT_PASSWORD"
               }
             }
@@ -167,9 +167,9 @@ resource "kubernetes_stateful_set" "minio" {
     }
   }
   depends_on = [
-    kubernetes_namespace.minio,
-    kubernetes_secret.minio_credentials,
-    kubernetes_service.minio_api,
-    kubernetes_service.minio_console
+    kubernetes_namespace_v1.minio,
+    kubernetes_secret_v1.minio_credentials,
+    kubernetes_service_v1.minio_api,
+    kubernetes_service_v1.minio_console
   ]
 }

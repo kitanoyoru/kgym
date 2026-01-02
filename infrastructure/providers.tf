@@ -14,7 +14,7 @@ provider "kubectl" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     config_path    = local.kubeconfig_path
     config_context = var.kubeconfig_context
   }

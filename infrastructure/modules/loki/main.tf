@@ -1,4 +1,4 @@
-resource "kubernetes_namespace" "loki" {
+resource "kubernetes_namespace_v1" "loki" {
   count = var.create_namespace ? 1 : 0
   metadata {
     name = var.namespace
@@ -93,5 +93,5 @@ resource "helm_release" "loki" {
     })
   ]
 
-  depends_on = [kubernetes_namespace.loki]
+  depends_on = [kubernetes_namespace_v1.loki]
 }
