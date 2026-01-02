@@ -1,0 +1,17 @@
+go 1.25
+
+use (
+	./contracts/protobuf
+	./internal/apps/file
+	./internal/apps/sso
+
+	./internal/apps/user
+
+	./internal/gateway
+
+	./pkg/database
+	./pkg/grpc
+	./pkg/metrics
+	./pkg/tracing
+	./pkg/testing
+)

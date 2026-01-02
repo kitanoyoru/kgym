@@ -14,8 +14,10 @@ import (
 	pkgpostgres "github.com/kitanoyoru/kgym/pkg/database/postgres"
 	"github.com/minio/minio-go/v7"
 	"github.com/samber/lo"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type App struct {
@@ -113,6 +115,9 @@ func (app *App) initGRPCServer(_ context.Context) error {
 		grpc.MaxSendMsgSize(app.cfg.MaxSendMsgSize),
 		grpc.ConnectionTimeout(app.cfg.ConnectionTimeout),
 		grpc.MaxConcurrentStreams(app.cfg.MaxConcurrentStreams),
+		grpc.StatsHandler(
+			otelgrpc.NewServerHandler(),
+		),
 	)
 
 	fileServer, err := apiv1grpc.NewFileService(app.fileService)
@@ -120,6 +125,8 @@ func (app *App) initGRPCServer(_ context.Context) error {
 		return err
 	}
 	pbFile.RegisterFileServiceServer(server, fileServer)
+
+	reflection.Register(server)
 
 	app.grpcServer = server
 

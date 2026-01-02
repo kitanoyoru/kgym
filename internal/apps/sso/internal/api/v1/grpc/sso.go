@@ -9,16 +9,20 @@ import (
 	authservice "github.com/kitanoyoru/kgym/internal/apps/sso/internal/service/auth"
 	keyservice "github.com/kitanoyoru/kgym/internal/apps/sso/internal/service/key"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 const (
-	GRPCServiceMetricsPrefix = "kgym.sso.api.grpc"
+	GRPCServerPrefix = "kgym.sso.api.grpc"
 )
 
 type SSOServer struct {
 	pb.UnimplementedSSOServiceServer
+
+	tracer trace.Tracer
 
 	authService authservice.IService
 	keyService  keyservice.IService
@@ -32,20 +36,26 @@ func NewSSOServer(authService authservice.IService, keyService keyservice.IServi
 
 	for _, method := range methods {
 		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
-			Name: fmt.Sprintf("%s.%s", GRPCServiceMetricsPrefix, method),
+			Name: fmt.Sprintf("%s.%s", GRPCServerPrefix, method),
 			Type: prometheus.Counter,
 		}); err != nil {
 			return nil, err
 		}
 	}
 
+	tracer := otel.Tracer(GRPCServerPrefix)
+
 	return &SSOServer{
 		authService: authService,
 		keyService:  keyService,
+		tracer:      tracer,
 	}, nil
 }
 
 func (s *SSOServer) GetToken(ctx context.Context, req *pb.GetToken_Request) (*pb.GetToken_Response, error) {
+	ctx, span := s.tracer.Start(ctx, "GetToken")
+	defer span.End()
+
 	switch req.Grant.(type) {
 	case *pb.GetToken_Request_PasswordGrant:
 		passwordGrant := req.GetPasswordGrant()
@@ -56,7 +66,7 @@ func (s *SSOServer) GetToken(ctx context.Context, req *pb.GetToken_Request) (*pb
 			ClientID: req.ClientId,
 		})
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "failed to grant password: %v", err)
+			return nil, status.Error(codes.Internal, "failed to grant password")
 		}
 
 		return &pb.GetToken_Response{
@@ -73,7 +83,7 @@ func (s *SSOServer) GetToken(ctx context.Context, req *pb.GetToken_Request) (*pb
 			RefreshToken: refreshTokenGrant.RefreshToken,
 		})
 		if err != nil {
-			return nil, status.Errorf(codes.Internal, "failed to grant refresh token: %v", err)
+			return nil, status.Error(codes.Internal, "failed to grant refresh token")
 		}
 
 		return &pb.GetToken_Response{
@@ -89,9 +99,12 @@ func (s *SSOServer) GetToken(ctx context.Context, req *pb.GetToken_Request) (*pb
 }
 
 func (s *SSOServer) GetJWKS(ctx context.Context, req *pb.GetJWKS_Request) (*pb.GetJWKS_Response, error) {
+	ctx, span := s.tracer.Start(ctx, "GetJWKS")
+	defer span.End()
+
 	keys, err := s.keyService.GetPublicKeys(ctx)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "failed to get public keys: %v", err)
+		return nil, status.Error(codes.Internal, "failed to get public keys")
 	}
 
 	pbKeys := make([]*pb.Key, 0, len(keys))

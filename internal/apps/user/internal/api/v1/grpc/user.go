@@ -9,21 +9,25 @@ import (
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 	userservice "github.com/kitanoyoru/kgym/internal/apps/user/internal/service/user"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
 const (
-	GRPCServiceMetricsPrefix = "kgym.user.api.grpc"
+	GRPCServicePrefix = "kgym.user.api.grpc"
 )
 
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
 
-	svc userservice.IService
+	tracer trace.Tracer
+
+	userService userservice.IService
 }
 
-func NewUserService(svc userservice.IService) (*UserServiceServer, error) {
+func NewUserService(userService userservice.IService) (*UserServiceServer, error) {
 	methods := []string{
 		"CreateUser",
 		"GetUser",
@@ -32,25 +36,31 @@ func NewUserService(svc userservice.IService) (*UserServiceServer, error) {
 
 	for _, method := range methods {
 		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
-			Name: fmt.Sprintf("%s.%s", GRPCServiceMetricsPrefix, method),
+			Name: fmt.Sprintf("%s.%s", GRPCServicePrefix, method),
 			Type: prometheus.Counter,
 		}); err != nil {
 			return nil, err
 		}
 	}
 
+	tracer := otel.Tracer(GRPCServicePrefix)
+
 	return &UserServiceServer{
-		svc: svc,
+		tracer:      tracer,
+		userService: userService,
 	}, nil
 }
 
 func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUser_Request) (*pb.CreateUser_Response, error) {
+	ctx, span := s.tracer.Start(ctx, "CreateUser")
+	defer span.End()
+
 	svcReq, err := serializer.PbCreateRequestToServiceRequest(req)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid request: %v", err)
 	}
 
-	svcResp, err := s.svc.Create(ctx, svcReq)
+	svcResp, err := s.userService.Create(ctx, svcReq)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to create user: %v", err)
 	}
@@ -61,6 +71,9 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUser_R
 }
 
 func (s *UserServiceServer) GetUser(ctx context.Context, req *pb.GetUser_Request) (*pb.GetUser_Response, error) {
+	ctx, span := s.tracer.Start(ctx, "GetUser")
+	defer span.End()
+
 	var userEntity userentity.User
 	var err error
 
@@ -68,9 +81,9 @@ func (s *UserServiceServer) GetUser(ctx context.Context, req *pb.GetUser_Request
 	email := req.GetEmail()
 
 	if id != "" {
-		userEntity, err = s.svc.GetByID(ctx, id)
+		userEntity, err = s.userService.GetByID(ctx, id)
 	} else if email != "" {
-		userEntity, err = s.svc.GetByEmail(ctx, email)
+		userEntity, err = s.userService.GetByEmail(ctx, email)
 	} else {
 		return nil, status.Errorf(codes.InvalidArgument, "either id or email must be provided")
 	}
@@ -90,7 +103,10 @@ func (s *UserServiceServer) GetUser(ctx context.Context, req *pb.GetUser_Request
 }
 
 func (s *UserServiceServer) DeleteUser(ctx context.Context, req *pb.DeleteUser_Request) (*pb.DeleteUser_Response, error) {
-	if err := s.svc.DeleteByID(ctx, req.Id); err != nil {
+	ctx, span := s.tracer.Start(ctx, "DeleteUser")
+	defer span.End()
+
+	if err := s.userService.DeleteByID(ctx, req.Id); err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to delete user: %v", err)
 	}
 

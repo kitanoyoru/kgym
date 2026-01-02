@@ -13,8 +13,10 @@ import (
 	pkgpostgres "github.com/kitanoyoru/kgym/pkg/database/postgres"
 	pkgredis "github.com/kitanoyoru/kgym/pkg/database/redis"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type App struct {
@@ -94,6 +96,9 @@ func (app *App) initGRPCServer(_ context.Context) error {
 		grpc.MaxSendMsgSize(app.cfg.MaxSendMsgSize),
 		grpc.ConnectionTimeout(app.cfg.ConnectionTimeout),
 		grpc.MaxConcurrentStreams(app.cfg.MaxConcurrentStreams),
+		grpc.StatsHandler(
+			otelgrpc.NewServerHandler(),
+		),
 	)
 
 	userServer, err := apiv1grpc.NewUserService(app.userService)
@@ -101,6 +106,8 @@ func (app *App) initGRPCServer(_ context.Context) error {
 		return err
 	}
 	pbuser.RegisterUserServiceServer(server, userServer)
+
+	reflection.Register(server)
 
 	app.grpcServer = server
 

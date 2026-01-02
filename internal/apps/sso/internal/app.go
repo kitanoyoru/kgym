@@ -19,9 +19,11 @@ import (
 	pkgpostgres "github.com/kitanoyoru/kgym/pkg/database/postgres"
 	pkgredis "github.com/kitanoyoru/kgym/pkg/database/redis"
 	"github.com/redis/go-redis/v9"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/reflection"
 )
 
 type App struct {
@@ -95,7 +97,13 @@ func (app *App) initRepositories(ctx context.Context) error {
 
 	app.tokenRepository = tokenpostgres.New(app.dbPool)
 
-	client, err := grpc.NewClient(app.cfg.UserEndpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	client, err := grpc.NewClient(
+		app.cfg.UserEndpoint,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithStatsHandler(
+			otelgrpc.NewClientHandler(),
+		),
+	)
 	if err != nil {
 		return err
 	}
@@ -117,6 +125,9 @@ func (app *App) initGRPCServer(_ context.Context) error {
 		grpc.MaxSendMsgSize(app.cfg.MaxSendMsgSize),
 		grpc.ConnectionTimeout(app.cfg.ConnectionTimeout),
 		grpc.MaxConcurrentStreams(app.cfg.MaxConcurrentStreams),
+		grpc.StatsHandler(
+			otelgrpc.NewServerHandler(),
+		),
 	)
 
 	ssoServer, err := apiv1grpc.NewSSOServer(app.authService, app.keyService)
@@ -124,6 +135,8 @@ func (app *App) initGRPCServer(_ context.Context) error {
 		return err
 	}
 	pbsso.RegisterSSOServiceServer(server, ssoServer)
+
+	reflection.Register(server)
 
 	app.grpcServer = server
 

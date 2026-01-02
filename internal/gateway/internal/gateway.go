@@ -12,6 +12,7 @@ import (
 	"github.com/kitanoyoru/kgym/internal/gateway/internal/handlers/file"
 	"github.com/kitanoyoru/kgym/internal/gateway/internal/middlewares"
 	"github.com/rs/cors"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -45,6 +46,9 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 			grpc.MaxCallRecvMsgSize(cfg.MaxGRPCMsgSize),
 			grpc.MaxCallSendMsgSize(cfg.MaxGRPCMsgSize),
 		),
+		grpc.WithStatsHandler(
+			otelgrpc.NewClientHandler(),
+		),
 	}
 
 	err := multierr.Combine(
@@ -73,17 +77,21 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 		return nil, err
 	}
 
-	handler := middlewares.Logging(cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedHeaders: []string{"*"},
-		AllowedMethods: []string{
-			http.MethodGet,
-			http.MethodPost,
-			http.MethodPut,
-			http.MethodDelete,
-			http.MethodOptions,
-		},
-	}).Handler(mux))
+	handler := middlewares.Tracing(
+		middlewares.Logging(
+			cors.New(cors.Options{
+				AllowedOrigins: []string{"*"},
+				AllowedHeaders: []string{"*"},
+				AllowedMethods: []string{
+					http.MethodGet,
+					http.MethodPost,
+					http.MethodPut,
+					http.MethodDelete,
+					http.MethodOptions,
+				},
+			}).Handler(mux),
+		),
+	)
 
 	return &Gateway{
 		server: &http.Server{

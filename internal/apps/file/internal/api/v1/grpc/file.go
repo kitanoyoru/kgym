@@ -9,15 +9,19 @@ import (
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
 	"github.com/kitanoyoru/kgym/internal/apps/file/internal/service"
 	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/multierr"
 )
 
 const (
-	GRPCServiceMetricsPrefix = "kgym.file.api.grpc"
+	GRPCServicePrefix = "kgym.file.api.grpc"
 )
 
 type FileServiceServer struct {
 	pb.UnimplementedFileServiceServer
+
+	tracer trace.Tracer
 
 	service service.IService
 }
@@ -31,20 +35,26 @@ func NewFileService(service service.IService) (*FileServiceServer, error) {
 
 	for _, method := range methods {
 		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
-			Name: fmt.Sprintf("%s.%s", GRPCServiceMetricsPrefix, method),
+			Name: fmt.Sprintf("%s.%s", GRPCServicePrefix, method),
 			Type: prometheus.Counter,
 		}); err != nil {
 			return nil, err
 		}
 	}
 
+	tracer := otel.Tracer(GRPCServicePrefix)
+
 	return &FileServiceServer{
+		tracer:  tracer,
 		service: service,
 	}, nil
 }
 
 func (s *FileServiceServer) UploadUserAvatar(stream pb.FileService_UploadUserAvatarServer) error {
 	ctx := stream.Context()
+
+	ctx, span := s.tracer.Start(ctx, "UploadUserAvatar")
+	defer span.End()
 
 	uploadRequest, doneChan, err := s.streamToPipe(ctx, stream)
 	if err != nil {
@@ -71,6 +81,9 @@ func (s *FileServiceServer) UploadUserAvatar(stream pb.FileService_UploadUserAva
 }
 
 func (s *FileServiceServer) GetFileURL(ctx context.Context, req *pb.GetFileURL_Request) (*pb.GetFileURL_Response, error) {
+	ctx, span := s.tracer.Start(ctx, "GetFileURL")
+	defer span.End()
+
 	url, err := s.service.GetURL(ctx, req.Id)
 	if err != nil {
 		return nil, err
@@ -82,6 +95,9 @@ func (s *FileServiceServer) GetFileURL(ctx context.Context, req *pb.GetFileURL_R
 }
 
 func (s *FileServiceServer) DeleteFile(ctx context.Context, req *pb.DeleteFile_Request) (*pb.DeleteFile_Response, error) {
+	ctx, span := s.tracer.Start(ctx, "DeleteFile")
+	defer span.End()
+
 	err := s.service.Delete(ctx, req.Id)
 	if err != nil {
 		return nil, err
