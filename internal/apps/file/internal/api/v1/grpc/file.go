@@ -21,8 +21,7 @@ const (
 type FileServiceServer struct {
 	pb.UnimplementedFileServiceServer
 
-	tracer trace.Tracer
-
+	tracer  trace.Tracer
 	service service.IService
 }
 

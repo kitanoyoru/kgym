@@ -22,8 +22,7 @@ const (
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
 
-	tracer trace.Tracer
-
+	tracer      trace.Tracer
 	userService userservice.IService
 }
 

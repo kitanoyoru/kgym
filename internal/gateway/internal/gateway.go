@@ -3,6 +3,7 @@ package gateway
 import (
 	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -13,6 +14,7 @@ import (
 	"github.com/kitanoyoru/kgym/internal/gateway/internal/middlewares"
 	"github.com/rs/cors"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.uber.org/multierr"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -85,7 +87,7 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 		return nil, err
 	}
 
-	handler := middlewares.Tracing(
+	handler := otelhttp.NewHandler(
 		middlewares.Logging(
 			cors.New(cors.Options{
 				AllowedOrigins: []string{"*"},
@@ -99,6 +101,10 @@ func New(ctx context.Context, cfg Config) (*Gateway, error) {
 				},
 			}).Handler(mux),
 		),
+		"gateway",
+		otelhttp.WithFilter(func(r *http.Request) bool {
+			return !strings.HasPrefix(r.URL.Path, "/api")
+		}),
 	)
 
 	return &Gateway{

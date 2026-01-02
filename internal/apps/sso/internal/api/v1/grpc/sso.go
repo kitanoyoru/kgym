@@ -22,8 +22,7 @@ const (
 type SSOServer struct {
 	pb.UnimplementedSSOServiceServer
 
-	tracer trace.Tracer
-
+	tracer      trace.Tracer
 	authService authservice.IService
 	keyService  keyservice.IService
 }
