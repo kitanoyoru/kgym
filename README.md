@@ -71,10 +71,10 @@ A comprehensive gym management platform for managing members, subscriptions, and
 
 | Service | Coverage |
 |---------|----------|
-| **Gateway** | ![Gateway Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/kitanoyoru/kgym/master/.github/badges/gateway.json&label=gateway) |
-| **SSO** | ![SSO Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/kitanoyoru/kgym/master/.github/badges/sso.json&label=sso) |
-| **User** | ![User Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/kitanoyoru/kgym/master/.github/badges/user.json&label=user) |
-| **File** | ![File Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/kitanoyoru/kgym/master/.github/badges/file.json&label=file) |
+| **Gateway** | ![Gateway Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/REPO_PLACEHOLDER/BRANCH_PLACEHOLDER/.github/badges/gateway.json&label=gateway) |
+| **SSO** | ![SSO Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/REPO_PLACEHOLDER/BRANCH_PLACEHOLDER/.github/badges/sso.json&label=sso) |
+| **User** | ![User Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/REPO_PLACEHOLDER/BRANCH_PLACEHOLDER/.github/badges/user.json&label=user) |
+| **File** | ![File Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/REPO_PLACEHOLDER/BRANCH_PLACEHOLDER/.github/badges/file.json&label=file) |
 
 ## 📧 Contact
 

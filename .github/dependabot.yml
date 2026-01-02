@@ -223,3 +223,18 @@ updates:
     commit-message:
       prefix: "chore"
       include: "scope"
+
+  - package-ecosystem: "terraform"
+    directory: "/infrastructure"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kitanoyoru"
+    labels:
+      - "dependencies"
+      - "terraform"
+      - "infrastructure"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
