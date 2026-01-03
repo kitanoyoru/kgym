@@ -7,8 +7,8 @@ require (
 	github.com/dromara/carbon/v2 v2.6.15
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4
-	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260102203931-f74ad1e9f47e
-	github.com/kitanoyoru/kgym/pkg/tracing v0.0.0-20260102203931-f74ad1e9f47e
+	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260103131015-fe35aa05ab64
+	github.com/kitanoyoru/kgym/pkg/tracing v0.0.0-20260103131015-fe35aa05ab64
 	github.com/pkg/errors v0.9.1
 	github.com/rs/cors v1.11.1
 	github.com/rs/zerolog v1.34.0
@@ -33,7 +33,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/kitanoyoru/kgym/internal/apps/file v0.0.0-20260102203931-f74ad1e9f47e // indirect
+	github.com/kitanoyoru/kgym/internal/apps/file v0.0.0-20260103131015-fe35aa05ab64 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

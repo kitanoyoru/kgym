@@ -11,12 +11,12 @@ require (
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
 	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260102203931-f74ad1e9f47e
-	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260102203931-f74ad1e9f47e
-	github.com/kitanoyoru/kgym/pkg/logging v0.0.0-20260102203931-f74ad1e9f47e
-	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260102203931-f74ad1e9f47e
+	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260103131015-fe35aa05ab64
+	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260103131015-fe35aa05ab64
+	github.com/kitanoyoru/kgym/pkg/logging v0.0.0-20260103131623-9c57395a1221
+	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260103131015-fe35aa05ab64
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224143826-c6c137689650
-	github.com/kitanoyoru/kgym/pkg/tracing v0.0.0-20260102203931-f74ad1e9f47e
+	github.com/kitanoyoru/kgym/pkg/tracing v0.0.0-20260103131015-fe35aa05ab64
 	github.com/minio/minio-go/v7 v7.0.97
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.26.0
