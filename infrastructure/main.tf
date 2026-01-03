@@ -22,6 +22,8 @@ module "cockroachdb" {
   storage_class = var.cockroachdb_storage_class
   resources     = var.cockroachdb_resources
   tls_enabled   = var.cockroachdb_tls_enabled
+
+  depends_on = [kubernetes_namespace_v1.cockroachdb]
 }
 
 module "redis" {
@@ -34,6 +36,8 @@ module "redis" {
   storage_size  = var.redis_storage_size
   storage_class = var.redis_storage_class
   password      = var.redis_password
+
+  depends_on = [kubernetes_namespace_v1.redis]
 }
 
 module "prometheus" {
@@ -140,7 +144,6 @@ module "sentry" {
   storage_class      = var.sentry_storage_class
 
   depends_on = [
-    module.cockroachdb,
     module.redis,
     module.kafka
   ]
