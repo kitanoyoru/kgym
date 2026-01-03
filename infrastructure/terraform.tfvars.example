@@ -59,15 +59,6 @@ minio_storage_class = ""
 minio_access_key   = "minioadmin"
 minio_secret_key   = "minioadmin"
 
-kafka_enabled       = false
-kafka_namespace     = "kafka"
-kafka_replicas      = 1
-kafka_storage_size  = "10Gi"
-kafka_storage_class = ""
-# Kafka SASL authentication credentials
-kafka_sasl_user     = "admin"
-kafka_sasl_password = "admin-secret"
-
 # Sentry Configuration
 # Uses embedded PostgreSQL when sentry_postgresql_host is empty (managed by Sentry Helm chart)
 # Note: If sentry_*_host variables are left empty (""), Sentry will automatically
@@ -90,8 +81,5 @@ sentry_postgresql_password = ""
 sentry_redis_host      = ""
 sentry_redis_port      = 6379
 sentry_redis_password  = null
-# Leave empty to auto-connect to Kafka, or set to external Kafka host
-sentry_kafka_host      = ""
-sentry_kafka_port      = 9092
 sentry_storage_size     = "10Gi"
 sentry_storage_class    = ""

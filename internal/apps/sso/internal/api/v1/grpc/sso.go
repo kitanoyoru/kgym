@@ -2,13 +2,11 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/sso/v1"
 	keyserializer "github.com/kitanoyoru/kgym/internal/apps/sso/internal/api/v1/grpc/serializer/key"
 	authservice "github.com/kitanoyoru/kgym/internal/apps/sso/internal/service/auth"
 	keyservice "github.com/kitanoyoru/kgym/internal/apps/sso/internal/service/key"
-	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/codes"
@@ -28,20 +26,6 @@ type SSOServer struct {
 }
 
 func NewSSOServer(authService authservice.IService, keyService keyservice.IService) (*SSOServer, error) {
-	methods := []string{
-		"GetToken",
-		"GetJWKS",
-	}
-
-	for _, method := range methods {
-		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
-			Name: fmt.Sprintf("%s.%s", GRPCServerPrefix, method),
-			Type: prometheus.Counter,
-		}); err != nil {
-			return nil, err
-		}
-	}
-
 	tracer := otel.Tracer(GRPCServerPrefix)
 
 	return &SSOServer{

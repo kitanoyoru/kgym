@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/jackc/pgx/v5/pgxpool"
 	pbuser "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	apiv1grpc "github.com/kitanoyoru/kgym/internal/apps/user/internal/api/v1/grpc"
@@ -12,6 +13,7 @@ import (
 	userservice "github.com/kitanoyoru/kgym/internal/apps/user/internal/service/user"
 	pkgpostgres "github.com/kitanoyoru/kgym/pkg/database/postgres"
 	pkgredis "github.com/kitanoyoru/kgym/pkg/database/redis"
+	pkgmetrics "github.com/kitanoyoru/kgym/pkg/metrics"
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.uber.org/multierr"
@@ -92,15 +94,39 @@ func (app *App) initServices(_ context.Context) error {
 }
 
 func (app *App) initGRPCServer(_ context.Context) error {
+	srvMetrics := grpcprometheus.NewServerMetrics(
+		grpcprometheus.WithServerCounterOptions(
+			grpcprometheus.WithNamespace("kgym"),
+			grpcprometheus.WithSubsystem("user"),
+		),
+		grpcprometheus.WithServerHandlingTimeHistogram(
+			grpcprometheus.WithHistogramNamespace("kgym"),
+			grpcprometheus.WithHistogramSubsystem("user"),
+		),
+		grpcprometheus.WithContextLabels(pkgmetrics.AllMetadataFields...),
+	)
+
 	server := grpc.NewServer(
 		grpc.MaxRecvMsgSize(app.cfg.MaxRecvMsgSize),
 		grpc.MaxSendMsgSize(app.cfg.MaxSendMsgSize),
 		grpc.ConnectionTimeout(app.cfg.ConnectionTimeout),
 		grpc.MaxConcurrentStreams(app.cfg.MaxConcurrentStreams),
+		grpc.ChainUnaryInterceptor(
+			srvMetrics.UnaryServerInterceptor(
+				grpcprometheus.WithLabelsFromContext(pkgmetrics.ExtractLabelsFromMetadata),
+			),
+		),
+		grpc.ChainStreamInterceptor(
+			srvMetrics.StreamServerInterceptor(
+				grpcprometheus.WithLabelsFromContext(pkgmetrics.ExtractLabelsFromMetadata),
+			),
+		),
 		grpc.StatsHandler(
 			otelgrpc.NewServerHandler(),
 		),
 	)
+
+	srvMetrics.InitializeMetrics(server)
 
 	userServer, err := apiv1grpc.NewUserService(app.userService)
 	if err != nil {

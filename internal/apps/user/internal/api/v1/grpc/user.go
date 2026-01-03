@@ -2,13 +2,11 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/user/v1"
 	"github.com/kitanoyoru/kgym/internal/apps/user/internal/api/v1/grpc/serializer"
 	userentity "github.com/kitanoyoru/kgym/internal/apps/user/internal/entity/user"
 	userservice "github.com/kitanoyoru/kgym/internal/apps/user/internal/service/user"
-	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc/codes"
@@ -27,21 +25,6 @@ type UserServiceServer struct {
 }
 
 func NewUserService(userService userservice.IService) (*UserServiceServer, error) {
-	methods := []string{
-		"CreateUser",
-		"GetUser",
-		"DeleteUser",
-	}
-
-	for _, method := range methods {
-		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
-			Name: fmt.Sprintf("%s.%s", GRPCServicePrefix, method),
-			Type: prometheus.Counter,
-		}); err != nil {
-			return nil, err
-		}
-	}
-
 	tracer := otel.Tracer(GRPCServicePrefix)
 
 	return &UserServiceServer{

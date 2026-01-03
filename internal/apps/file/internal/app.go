@@ -4,6 +4,7 @@ import (
 	"context"
 	"net"
 
+	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
 	"github.com/jackc/pgx/v5/pgxpool"
 	pbFile "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
 	apiv1grpc "github.com/kitanoyoru/kgym/internal/apps/file/internal/api/v1/grpc"
@@ -12,6 +13,7 @@ import (
 	fileservice "github.com/kitanoyoru/kgym/internal/apps/file/internal/service"
 	pkgminio "github.com/kitanoyoru/kgym/pkg/database/minio"
 	pkgpostgres "github.com/kitanoyoru/kgym/pkg/database/postgres"
+	pkgmetrics "github.com/kitanoyoru/kgym/pkg/metrics"
 	"github.com/minio/minio-go/v7"
 	"github.com/samber/lo"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -111,15 +113,39 @@ func (app *App) initServices(_ context.Context) error {
 }
 
 func (app *App) initGRPCServer(_ context.Context) error {
+	srvMetrics := grpcprometheus.NewServerMetrics(
+		grpcprometheus.WithServerCounterOptions(
+			grpcprometheus.WithNamespace("kgym"),
+			grpcprometheus.WithSubsystem("file"),
+		),
+		grpcprometheus.WithServerHandlingTimeHistogram(
+			grpcprometheus.WithHistogramNamespace("kgym"),
+			grpcprometheus.WithHistogramSubsystem("file"),
+		),
+		grpcprometheus.WithContextLabels(pkgmetrics.AllMetadataFields...),
+	)
+
 	server := grpc.NewServer(
 		grpc.MaxRecvMsgSize(app.cfg.MaxRecvMsgSize),
 		grpc.MaxSendMsgSize(app.cfg.MaxSendMsgSize),
 		grpc.ConnectionTimeout(app.cfg.ConnectionTimeout),
 		grpc.MaxConcurrentStreams(app.cfg.MaxConcurrentStreams),
+		grpc.ChainUnaryInterceptor(
+			srvMetrics.UnaryServerInterceptor(
+				grpcprometheus.WithLabelsFromContext(pkgmetrics.ExtractLabelsFromMetadata),
+			),
+		),
+		grpc.ChainStreamInterceptor(
+			srvMetrics.StreamServerInterceptor(
+				grpcprometheus.WithLabelsFromContext(pkgmetrics.ExtractLabelsFromMetadata),
+			),
+		),
 		grpc.StatsHandler(
 			otelgrpc.NewServerHandler(),
 		),
 	)
+
+	srvMetrics.InitializeMetrics(server)
 
 	fileServer, err := apiv1grpc.NewFileService(app.fileService)
 	if err != nil {

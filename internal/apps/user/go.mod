@@ -8,12 +8,13 @@ require (
 	github.com/dromara/carbon/v2 v2.6.15
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/google/uuid v1.6.0
+	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
 	github.com/jackc/pgx/v5 v5.8.0
-	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260102182957-a668ea0b5162
-	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260102182957-a668ea0b5162
-	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260102182957-a668ea0b5162
+	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260102203931-f74ad1e9f47e
+	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260102203931-f74ad1e9f47e
+	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260102203931-f74ad1e9f47e
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224143826-c6c137689650
-	github.com/kitanoyoru/kgym/pkg/tracing v0.0.0-20260102182957-a668ea0b5162
+	github.com/kitanoyoru/kgym/pkg/tracing v0.0.0-20260102203931-f74ad1e9f47e
 	github.com/pkg/errors v0.9.1
 	github.com/pressly/goose/v3 v3.26.0
 	github.com/redis/go-redis/v9 v9.17.2
@@ -60,12 +61,13 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/puddle/v2 v2.2.2 // indirect
-	github.com/kitanoyoru/kgym/internal/apps/file v0.0.0-20260102182957-a668ea0b5162 // indirect
+	github.com/kitanoyoru/kgym/internal/apps/file v0.0.0-20260102203931-f74ad1e9f47e // indirect
 	github.com/klauspost/compress v1.18.2 // indirect
 	github.com/lann/builder v0.0.0-20180802200727-47ae307949d0 // indirect
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
@@ -101,7 +103,7 @@ require (
 	github.com/tklauser/numcpus v0.6.1 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.64.0 // indirect
 	go.opentelemetry.io/otel/metric v1.39.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.39.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.3 // indirect

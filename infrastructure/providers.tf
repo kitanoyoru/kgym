@@ -1,6 +1,6 @@
 locals {
   default_kubeconfig = pathexpand("~/.kube/config")
-  kubeconfig_path = var.kubeconfig_path != null && var.kubeconfig_path != "" ? var.kubeconfig_path : local.default_kubeconfig
+  kubeconfig_path    = var.kubeconfig_path != null && var.kubeconfig_path != "" ? var.kubeconfig_path : local.default_kubeconfig
 }
 
 provider "kubernetes" {

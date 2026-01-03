@@ -128,23 +128,10 @@ resource "helm_release" "sentry" {
       rabbitmq = {
         enabled = false
       }
-      kafka = var.kafka_host != "" ? {
-        enabled = false
-      } : {
+      kafka = {
         enabled = true
       }
-      externalKafka = var.kafka_host != "" ? (var.kafka_sasl_username != null ? {
-        host            = var.kafka_host
-        port            = var.kafka_port
-        securityProtocol = "SASL_PLAINTEXT"
-        saslMechanism   = "PLAIN"
-        saslUsername    = var.kafka_sasl_username
-        saslPassword    = var.kafka_sasl_password != null ? var.kafka_sasl_password : ""
-      } : {
-        host            = var.kafka_host
-        port            = var.kafka_port
-        securityProtocol = "PLAINTEXT"
-      }) : null
+      externalKafka = null
       web = {
         replicas = 1
         resources = {
@@ -189,6 +176,9 @@ resource "helm_release" "sentry" {
       }
       service = {
         type = "ClusterIP"
+      }
+      migration = {
+        enabled = true
       }
     })
   ]

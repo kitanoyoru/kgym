@@ -3,12 +3,10 @@ package grpc
 import (
 	"context"
 	"errors"
-	"fmt"
 	"io"
 
 	pb "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
 	"github.com/kitanoyoru/kgym/internal/apps/file/internal/service"
-	"github.com/kitanoyoru/kgym/pkg/metrics/prometheus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/multierr"
@@ -26,21 +24,6 @@ type FileServiceServer struct {
 }
 
 func NewFileService(service service.IService) (*FileServiceServer, error) {
-	methods := []string{
-		"UploadUserAvatar",
-		"GetFileURL",
-		"DeleteFile",
-	}
-
-	for _, method := range methods {
-		if err := prometheus.GlobalRegistry.RegisterMetric(prometheus.MetricConfig{
-			Name: fmt.Sprintf("%s.%s", GRPCServicePrefix, method),
-			Type: prometheus.Counter,
-		}); err != nil {
-			return nil, err
-		}
-	}
-
 	tracer := otel.Tracer(GRPCServicePrefix)
 
 	return &FileServiceServer{
