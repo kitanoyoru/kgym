@@ -13,5 +13,6 @@ use (
 	./pkg/grpc
 	./pkg/metrics
 	./pkg/testing
+	./pkg/logging
 	./pkg/tracing
 )

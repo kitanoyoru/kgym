@@ -9,9 +9,11 @@ require (
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/google/uuid v1.6.0
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0
+	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3
 	github.com/jackc/pgx/v5 v5.8.0
 	github.com/kitanoyoru/kgym/contracts/protobuf v0.0.0-20260102203931-f74ad1e9f47e
 	github.com/kitanoyoru/kgym/pkg/database v0.0.0-20260102203931-f74ad1e9f47e
+	github.com/kitanoyoru/kgym/pkg/logging v0.0.0-20260102203931-f74ad1e9f47e
 	github.com/kitanoyoru/kgym/pkg/metrics v0.0.0-20260102203931-f74ad1e9f47e
 	github.com/kitanoyoru/kgym/pkg/testing v0.0.0-20251224143826-c6c137689650
 	github.com/kitanoyoru/kgym/pkg/tracing v0.0.0-20260102203931-f74ad1e9f47e
@@ -61,7 +63,6 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/grpc-ecosystem/go-grpc-middleware/v2 v2.3.3 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.27.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -119,6 +120,7 @@ require (
 
 replace (
 	github.com/kitanoyoru/kgym/pkg/database => ../../../pkg/database
+	github.com/kitanoyoru/kgym/pkg/logging => ../../../pkg/logging
 	github.com/kitanoyoru/kgym/pkg/metrics => ../../../pkg/metrics
 	github.com/kitanoyoru/kgym/pkg/testing => ../../../pkg/testing
 )

@@ -5,6 +5,7 @@ import (
 	"net"
 
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/jackc/pgx/v5/pgxpool"
 	pbFile "github.com/kitanoyoru/kgym/contracts/protobuf/gen/go/file/v1"
 	apiv1grpc "github.com/kitanoyoru/kgym/internal/apps/file/internal/api/v1/grpc"
@@ -13,6 +14,7 @@ import (
 	fileservice "github.com/kitanoyoru/kgym/internal/apps/file/internal/service"
 	pkgminio "github.com/kitanoyoru/kgym/pkg/database/minio"
 	pkgpostgres "github.com/kitanoyoru/kgym/pkg/database/postgres"
+	pkglogging "github.com/kitanoyoru/kgym/pkg/logging"
 	pkgmetrics "github.com/kitanoyoru/kgym/pkg/metrics"
 	"github.com/minio/minio-go/v7"
 	"github.com/samber/lo"
@@ -21,6 +23,11 @@ import (
 	"google.golang.org/grpc"
 	pbhealth "google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/reflection"
+)
+
+const (
+	Namespace   = "kgym"
+	ServiceName = "file"
 )
 
 type App struct {
@@ -115,12 +122,12 @@ func (app *App) initServices(_ context.Context) error {
 func (app *App) initGRPCServer(_ context.Context) error {
 	srvMetrics := grpcprometheus.NewServerMetrics(
 		grpcprometheus.WithServerCounterOptions(
-			grpcprometheus.WithNamespace("kgym"),
-			grpcprometheus.WithSubsystem("file"),
+			grpcprometheus.WithNamespace(Namespace),
+			grpcprometheus.WithSubsystem(ServiceName),
 		),
 		grpcprometheus.WithServerHandlingTimeHistogram(
-			grpcprometheus.WithHistogramNamespace("kgym"),
-			grpcprometheus.WithHistogramSubsystem("file"),
+			grpcprometheus.WithHistogramNamespace(Namespace),
+			grpcprometheus.WithHistogramSubsystem(ServiceName),
 		),
 		grpcprometheus.WithContextLabels(pkgmetrics.AllMetadataFields...),
 	)
@@ -134,10 +141,16 @@ func (app *App) initGRPCServer(_ context.Context) error {
 			srvMetrics.UnaryServerInterceptor(
 				grpcprometheus.WithLabelsFromContext(pkgmetrics.ExtractLabelsFromMetadata),
 			),
+			logging.UnaryServerInterceptor(
+				pkglogging.NewInterceptorLogger(Namespace, ServiceName),
+			),
 		),
 		grpc.ChainStreamInterceptor(
 			srvMetrics.StreamServerInterceptor(
 				grpcprometheus.WithLabelsFromContext(pkgmetrics.ExtractLabelsFromMetadata),
+			),
+			logging.StreamServerInterceptor(
+				pkglogging.NewInterceptorLogger(Namespace, ServiceName),
 			),
 		),
 		grpc.StatsHandler(
